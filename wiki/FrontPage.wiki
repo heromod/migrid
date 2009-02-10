@@ -1,0 +1,16 @@
+#summary Wiki front page
+
+= Introduction =
+
+Welcome to the public MiG Wiki!
+
+On these pages you can communicate with the MiG team and find information about the project.
+
+
+= Topics =
+
+ * GettingStarted
+ * MiGDays
+ * ...
+
+ 

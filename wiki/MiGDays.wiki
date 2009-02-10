@@ -37,6 +37,7 @@ Meeting (proposed at 10):
  * Short presentation of each participant and active projects
  * Tasks for the day
  * Planning for the future
+ * Future of the Full MiG model
  * Partial LGPL licensing (user side apps/libs may be better to LGPL)
  * Other topics that may come up
 

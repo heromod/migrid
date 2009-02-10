@@ -9,8 +9,8 @@ On these pages you can communicate with the MiG team and find information about 
 
 = Topics =
 
- * GettingStarted
- * MiGDays
+ * [GettingStarted Getting started with MiG]
+ * [MiGDays MiG Days]
  * ...
 
  

@@ -14,4 +14,5 @@ On these pages you can communicate with the MiG team and find information about 
  * [MiGDays MiG Days]
  * ...
 
- 
+
+There's additional information available at our [http://www.migrid.org main page].

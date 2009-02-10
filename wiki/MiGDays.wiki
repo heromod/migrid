@@ -42,7 +42,7 @@ Working groups (e.g. at 11)
  * GPL license all the code as previously decided
  * Document the process of running your own MiG server
  * Integrate finished subprojects
- * Tidy all code (i.e. PythonTidy)
+ * Tidy all code (i.e. [http://pypi.python.org/pypi/PythonTidy PythonTidy])
  * Release the code here
 
 

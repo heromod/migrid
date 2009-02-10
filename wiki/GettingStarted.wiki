@@ -1,0 +1,45 @@
+#summary Getting started page
+
+= Getting Started with MiG =
+
+== As a user ==
+If You want to try out MiG as a user, please request a user certificate using the link on:
+http://www.migrid.org/MiG/Components/index_html
+
+Depending on your supplied motivation for requesting the certificate we will try to provide you with access to a suitable subset of the available Grid resources. In case you just want to try it out, this will most likely be the least trusted resources. If on the other hand You have a scientific project to run on the Grid, there's good chances of getting access to more powerful resources.
+
+
+== As a resource owner ==
+MiG provides three overall resource models so you can choose the one which best matches your type of resources and how much you want to dedicate them to Grid.
+ * One-click resource
+ * Screen Saver Science resource
+ * Full scale resource
+
+The first two models are easy to set up and run purely in a sandboxed environment to prevent any permanent damage to your resource. There's a trade off between easy set up and power, so the Full scale model is more flexible and powerful than the other two at the cost of more set up and management complexity. The SSS sandbox is a good compromise between flexibility, ease of setup and power, so in many cases it may be a good choice. 
+
+
+=== One-click resource ===
+One-click resources are the simplest to set up - it just takes a single mouse click on a link and you computer will start handling Grid jobs. Stopping again is just as simple - simply close the browser window/tab or enter open another web page.
+The cost of this extreme simplicity is limitations in the jobs that this kind of resource can execute and in the efficiency of such jobs.
+One-click uses the Java Virtual Machine (JVM) installed by default in almost every browser available, so in 99% of all computers it requires absolutely no setup.
+
+
+=== SSS resource ===
+Screen Saver Science resources got their name from the popular configuration of linking this kind of resource to the screensaver of computers. That is, so that the computer will only act as a Grid resource whenever it is not used for a while so that the screensaver kicks in.
+It uses the _qemu_ Virtual Machine (VM) to run all the resource tasks and jobs on your computer. This means that the resource and job execution is _sandboxed_, i.e. completely separated from your own data and devices. Because qemu is available on most platforms, this is a very flexible solution.
+Grid jobs running inside a qemu VM are additionally significantly less limited and more efficient than jobs running on One-click resources, but it takes slightly more work to get the SSS resource running.
+Still, it should not scare you away from trying out the SSS model, as the efficiency advantages really makes such resources much more valuable than One-click resources.
+
+
+=== Full resources ===
+The full resource model is mainly for dedicated Grid resources such as super computers or cluster computers. They require a Linux/UNIX based system with the _bash_ shell and inbound ssh access to at least one user account from the MiG servers. When those prerequisites are fulfilled, it takes no more installation or daemons to utilize the computer(s) as a MiG resource.
+To get started with this setup you need a working MiG user certificate, and then it is a matter of filling in a resource creation form on your personal MiG Resources page (further information about access to your personal MiG page is included with your user certificate).
+Please contact jonas.bardino or one of the other MiG maintainers in case you wish to try out the Full resource model. Then we will help you filling in the resource creation form and get running.
+
+
+== As a developer ==
+Please contact jonas.bardino or one of the other maintainers if you wish to experiment with or develop the MiG code. Depending on your interests and skills we may be able to provide you with one of our development accounts or help you getting started on your own computer.
+
+
+== As a Grid provider ==
+At the moment development is limited to working on one of our development accounts, but when we get the code published here this can also take place on your own private MiG server. This also means the ability to run your own private Grid using MiG.

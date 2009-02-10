@@ -9,15 +9,40 @@ We tend to do this at least once a year, but when the chance arises we may take 
 = Next MiG working day =
 On the MiG Days last year, we discussed the future collaboration possibilities and there was some backing for introducing more frequent working days to make sure that we synchronize our efforts and get finished subprojects integrated in the main MiG code base.
 
-We have a number of tasks to take care of now, so therefore I propose such a working day in the near future. 
+We have a number of tasks to take care of now, so therefore I propose such a working day in the near future at KU. 
 
+
+== Deciding a date ==
 Please fill in this table to indicate which days you are interested in participating.
 There is no requiremnet whatsoever that you participate at all even if you are a core member of the MiG team, and the participation can be limited or full time as you see fit.
 
 Table entries should be one of:
-X = Available all day
-Y = Limited availability
-Z = Not available
+ * X = Available all day
+ * Y = Limited availability
+ * Z = Not available
 
 || Name \ Date || 19/2 || 20/2 || 26/2 || 27/2 ||
 || Jonas Bardino || X || X || X || X ||
+
+
+Please sign up no later than Monday (16/2) the if you wish to participate!
+
+
+== Topics ==
+A working day could start of with a short meeting first where we go through the projects and plans followed by more free sessions where we set up a few groups to take care of a particular task. In that way the amount of participation in the groups is completely up to everyone. We should of course decide an approximate time plan for the groups so that we are able to meet up at the end of the day and conclude on the results and future work.
+
+Meeting (proposed at 10:00):
+ * presentation of participants and active projects
+ * areas that need attention
+ * planning
+ * other topics
+
+Working groups (e.g. at 11)
+ * GPL license all the code as previously decided
+ * Document the process of running your own MiG server
+ * Integrate finished subprojects
+ * Tidy all code (i.e. PythonTidy)
+ * Release the code here
+
+
+Feel free to comment or suggest any additional topics you may have in mind.

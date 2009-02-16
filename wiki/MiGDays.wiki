@@ -24,6 +24,7 @@ Table entries should be one of:
 
 || Name \ Date || 19/2 || 20/2 || 26/2 || 27/2 || 5/3 || 6/3 ||
 || Jonas Bardino || X || X || X || X || X || X ||
+|| Brian Vinter || X || X || Z || X || X || X ||
 
 
 Please sign up no later than Monday (16/2) the if you wish to participate!

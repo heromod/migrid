@@ -1,6 +1,7 @@
-#summary Getting started with MiG
+#summary Getting started with MiG as a user, resource owner or Grid provider
 #labels Featured
-<wiki:toc max_depth="1" />
+
+<wiki:toc max_depth="1"/>
 
 =Getting Started with MiG=
 

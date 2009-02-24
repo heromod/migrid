@@ -39,7 +39,7 @@ With full scale resources you are able to decide even more closely which VGrids 
 
 
 === One-click resource ===
-One-click resources are the simplest to set up - it just takes a single mouse click on [https://mig-1.imada.sdu.dk/cgi-sid/oneclick.py this link] from your browser and your computer will start handling Grid jobs. Stopping again is just as simple - simply close the browser window/tab or navigate to another web page.
+One-click resources are the simplest to set up - it just takes a single [https://mig-1.imada.sdu.dk/cgi-sid/oneclick.py click] from your browser and your computer will start handling Grid jobs. Stopping again is just as simple - simply close the browser window/tab or navigate to another web page.
 
 The cost of this extreme simplicity is limitations in the jobs that this kind of resource can execute and in the efficiency of such jobs.
 

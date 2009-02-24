@@ -31,7 +31,7 @@ MiG provides three overall resource models so you can choose the one which best 
 
 The first two models are easy to set up and run purely in a sandboxed environment to prevent any permanent damage to your resource. There's a trade off between easy set up and power, so the Full scale model is more flexible and powerful than the other two at the cost of more set up and management complexity. The SSS sandbox is a good compromise between flexibility, ease of setup and power, so in many cases it may be a good choice. 
 
-If your computer runs Windows you can choose between the One-click and SSS resource model, whereas the Full scale model requires a UNIX compatible operating system like Mac OS X or Linux.
+All common computer platforms are supported for the One-click and SSS resource model, whereas the Full scale model is limited to UNIX compatible operating systems like Mac OS X or Linux.
 
 When you donate computing power to MiG in general, it will *only* be used for scientific purposes.
 

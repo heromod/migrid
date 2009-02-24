@@ -1,12 +1,12 @@
 #summary Getting started page
 #labels Featured
 
+<wiki:toc max_depth="3" />
+
 = Getting Started with MiG =
 
 == As a user ==
-If You want to try out MiG as a user, please request a user certificate using the link on:
-
-http://www.migrid.org/MiG/Components/index_html
+If You want to try out MiG as a user, please request a user certificate using the link on the [http://www.migrid.org/MiG/Components/index_html MiG Components page]
 
 Depending on your supplied motivation for requesting the certificate we will try to provide you with access to a suitable subset of the available Grid resources. In case you just want to try it out, this will most likely be the least trusted resources. If on the other hand You have a scientific project to run on the Grid, there's good chances of getting access to more powerful resources.
 
@@ -24,7 +24,7 @@ The first two models are easy to set up and run purely in a sandboxed environmen
 
 When you donate computing power to MiG in general, it will *only* be used for scientific purposes.
 
-With full scale resources you are able to decide more closely which VGrids and thus which projects you want to donate your resources to.
+With full scale resources you are able to decide even more closely which VGrids and thus which projects you want to donate your resources to.
 
 
 === One-click resource ===
@@ -44,14 +44,14 @@ Still, it should not scare you away from trying out the SSS model, as the effici
 The full scale resource model is mainly for dedicated Grid resources such as super computers or cluster computers. They require a Linux/UNIX based system with the _bash_ shell and inbound ssh access to at least one user account from the MiG servers. When those prerequisites are fulfilled, it takes no more installation or daemons to utilize the computer(s) as a MiG resource. Furthermore MiG is very firewall friendly so in most cases you do not need to add new firewall rules to run a MiG resource.
 
 To get started with this setup you need a working MiG user certificate, and then it is a matter of filling in a resource creation form on your personal MiG Resources page (further information about access to your personal MiG page is included with your user certificate).
-Please contact jonas.bardino or one of the other MiG maintainers in case you wish to try out the Full scale resource model. Then we will help you filling in the resource creation form and get running.
+Please [ContactUs contact us] in case you wish to try out the Full scale resource model. Then we will help you filling in the resource creation form and get running.
 Once you finish the resource creation form, we will verify and create the resource in MiG and it will then show up in your list of MiG resources. Each MiG resource on the list is associated with a simple dashboard so that you can easily reconfigure, start and stop your MiG resources at any time.
 
 
 == As a developer ==
-Please contact jonas.bardino or one of the other maintainers if you wish to experiment with or develop the MiG code. Depending on your interests and skills we may be able to provide you with one of our development accounts or help you getting started on your own computer.
+Please [ContactUs contact us] if you wish to experiment with or develop the MiG code. Depending on your interests and skills we may be able to provide you with one of our development accounts or help you getting started on your own computer.
 
 
 == As a Grid provider ==
 At the moment development is limited to working on one of our development accounts, but when we get the code published here this can also take place on your own private MiG server. This also means the ability to run your own private Grid using MiG.
-Please contact us if you are interested in this setup.
+Please [ContactUs contact us] if you are interested in this setup.

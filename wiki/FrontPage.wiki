@@ -15,4 +15,4 @@ On these pages you can communicate with the MiG team and find information about 
  * ...
 
 
-There's additional information available at our [http://www.migrid.org main page].
+There's additional information available at our [http://www.migrid.org main project page].

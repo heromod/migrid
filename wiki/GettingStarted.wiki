@@ -21,6 +21,8 @@ Depending on your supplied motivation for requesting the certificate we will try
 
 All users get full access to the storage and virtual organization features, so even if you are limited to running jobs on few and sandboxed resources you can still use MiG as e.g. a collaboration or project framework.
 
+When we have reviewed and verified your certificate request we will send you further instructions for getting started as a MiG user. For the impatient, some of these instructions are also available in the [http://www.migrid.org/MiG/Mig/user_tutorial.html user tutorial] from the main MiG project page.
+
 
 == As a resource owner ==
 If you own one or more computers you can let them participate in MiG as resources.

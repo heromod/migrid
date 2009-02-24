@@ -14,7 +14,8 @@ http://groups.google.com/group/google-code-hosting/browse_thread/thread/a08c273f
 = Getting Started with MiG =
 
 == As a user ==
-If You want to try out MiG as a user, please request a user certificate using the link on the [http://www.migrid.org/MiG/Components/index_html MiG Components page]
+If You want to try out MiG as a user, all you need is a MiG certificate and a web browser.
+Please request a user certificate using the link on the [http://www.migrid.org/MiG/Components/index_html MiG Components page]
 
 Depending on your supplied motivation for requesting the certificate we will try to provide you with access to a suitable subset of the available Grid resources. In case you just want to try it out, this will most likely be the least trusted resources. If on the other hand You have a scientific project to run on the Grid, there's good chances of getting access to more powerful resources.
 
@@ -36,7 +37,7 @@ With full scale resources you are able to decide even more closely which VGrids 
 
 
 === One-click resource ===
-One-click resources are the simplest to set up - it just takes a single mouse click on a link and you computer will start handling Grid jobs. Stopping again is just as simple - simply close the browser window/tab or enter open another web page.
+One-click resources are the simplest to set up - it just takes a single mouse click on [https://mig-1.imada.sdu.dk/cgi-sid/oneclick.py this link] from your browser and you computer will start handling Grid jobs. Stopping again is just as simple - simply close the browser window/tab or enter/open another web page.
 The cost of this extreme simplicity is limitations in the jobs that this kind of resource can execute and in the efficiency of such jobs.
 One-click uses the Java Virtual Machine (JVM) installed by default in almost every browser available, so in 99% of all computers it requires absolutely no setup.
 

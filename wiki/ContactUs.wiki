@@ -5,6 +5,6 @@
 
 MiG is developed mainly by people from the E-science center at the University of Copenhagen (KU). We are always available through email but if you happen to be anyway near Copenhagen and want to talk we can probably set up a real life meeting, too. 
 
-Please contact Project leader brian.vinter to make an appointment or to get more information about getting your own project on MiG.
+Please contact Project leader Brian Vinter (brian DOT vinter AT gmail DOT com) to make an appointment or to get more information about getting your own project on MiG.
 
-Specific technical questions to the MiG middleware, e.g. related to getting started with MiG are probably easier to send directly to one of the dedicated MiG developers. So if You just send an email to jonas.bardino, we will forward it to the appropriate developer.
+Specific technical questions to the MiG middleware, e.g. related to getting started with MiG are probably easier to send directly to one of the dedicated MiG developers. So if You just send an email to Jonas Bardino (jonas DOT bardino AT gmail DOT com), we will forward it to the appropriate developer.

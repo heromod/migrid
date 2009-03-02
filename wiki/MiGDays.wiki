@@ -2,7 +2,6 @@
 #labels Featured
 
 = MiG Days =
-
 From time to time we gather interested users, resource owners and developers to collaborate for a few days on the projects at hand in the MiG project.
 We tend to do this at least once a year, but when the chance arises we may take a single joint working day, too.
 
@@ -14,20 +13,10 @@ We have a number of tasks to take care of now, so therefore I propose such a wor
 
 
 == Deciding a date ==
-Please fill in this table (or send me an e-mail) to indicate which days you are interested in participating.
-There is no requiremnet whatsoever that you participate at all even if you are a core member of the MiG team, and the participation can be limited or full time as you see fit.
+After a limited number of responses to the date election we have now decided that we will meet on this Friday (the 6th of March) at the E-Science Center / DIKU (Further details will be announced).
 
-Table entries should be one of:
- * X = Available all day
- * Y = Limited availability
- * Z = Not available
-
-|| Name \ Date || 19/2 || 20/2 || 26/2 || 27/2 || 5/3 || 6/3 ||
-|| Jonas Bardino || X || X || X || X || X || X ||
-|| Brian Vinter || X || X || Z || X || X || X ||
-
-
-Please sign up no later than Wednesday (18/2) the if you wish to participate!
+However, there is no requirement whatsoever that you participate at all even if you are a core member of the MiG team, and the participation can be limited or full time as you see fit.
+But for administrative purposes, please send me (bardino AT diku.dk) an email if you expect to participate.
 
 
 == Topics ==

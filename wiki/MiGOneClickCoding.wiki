@@ -128,7 +128,7 @@ The interesting parts of this code are the following lines:
  * 48-49: Errors occuring in a file object can be retrieved using the  *getErrorMessages* method located in [https:../../../../../MiG-developers/Oneclick/javadoc/index.html MiG.oneclick.File]
 
 === Compiling `HelloMiGOneClickWorld` ===
-You need to download the [https:../../../../../MiG-developers/Oneclick/MiGOneClickCodebase.jar MiGOneclickCodebase.jar] archive if you haven't done so already. It contains the entire [https:../../../../../MiG-developers/Oneclick/javadoc/index.html MiG.oneclick package] needed for compilation.
+You need to download the [http://migrid.googlecode.com/svn/trunk/mig/java-bin/MiGOneClickCodebase.jar MiGOneclickCodebase.jar] archive if you haven't done so already. It contains the entire [https:../../../../../MiG-developers/Oneclick/javadoc/index.html MiG.oneclick package] needed for compilation.
 {{{
 javac -classpath MiGOneClickCodebase.jar:. HelloMiGOneClickWorld.java
 }}}

@@ -12,13 +12,13 @@ The tour begins with a description of framework limitations, followed by the MiG
  * Due to [http://java.sun.com/sfaq/ applet security] fileaccess is done through the [https:../../../../../MiG-developers/Oneclick/javadoc/index.html MiG.oneclick.File] class.
 
 
-= The flow of a MiG OneClick job execution =
+= The flow of a MiG One-Click job execution =
 
 The flow of an MiG One-Click job execution differs from a *normal* resource as it must apply to the java applet security model and therefore can't store any files locally on the resource. This has left us with the following execution flow:
 
   * Browser (or console) contacts the MiG server.
   
-  * The MiG server creates/reconize the contacting resource and responds with information necessary for the resource to load the MiG One-Click environment.
+  * The MiG server creates/recognize the contacting resource and responds with information necessary for the resource to load the MiG One-Click environment.
 
   * The browser (or console) then loads the MiG One-Click environment from the `MiGOneclickCodebase.jar` located on the MiG server, this is done through https.
 

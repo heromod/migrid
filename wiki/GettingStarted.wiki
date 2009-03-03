@@ -74,5 +74,5 @@ Please [ContactUs contact us] if you wish to experiment with or develop the MiG 
 
 
 == As a Grid provider ==
-At the moment development is limited to working on one of our development accounts, but when we get the code published here this can also take place on your own private MiG server. This also means the ability to run your own private Grid using MiG.
+At the moment development is limited to working on one of our [MiGDeveloperAccounts development accounts], but when we get the code published here this can also take place on your own private MiG server. This also means the ability to run your own private Grid using MiG.
 Please [ContactUs contact us] if you are interested in this setup.

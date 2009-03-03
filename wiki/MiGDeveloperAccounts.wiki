@@ -2,7 +2,7 @@
 #labels Phase-Implementation,Phase-QA
 
 = Intended Audience =
-Some MiG sub projects require access to a partial or complete MiG server environment. Those of you who need access to such a setup should apply for a developer account on one of the MiG test servers. If granted, you will be given a normal user account at one or more of the servers with access to a personal Apache web server.
+Some MiG sub projects require access to a partial or complete MiG server environment. Those of you who need access to such a setup can apply for a developer account on one of the MiG test servers. If granted, you will be given a normal user account at one or more of the servers with access to a personal Apache web server.
 
 Please [ContactUs contact us] if you think you need a developer account.
 

@@ -115,7 +115,7 @@ public class HelloMiGOneClickWorld extends MiG.oneclick.Job
 }
 
 }}}
-which you can download as [https:../../../../../MiG-developers/Oneclick/HelloMiGOneClickWorld.java HelloMiGOnceClickWorld.java].
+which you can download as [http://migrid.googlecode.com/svn/trunk/mig/java-src/Oneclick/HelloMiGOneClickWorld.java HelloMiGOnceClickWorld.java].
 
 The interesting parts of this code are the following lines:
 
@@ -183,7 +183,7 @@ JVM_BYTECODE
 1
 
 }}}
-or download the above [https:../../../../../MiG-developers/Oneclick/HelloMiGOneClickWorld.mRSL HelloMiGOneClickWorld.mRSL] job specification file.
+or download the above [http://migrid.googlecode.com/svn/trunk/mig/java-src/Oneclick/HelloMiGOneClickWorld.mRSL HelloMiGOneClickWorld.mRSL] job specification file.
 
 To submit the job use the web interface or use:
 

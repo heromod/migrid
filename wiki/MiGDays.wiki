@@ -18,6 +18,9 @@ After a limited number of responses to the date election we have now decided tha
 However, there is no requirement whatsoever that you participate at all even if you are a core member of the MiG team, and the participation can be limited or full time as you see fit.
 But for administrative purposes, please send me (bardino AT diku.dk) an email if you expect to participate.
 
+== Location ==
+We have reserved room N034 (i.e. 1-0-34) for the meeting and we will try to make sure that we will be able to get the necessary network access.
+I have no idea where that room is, so I'll meet up with the others at Brians office at 10, feel free to meet us there if you don't know either :-)
 
 == Topics ==
 A working day could start of with a short meeting first where we go through the projects and plans followed by more free sessions where we set up a few groups to take care of a particular task. In that way the amount of participation in the groups is completely up to everyone. We should of course decide an approximate time plan for the groups so that we are able to meet up at the end of the day and conclude on the results and future work.

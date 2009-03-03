@@ -174,7 +174,7 @@ JVM_BYTECODE
 1
 
 }}}
-or download the above [https:../../../../../MiG-developers/Oneclick/HelloMiGOneClickWorld.mRSL] job specification file.
+or download the above [https:../../../../../MiG-developers/Oneclick/HelloMiGOneClickWorld.mRSL HelloMiGOneClickWorld.mRSL] job specification file.
 
 To submit the job use the web interface or use:
 

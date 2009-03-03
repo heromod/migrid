@@ -66,5 +66,5 @@ We use HTML formatting quite a lot in the cgi scripts at the time of writing. Ho
 
 
 = Other Programming Languages =
-MiG coding style guidelines mostly apply to python code, as one of the ["MiG Rules"] specifies the intent to write as much of the code as possible in python. However, in some situations it may not be possible or reasonable to implement one or more features in python. In those situations coding style should either try to follow the same guidelines or an official coding standard for the specific language.
+MiG coding style guidelines mostly apply to python code, as one of the [MiGRules] specifies the intent to write as much of the code as possible in python. However, in some situations it may not be possible or reasonable to implement one or more features in python. In those situations coding style should either try to follow the same guidelines or an official coding standard for the specific language.
 Please talk this issue over with the other MiG developers.

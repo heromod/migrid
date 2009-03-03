@@ -17,7 +17,7 @@ On these pages you can communicate with the MiG team and find information about 
  * [MiGOneClickCoding Coding MiG One-Click Jobs]
 
 = Resource Owner Topics =
- * [SetupRuntimeEnvironments Setting Up Runtime Environments]
+ * [SettingUpRuntimeEnvironments Setting Up Runtime Environments]
 
 = Developer topics =
  * [MiGRules MiG Project Rules]

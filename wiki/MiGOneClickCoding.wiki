@@ -1,6 +1,10 @@
 #summary MiG One-Click environment jobs
 #labels Phase-Implementation,Phase-Deploy
 
+= Important Note =
+The referenced files on this page are not yet generally available online yet, but please just [ContactUs contact us] if you need them.
+
+
 =  Introduction =
 Welcome to the guide on how to code for the MiG One-Click environment.
 The tour begins with a description of framework limitations, followed by the MiG One-Click job execution flow, ending with a code generation guide.

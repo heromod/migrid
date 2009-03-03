@@ -1,7 +1,9 @@
 #summary Coding style for MiG developers
 #labels Phase-Design,Phase-Implementation,Featured
 
-= History =
+<wiki:toc max_depth="2"/>
+
+= Introduction =
 MiG started out as a few separate subprojects and after the initial core design and development by Henrik Høy Karlsen a number of developers contributed code without caring too much about style consistency. Most of the developers have a solid background in C and to some extent Java, so the initial code is rather un-pythonic in terms of issues like naming and layout.
 
 As the code developed we realised the need to converge on a consistent coding style and came across the official [http://www.python.org/dev/peps/pep-0008/ Python Coding style] proposals. Those guidelines were chosen as general guidelines for all new MiG code. Furthermore we try to update old code to fit the standards but that is mostly done when changing existing code anyway.

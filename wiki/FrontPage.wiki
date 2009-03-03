@@ -10,6 +10,7 @@ On these pages you can communicate with the MiG team and find information about 
 
 = Topics =
 
+ * [MiGRules MiG Project Rules]
  * [GettingStarted Getting started with MiG]
  * [MiGDays MiG Days]
  * ...

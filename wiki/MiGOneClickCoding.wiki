@@ -45,7 +45,7 @@ We will now run through an `HelloMiGOneClickWorld` sample which copies a file, w
 and errors to stderr.
 
 === `HelloMiGOneClickWorld` ===
-
+The following code is a simple hello world app:
 {{{
 #!java
 import MiG.oneclick.File;
@@ -106,7 +106,7 @@ public class HelloMiGOneClickWorld extends MiG.oneclick.Job
 }
 
 }}}
-Download file [https:../../../../../MiG-developers/Oneclick/HelloMiGOneClickWorld.java here],
+which you can download as [https:../../../../../MiG-developers/Oneclick/HelloMiGOneClickWorld.java HelloMiGOnceClickWorld.java].
 
 The interesting parts of this code are the following lines:
 
@@ -119,10 +119,11 @@ The interesting parts of this code are the following lines:
  * 48-49: Errors occuring in a file object can be retrieved using the  *getErrorMessages* method located in [https:../../../../../MiG-developers/Oneclick/javadoc/index.html MiG.oneclick.File]
 
 === Compiling `HelloMiGOneClickWorld` ===
+You need to download the [https:../../../../../MiG-developers/Oneclick/MiGOneClickCodebase.jar MiGOneclickCodebase.jar] archive if you haven't done so already. It contains the entire [https:../../../../../MiG-developers/Oneclick/javadoc/index.html MiG.oneclick package] needed for compilation.
 {{{
 javac -classpath MiGOneClickCodebase.jar:. HelloMiGOneClickWorld.java
 }}}
-Download `MiGOneclickCodebase.jar` [https:../../../../../MiG-developers/Oneclick/MiGOneClickCodebase.jar here]. This contains the [https:../../../../../MiG-developers/Oneclick/javadoc/index.html MiG.oneclick package].
+
 
 
 === Creating MiG One-Click root path ===
@@ -173,7 +174,7 @@ JVM_BYTECODE
 1
 
 }}}
-Download file [https:../../../../../MiG-developers/Oneclick/HelloMiGOneClickWorld.mRSL here].
+or download the above [https:../../../../../MiG-developers/Oneclick/HelloMiGOneClickWorld.mRSL] job specification file.
 
 To submit the job use the web interface or use:
 

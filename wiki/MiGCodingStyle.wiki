@@ -16,9 +16,11 @@ To sum up and elaborate on the official naming scheme:
  * Modules should be given short, descriptive, all lowercase names, e.g. a module for supporting the web editor could be called editing.py whereas a script for adding members to a vgrid coud be called addvgridmember.py.
  * User scripts are named according to the un*x operation they emulate and with 'mig' as a prefix, e.g. the MiG 'list' operation is called migls.py. The '.py' suffix of the user scripts can not simply be left out as we provide versions in other languages as well, e.g. similar '.sh' scripts exist.
  * The server side CGI scripts providing the actual list file functionality is similarly named ls.py, i.e. without the 'mig' prefix.
- * Classes are given [http://en.wikipedia.org/wiki/Camelcase CamelCase] names and should preferably be implemeted in their own separate file of the same name, but in all lowercase. That is, the BestFitScheduler class should be implemented in bestfitscheduler.py.
+ * Classes are given [http://en.wikipedia.org/wiki/Camelcase CamelCase] names and should preferably be implemeted in their own separate file of the same name, but in all lowercase. That is, the `BestFitScheduler` class should be implemented in `bestfitscheduler.py`.
  * Function, package, method and variable names should be all lower case with underscores ({{{'_'}}}) as word separators. These names should focus more on being descriptive than necessarily being short. An example of a function for acquiring an editing lock on a file is: 
-{{{def acquire_edit_lock(real_path, cert_name_no_spaces):}}}
+{{{
+def acquire_edit_lock(real_path, cert_name_no_spaces):
+}}}
 
 NB: if you think that these long names are annoying to type, consider using an editor with variable expansion support
 

@@ -1,5 +1,5 @@
 #summary MiG gatherings
-#labels Featured
+#labels Featured,Phase-QA,Phase-Requirements,Phase-Design,Phase-Support
 
 = MiG Days =
 From time to time we gather interested users, resource owners and developers to collaborate for a few days on the projects at hand in the MiG project.

@@ -1,5 +1,5 @@
 #summary Coding style for MiG developers
-#labels Phase-Design,Phase-Implementation
+#labels Phase-Design,Phase-Implementation,Featured
 
 = History =
 MiG started out as a few separate subprojects and after the initial core design and development by Henrik Høy Karlsen a number of developers contributed code without caring too much about style consistency. Most of the developers have a solid background in C and to some extent Java, so the initial code is rather un-pythonic in terms of issues like naming and layout.

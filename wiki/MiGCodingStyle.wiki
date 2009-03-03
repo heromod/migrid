@@ -1,5 +1,5 @@
 #summary Coding style for MiG developers
-#labels Phase-Design,Phase-Implementation,Featured
+#labels Phase-Design,Phase-Implementation
 
 <wiki:toc max_depth="2"/>
 

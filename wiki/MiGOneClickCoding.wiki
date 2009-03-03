@@ -2,7 +2,8 @@
 #labels Phase-Implementation,Phase-Deploy
 
 = Important Note =
-The referenced files on this page are not yet generally available online yet, but please just [ContactUs contact us] if you need them.
+some of the One-Click files referenced on this page are not yet generally available online, but please just [ContactUs contact us] if you need them.
+We will package and upload them ASAP to make the links work.
 
 
 =  Introduction =

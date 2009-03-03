@@ -1,4 +1,4 @@
-#summary MiG OneClick environment jobs
+#summary MiG One-Click environment jobs
 #labels Phase-Implementation,Phase-Deploy
 
 =  Introduction =
@@ -44,7 +44,7 @@ The difference between a *normal* java application and a MiG One-Click job are t
 We will now run through an `HelloMiGOneClickWorld` sample which copies a file, writes the status of the filecopy to stdout
 and errors to stderr.
 
-=== HelloMiGOneClickWorld ===
+=== `HelloMiGOneClickWorld` ===
 
 {{{
 #!java
@@ -118,23 +118,22 @@ The interesting parts of this code are the following lines:
  * 47: If an exception is caught the error message is written to stderr of the job through the *err* method located in [https:../../../../../MiG-developers/Oneclick/javadoc/index.html MiG.oneclick.Job]
  * 48-49: Errors occuring in a file object can be retrieved using the  *getErrorMessages* method located in [https:../../../../../MiG-developers/Oneclick/javadoc/index.html MiG.oneclick.File]
 
-=== Compiling HelloMiGOneClickWorld ===
+=== Compiling `HelloMiGOneClickWorld` ===
 {{{
 javac -classpath MiGOneClickCodebase.jar:. HelloMiGOneClickWorld.java
 }}}
 Download `MiGOneclickCodebase.jar` [https:../../../../../MiG-developers/Oneclick/MiGOneClickCodebase.jar here]. This contains the [https:../../../../../MiG-developers/Oneclick/javadoc/index.html MiG.oneclick package].
 
 
-=== Creating MiG OneClick rootpath ===
+=== Creating MiG One-Click root path ===
 
-As for now all MiG One-Click binaries should have rootpath $MIGHOME/jvm on the MiG server,
-to create this path use the web interface or use:
+As for now all MiG One-Click binaries should have the root path $MIGHOME/jvm on the MiG server, to create this path use the web interface or use:
 
 {{{
 migmkdir.sh jvm
 }}}
 
-=== Uploading MiG OneClick binaries ===
+=== Uploading MiG One-Click binaries ===
 
 To upload the newly generated `HelloMiGOneClickWorld.class` use the web interface or use:
 
@@ -142,7 +141,7 @@ To upload the newly generated `HelloMiGOneClickWorld.class` use the web interfac
 migput.sh HelloMiGOneClickWorld.class jvm/
 }}}
 
-=== Submitting MiG OneClick jobs ===
+=== Submitting MiG One-Click jobs ===
 To submit a `HelloMiGOneClickWorld` job create a mRSL file like this:
 
 {{{

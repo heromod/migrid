@@ -1,13 +1,6 @@
 #summary MiG One-Click environment jobs
 #labels Phase-Implementation,Phase-Deploy
 
-----
-
-*Important Note:* some of the One-Click files referenced on this page are not yet generally available online, but please just [ContactUs contact us] if you need them.
-We will package and upload them ASAP to make the links work.
-
-----
-
 <wiki:toc max_depth="2"/>
 
 =  Introduction =

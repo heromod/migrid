@@ -8,11 +8,21 @@ Welcome to the public MiG Wiki!
 On these pages you can communicate with the MiG team and find information about the project.
 
 
-= Topics =
-
- * [MiGRules MiG Project Rules]
+= General Topics =
  * [GettingStarted Getting started with MiG]
  * [MiGDays MiG Days]
+ * [ContactUs Contact Information]
+
+= User Topics =
+ * [MiGOneClickCoding Coding MiG One-Click Jobs]
+
+= Resource Owner Topics =
+ * [SetupRuntimeEnvironments Setting Up Runtime Environments]
+
+= Developer topics =
+ * [MiGRules MiG Project Rules]
+ * [MiGCodingStyle MiG Coding Style]
+ * [MiGDeveloperAccounts MiG Developer Accounts]
  * ...
 
 

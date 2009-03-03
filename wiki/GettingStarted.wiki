@@ -1,14 +1,6 @@
 #summary Getting started with MiG as a user, resource owner or Grid provider
 #labels Featured
 
-<wiki:comment>
-The wiki:toc tag should create a table of contents according to
-http://code.google.com/p/support/wiki/WikiSyntax#Table_of_Contents
-but it does not work ATM.
-Perhaps it will be fixed?
-http://groups.google.com/group/google-code-hosting/browse_thread/thread/a08c273ffc564f42
-</wiki:comment>
-
 <wiki:toc max_depth="2"/>
 
 = Getting Started with MiG =

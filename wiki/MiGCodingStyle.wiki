@@ -15,7 +15,7 @@ To sum up and elaborate on the official naming scheme:
  * User scripts are named according to the un*x operation they emulate and with 'mig' as a prefix, e.g. the MiG 'list' operation is called migls.py. The '.py' suffix of the user scripts can not simply be left out as we provide versions in other languages as well, e.g. similar '.sh' scripts exist.
  * The server side CGI scripts providing the actual list file functionality is similarly named ls.py, i.e. without the 'mig' prefix.
  * Classes are given [http://en.wikipedia.org/wiki/Camelcase "CamelCase"] names and should preferably be implemeted in their own separate file of the same name, but in all lowercase. That is, the BestFitScheduler class should be implemented in bestfitscheduler.py.
- * Function, package, method and variable names should be all lower case with underscores ('_') as word separators. These names should focus more on being descriptive than necessarily being short. An example of a function for acquiring an editing lock on a file is: 
+ * Function, package, method and variable names should be all lower case with underscores ({{{'_'}}}) as word separators. These names should focus more on being descriptive than necessarily being short. An example of a function for acquiring an editing lock on a file is: 
 {{{def acquire_edit_lock(real_path, cert_name_no_spaces):}}}
 
 NB: if you think that these long names are annoying to type, consider using an editor with variable expansion support
@@ -29,9 +29,11 @@ Please try to write code that is easy to read i.e. use:
 == Strings ==
 There's at least three different ways to build (concatenate) strings in python:
 
-{{{my_string + " " + str(my_integer)
+{{{
+my_string + " " + str(my_integer)
 "%s %d" % (my_string, my_integer) 
-my_string, my_integer}}}
+my_string, my_integer
+}}}
 
 We've considered and tried to consistently use a single one, but in reality it turns out that some situations are much easier to handle with the first one, whereas other situations are best handled with the second way. The third way does not add significant value and it may interfere in function argument lists, so the first two ways are preferred.
 
@@ -42,8 +44,10 @@ For performance seasons the use of classes/objects should be kept to a minimum i
 == Documentation ==
 The guidelines also contain information about proposed use of python docstrings to document the code. Although it may be boring, please try to document your code whenever it isn't obvious what it does and why. Even a short doc string to introduce modules/functions/classes can be very helpful for other developers working with the code. Inline comments are also welcome in places where the code or algorithm isn't self explaining.
 
-== Tools ==
+== Interpreter Versions ==
+We are pretty much bound to the python version available at the MiG servers and should always aim at not requiring a more recent python version if at all possible. As of 2009 we use python 2.4 on the servers, and we expect to move to 2.5 soon, so 2.6 and 3.0 specific features will not be available for quite a while.
 
+== Tools ==
 Apart from the guide there are a few tools to help coding in a way that adheres to the official style:
 
 [http://www.logilab.org/projects/pylint PyLint] is a nice tool for statically checking correctness and style of python source code.

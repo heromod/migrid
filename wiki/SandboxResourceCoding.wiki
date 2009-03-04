@@ -44,3 +44,4 @@ The PS3 sandboxes use a live CD without any access to the hard disk so they do n
 0
 
 }}}
+The same applies to the PC sandboxes with only 100 MB of disk.

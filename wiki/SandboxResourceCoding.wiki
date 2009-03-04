@@ -4,7 +4,7 @@
 = Introduction =
 MiG features sandbox resources using virtual machines on `PC`s and `PlayStation3`s as mentioned on the [http://code.google.com/p/migrid/wiki/GettingStarted#As_a_resource_owner Getting started page] and in the [http://www.migrid.org/MiG/Mig_english/sandboxes_html SSS sandbox intro]. These sandboxes provide a small Linux environment where all MiG users can run jobs.
 This page only covers coding for those sandboxes whereas One-Click sandboxes are treated  on the [http://code.google.com/p/migrid/wiki/MiGOneClickCoding MiG One-Click Coding] page
-The sandbox resources are quite safe to use as they are difficult to tamper with, but they *are* less trusted than our dedicated resources, so we do not allow jobs to run there unless explicitly permitted to. Therefore you must actively mark your sandbox for sandbox execution if that is what you want.
+The sandbox resources are quite safe to use as they are difficult to tamper with, but they *are* less trusted than our dedicated resources, so we do not allow jobs to run there unless explicitly permitted by the user. Therefore you must actively mark your sandbox for sandbox execution if that is what you want.
 
 
 = How to run a sandbox job =

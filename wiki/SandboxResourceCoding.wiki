@@ -4,7 +4,7 @@
 = Introduction =
 MiG features sandbox resources using virtual machines on `PC`s and `PlayStation3`s as mentioned on the [http://code.google.com/p/migrid/wiki/GettingStarted#As_a_resource_owner Getting started page] and in the [http://www.migrid.org/MiG/Mig_english/sandboxes_html SSS sandbox intro]. These sandboxes provide a small Linux environment where all MiG users can run jobs.
 This page only covers coding for those sandboxes whereas One-Click sandboxes are treated  on the [http://code.google.com/p/migrid/wiki/MiGOneClickCoding MiG One-Click Coding] page
-The sandbox resources are quite safe to use as they are difficult to tamper with, but they *are* less trusted than our dedicated resources, so we do not allow jobs to run there unless explicitly permitted by the user. Therefore you must actively mark your sandbox for sandbox execution if that is what you want.
+The sandbox resources are quite safe to use as they are difficult to tamper with, but they *are* less trusted than our dedicated resources, so we do not allow jobs to run there unless explicitly permitted by the user. Therefore you must actively mark your job for sandbox execution if that is what you want.
 
 
 = How to run a sandbox job =
@@ -25,13 +25,22 @@ You may additionally specify ARCHITECTURE if you need to target either PS3s or P
 {{{
 ::ARCHITECTURE::
 PS3
+
 }}}
 or
 {{{
 ::ARCHITECTURE::
 X86
+
 }}}
 
 
 = Limitations on sandbox resources =
-As mentioned above the sandboxes contain a minimal Linux environment, with only basic applications and libraries. Please [ContactUs contact us] if you miss any basic libraries or applications in the sandboxes. Then we may be able to help getting them included or help you creating a library package to include as input to your jobs.
+As mentioned above the sandboxes contain a minimal Linux environment, with only basic applications and libraries. The sandboxes generally have the GCC suite so that they support building C and C++ applications but not much else. Please [ContactUs contact us] if you miss any basic libraries or applications in the sandboxes. Then we may be able to help getting them included or help you creating a library package to include as input to your jobs.
+
+The PS3 sandboxes use a live CD without any access to the hard disk so they do not include any real disk at all. Therefore it is necessary to explicitly override the default value og 1 GB disk to run jobs there:
+{{{
+::DISK::
+0
+
+}}}

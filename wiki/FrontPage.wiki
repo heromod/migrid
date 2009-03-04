@@ -15,6 +15,7 @@ On these pages you can communicate with the MiG team and find information about 
 
 = User Topics =
  * [MiGOneClickCoding Coding MiG One-Click Jobs]
+ * [SandBoxResourceCoding Coding MiG Sandbox Jobs]
 
 = Resource Owner Topics =
  * [SettingUpRuntimeEnvironments Setting Up Runtime Environments]

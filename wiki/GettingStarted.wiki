@@ -62,9 +62,19 @@ Once you finish the resource creation form, we will verify and create the resour
 
 
 == As a developer ==
-Please [ContactUs contact us] if you wish to experiment with or develop the MiG code. Depending on your interests and skills we may be able to provide you with one of our [MiGDeveloperAccounts development accounts] or help you getting started on your own computer.
+Please [ContactUs contact us] if you wish to experiment with or develop
+the MiG code. Depending on your interests and skills we may be able to
+provide you with one of our [MiGDeveloperAccounts development accounts]
+or help you getting started on your own computer. Pleaase refer to the
+next section if you prefer to set up your own test Grid instead.
 
 
 == As a Grid provider ==
-At the moment development is limited to working on one of our [MiGDeveloperAccounts development accounts], but when we get the code published here this can also take place on your own private MiG server. This also means the ability to run your own private Grid using MiG.
-Please [ContactUs contact us] if you are interested in this setup.
+With our recent public release of the code it is now possible to setup
+your own MiGrid. The [http://migrid.googlecode.com/files/mig-1.0.0.tgz MiG server
+code] includes specific instructions for setting up your own MiG server
+on a Debian installation, but the software should also work on
+any other UNIX/Linux installations with Apache and OpenSSH.
+Please refer to mig/install/README.Debian for the installation
+instructions. More documentation will follow on this subject, so please
+feel free to [ContactUs contact us] if you run into problems.

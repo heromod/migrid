@@ -2,9 +2,18 @@
 #labels Phase-Implementation,Phase-QA
 
 = Intended Audience =
-Some MiG sub projects require access to a partial or complete MiG server environment. Those of you who need access to such a setup can apply for a developer account on one of the MiG test servers. If granted, you will be given a normal user account at one or more of the servers with access to a personal Apache web server.
-
+Some MiG sub projects require access to a partial or complete MiG server
+environment. Those of you who need access to such a setup can apply for
+a developer account on one of the MiG test servers. If granted, you will
+be given a normal user account at one or more of the servers with access
+to a personal Apache web server. 
 Please [ContactUs contact us] if you think you need a developer account.
+
+Alternatively you can download and install the MiG source code from the [http://code.google.com/p/migrid/downloads/list
+Downloads section]. This is not the simplest of tasks yet so this is not
+recommended unless you are comfortable with getting your hands into
+some linux command line tasks.
+
 
 = SSH Access =
 For security reasons, the MiG servers require ssh logins to use public key encryption instead of passwords only. When your request an account on a development server, please provide a ssh public key. If you haven't got a ssh key that you would like to use for this purpose you can simply create a new one:

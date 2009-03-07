@@ -9,7 +9,7 @@ We tend to do this at least once a year, but when the chance arises we may take 
 = Next MiG working day =
 On the MiG Days last year, we discussed the future collaboration possibilities and there was some backing for introducing more frequent working days to make sure that we synchronize our efforts and get finished subprojects integrated in the main MiG code base.
 
-We have a number of tasks to take care of now, so therefore I propose such a working day in the near future at KU. 
+We have a number of tasks to take care of now, so therefore I propose such a working day at KU in the near future. 
 
 
 == Deciding a date ==

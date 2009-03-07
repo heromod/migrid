@@ -71,7 +71,7 @@ next section if you prefer to set up your own test Grid instead.
 
 == As a Grid provider ==
 With our recent public release of the code it is now possible to deploy
-your own MiGs. The mig tgz from
+your own grids. The latest mig-X.Y.Z.tgz archive from
 [http://code.google.com/p/migrid/downloads/list the Downloads page]
 includes specific instructions for setting up your own MiG server 
 on a Debian installation, but the software is known to also work on

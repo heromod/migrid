@@ -70,11 +70,12 @@ next section if you prefer to set up your own test Grid instead.
 
 
 == As a Grid provider ==
-With our recent public release of the code it is now possible to setup
-your own MiGrid. The [http://migrid.googlecode.com/files/mig-1.0.0.tgz MiG server
-code] includes specific instructions for setting up your own MiG server
-on a Debian installation, but the software should also work on
-any other UNIX/Linux installations with Apache and OpenSSH.
+With our recent public release of the code it is now possible to deploy
+your own MiGs. The mig tgz from
+[http://code.google.com/p/migrid/downloads/list the Downloads page]
+includes specific instructions for setting up your own MiG server 
+on a Debian installation, but the software is known to also work on
+ other UNIX/Linux installations with Apache and OpenSSH.
 Please refer to mig/install/README.Debian for the installation
 instructions. More documentation will follow on this subject, so please
 feel free to [ContactUs contact us] if you run into problems.

@@ -9,8 +9,7 @@ be given a normal user account at one or more of the servers with access
 to a personal Apache web server. 
 Please [ContactUs contact us] if you think you need a developer account.
 
-Alternatively you can download and install the MiG source code from the [http://code.google.com/p/migrid/downloads/list
-Downloads section]. This is not the simplest of tasks yet so this is not
+Alternatively you can download and install the MiG source code from the [http://code.google.com/p/migrid/downloads/list Downloads section]. This is not the simplest of tasks yet so this is not
 recommended unless you are comfortable with getting your hands into
 some linux command line tasks.
 

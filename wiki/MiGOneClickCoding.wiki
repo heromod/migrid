@@ -11,7 +11,7 @@ The tour begins with a description of framework limitations, followed by the MiG
 = Restrictions of the MiG One-Click model =
  * Jobs must be written in java.
  * Jobs must apply to the java [http://java.sun.com/sfaq/ applet security] model. 
- * Due to [http://java.sun.com/sfaq/ applet security] fileaccess is done through the [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.File] class.
+ * Due to [http://java.sun.com/sfaq/ applet security] fileaccess is done through the [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.File] class.
 
 
 = The flow of a MiG One-Click job execution =
@@ -31,16 +31,16 @@ The flow of an MiG One-Click job execution differs from a *normal* resource as i
   * When execution of the job is done stdout, stderr and status is sent to the server and the resource is ready to retrieve a new job.
 
 =  Creating a MiG One-Click job =
-All jobs must extend the [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.Job] class. 
+All jobs must extend the [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.Job] class. 
 This class provides methods for writing to stderr/stdout of the job and 
-retrieving [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.File] 
+retrieving [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.File] 
 objects used for file I/O on files in the MiG homedir of the job submitter.
 The difference between a *normal* java application and a MiG One-Click job are the following:
- * The main class must extend [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.Job]
+ * The main class must extend [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.Job]
  * The program is started in the method MiG_main(String[] argv)
- * stdout is written using the out(String str) method from [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.Job]
- * stderr is written using the err(String str) method from [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.Job]
- * File I/O is done through [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.File] 
+ * stdout is written using the out(String str) method from [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.Job]
+ * stderr is written using the err(String str) method from [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.Job]
+ * File I/O is done through [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.File] 
  * The [http://java.sun.com/sfaq/ applet security] model is used
 
 We will now run through an `HelloMiGOneClickWorld` sample which copies a file, writes the status of the filecopy to stdout
@@ -112,16 +112,16 @@ which you can download as [http://migrid.googlecode.com/svn/trunk/mig/java-src/O
 
 The interesting parts of this code are the following lines:
 
- * 4: The class extends [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.Job]
- * 16-18: The arguments to the program is written to the job stdout through the *out* method located in [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.Job]
- * 20-21: New [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.File] objects are retrieved from [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.Job]
- * 26: The input filename given as argument 0 is opened for read, a  [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.FileException] is thrown if open fails.
- * 27: The output filename given as argument 1 is opened for write, a [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.FileException] is thrown if open fails.
- * 47: If an exception is caught the error message is written to stderr of the job through the *err* method located in [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.Job]
- * 48-49: Errors occuring in a file object can be retrieved using the  *getErrorMessages* method located in [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick.File]
+ * 4: The class extends [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.Job]
+ * 16-18: The arguments to the program is written to the job stdout through the *out* method located in [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.Job]
+ * 20-21: New [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.File] objects are retrieved from [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.Job]
+ * 26: The input filename given as argument 0 is opened for read, a  [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.FileException] is thrown if open fails.
+ * 27: The output filename given as argument 1 is opened for write, a [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.FileException] is thrown if open fails.
+ * 47: If an exception is caught the error message is written to stderr of the job through the *err* method located in [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.Job]
+ * 48-49: Errors occuring in a file object can be retrieved using the  *getErrorMessages* method located in [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick.File]
 
 === Compiling `HelloMiGOneClickWorld` ===
-You need to download the [http://migrid.googlecode.com/svn/trunk/mig/java-bin/MiGOneClickCodebase.jar MiGOneclickCodebase.jar] archive if you haven't done so already. It contains the entire [http://www.migrid.org/public/oneclick/javadoc/index.html MiG.oneclick package] needed for compilation.
+You need to download the [http://migrid.googlecode.com/svn/trunk/mig/java-bin/MiGOneClickCodebase.jar MiGOneclickCodebase.jar] archive if you haven't done so already. It contains the entire [http://www.migrid.org/public/sandbox/One-Click/javadoc/index.html MiG.oneclick package] needed for compilation.
 {{{
 javac -classpath MiGOneClickCodebase.jar:. HelloMiGOneClickWorld.java
 }}}

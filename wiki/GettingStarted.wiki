@@ -43,14 +43,16 @@ Please note that unless you already have the MiG CA certificate imported in your
 
 
 === SSS resource ===
-Screen Saver Science resources got their name from the popular configuration of linking this kind of resource to the screensaver of computers. That is, so that the computer will only act as a Grid resource whenever it is not used for a while so that the screensaver kicks in.
+Screen Saver Science resources got their name from the popular configuration of linking this kind of resource to the screensaver of computers. That is, so that the computer will only act as a Grid resource whenever it is not used for a while so that the screensaver kicks in. In MiG we've this screensaver resource model in addition to a similar version that runs as a permanent background service. Both versions use a safe resource model referred to as MiG-SSS in the following description.
 
-It uses the _qemu_ Virtual Machine (VM) to run all the resource tasks and jobs on your computer. This means that the resource and job execution is _sandboxed_, i.e. completely separated from your own data and devices. Because qemu is available on most platforms, this is a very flexible solution.
+MiG-SSS uses the _qemu_ Virtual Machine (VM) to run all the resource tasks and jobs on your computer. This means that the resource and job execution is _sandboxed_, i.e. completely separated from your own data and devices. Because qemu is available on most platforms, this is a very flexible solution.
 
 Grid jobs running inside a qemu VM are additionally significantly less limited and more efficient than jobs running on One-click resources, but it takes slightly more work to get the SSS resource running.
 
 Still, it should not scare you away from trying out the SSS model, as the efficiency advantages really makes such resources much more valuable than One-click resources.
+With MiG-SSS resources you additionally get more control over the exact resource settings including limiting the bandwidth to the sandbox. 
 
+You can install MiG-SSS on your computer by following the MiG-SSS link on the [http://www.migrid.org/MiG/Components/index_html MiG Components page].
 
 === Full scale resources ===
 The full scale resource model is mainly for dedicated Grid resources such as super computers or cluster computers. They require a Linux/UNIX based system with the _bash_ shell and inbound ssh access to at least one user account from the MiG servers. When those prerequisites are fulfilled, it takes no more installation or daemons to utilize the computer(s) as a MiG resource. Furthermore MiG is very firewall friendly so in most cases you do not need to add new firewall rules to run a MiG resource.

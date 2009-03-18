@@ -1,0 +1,185 @@
+#summary Using Files in MiG Jobs
+#labels Phase-Support
+
+= Introduction =
+MiG includes a relatively simple file handling structure compared to many other grids. Thus it is not too hard to get started using the simple examples with basic file access.
+However, it appears more complex file handling is a common problem for new MiG users. This page is an attempt to guide you through some common use cases and avoid some of the pit falls.
+
+In the examples we use the `md5sum` checksum command available on Linux/UNIX resources. This command is not that interesting but it is just used for simplicity, because it does not need to be sent to the resource as a part of the job. 
+It prints the checksum result to `stdout` so we can use shell output redirection ('>') if we want to write the result to a file. 
+
+
+= Simple File Access =
+Basic file access in jobs covers situations where your job only uses a few files in a simple directory structure.
+
+
+== Plain Files ==
+Let's look at some plain file examples using flat and layered directory structures. The example jobs are rather boring as such but they explain the available methods.
+
+=== A Single File ===
+For example you may have a file, input.txt, in your MiG home directory that you want to analyze in your job. You want the results of your analysis to be saved in another file, output.txt, in your MiG home when the job is done.
+So first you either upload a file to input.txt in your MiG home or else you create the file there inline using `edit` from e.g. the Submit Job page in MiG.
+
+Now your job description could look like this:
+
+{{{
+::EXECUTE::
+md5sum input.txt > output.txt
+
+::INPUTFILES::
+input.txt
+
+::OUTPUTFILES::
+output.txt
+
+::CPUTIME::
+60
+}}}
+
+The CPUTIME field is mandatory so we just set it to 60 seconds, which should be more than enough to checksum even a big file.
+
+Now when MiG runs the job it will automatically send input.txt to the resource before the job is started and after the execution finishes the output.txt file is automatically sent back to your home on the MiG server.
+
+
+=== Single File Renaming ===
+If your input file was instead called myinput.txt in your MiG home and you wanted the output file to be called myoutput.txt you could use the 
+{{{
+source destination
+}}}
+format instead to get a job description like:
+
+{{{
+::EXECUTE::
+md5sum input.txt > output.txt
+
+::INPUTFILES::
+myinput.txt input.txt
+
+::OUTPUTFILES::
+output.txt myoutput.txt
+
+::CPUTIME::
+60
+}}}
+
+Now when MiG runs the job it will automatically send myinput.txt to input.txt on the resource before the job is started and after the execution finishes the output.txt file is automatically sent back to myoutput.txt in your home on the MiG server.
+
+Clearly this is a cumbersome way of achieving the same result as we would have gotten by replacing input.txt with myinput.txt and output.txt with myoutput.txt directly in the previous example, but this is just to show the format. When you run multiple jobs with more complex I/O the renaming often becomes more useful.
+
+
+=== Nested Files ===
+If your input file was instead stored in inputfiles/input.txt and you wanted the output saved in outputfiles/output.txt the job could be changed to:
+
+{{{
+::EXECUTE::
+md5sum inputfiles/input.txt > output.txt
+
+::INPUTFILES::
+inputfiles/input.txt
+
+::OUTPUTFILES::
+output.txt outputfiles/output.txt
+
+::CPUTIME::
+60
+}}}
+
+Now when MiG runs the job it will automatically send inputfiles/input.txt to the resource before the job is started and after the execution finishes the created output.txt  file is automatically sent back to outputfiles/output.txt in your home on the MiG server. Please note that the required directories are automatically created during the transfer to and from the resource.
+
+
+=== External Sources ===
+Files for input and output in MiG are by default implicitly referenced in relation to your MiG home, but it is possibly to explicitly tell MiG to use an external source or destination instead. As long as the external source/destination is accessible from the resource using [http://curl.haxx.se/ cURL], it will work.
+
+Now let's repeat the renaming plain files example above but with a file from an external source instead.
+
+This time we use the MiG monitor file on the web, http://www.migrid.org/monitor.html , as input instead of our myinput.txt file in our MiG home.
+
+Now your job description could look like this:
+
+{{{
+::EXECUTE::
+md5sum input.txt > output.txt
+
+::INPUTFILES::
+http://www.migrid.org/monitor.html input.txt
+
+::OUTPUTFILES::
+output.txt myoutput.txt
+
+::CPUTIME::
+60
+}}}
+
+Now when MiG runs the job it will automatically download the monitor URL contents to input.txt on the resource before the job is started and after the execution finishes the output.txt file is automatically sent back to myoutput.txt in your home on the MiG server as above.
+
+In this example we used the HTTP protocol with an external web server as the source for our input, but we could have used any other server supported by `cURL`. For recent versions of curl the list of supported protocols include HTTP, HTTPS, FTP, FTPS, SCP, SFTP, TFTP, DICT, TELNET and LDAP. 
+
+Please refer to the [http://curl.haxx.se/docs/manpage.html cURL manual page] for details about e.g. the login format used in curl adresses.
+
+We could also have used an external destination in the OUTPUTFILES field, but this may require a bit more preparation to work.
+External data destinations obviously require the executing resource to have outbound network access to the data destination. Thus HTTP or HTTPS are the most likely to be allowed even on network restricted resources. Please note however, that HTTP upload requires the destination web server to support the PUT operation, which is not generally enabled on all servers.
+
+So in short we do not recommend external output destinations unless you are familiar with such setups.
+
+
+== Plain Directories ==
+*Only files* and not directories are supported at the moment!
+
+Thus it is *not* possible to specify a directory as the source or destination in INPUTFILES or OUTPUTFILES. 
+
+This means that you can *not* e.g. use implicit destinations like:
+{{{
+::INPUTFILES::
+input.txt inputfiles/
+}}}
+to send input.txt into an inputfiles directory on the resource - you *must* use 
+{{{
+::INPUTFILES::
+input.txt inputfiles/input.txt
+}}}
+to achieve that.
+
+A workaround for the directory limitations is described in the Advanced File Access section. 
+
+
+
+= Advanced File Access =
+As job complexity grows so does the need for more complex file structure support. So this section covers some more complex cases of file access in jobs.
+
+== Variable Expansion ==
+Job files can be associated with variables in order to simplify management of files for multiple similar jobs.
+
+The most important variable in that case is `JOBID` which can be used to redirect your files based on the actual job ID given to the job in MiG.
+
+As an example you can send the results of the job with ID ABC into a directory of the same name in your MiG home by specifying it in OUTPUTFILES:
+{{{
+::OUTPUTFILES::
+output.txt +JOBID+/output.txt
+
+}}}
+
+Then output.txt from the job will be saved in ABC/output.txt in your MiG home when the job finishes. Another job with ID DEF resulting from submission of the same job description will similarly have it's output.txt sent to DEF/output.txt in your MiG home.
+
+At first glance it may seem stupid to submit the same job description many times, but if you do so-called Monte Carlo simulations where each run gives different results because it simulates statistical variations, this comes in handy. 
+
+== Lots of Files or Recursive Directories ==
+If your job requires lots of input or output files it may be tedious to manually handle them in the INPUTFILES and OUTPUTFILES fields. In that case it may be simpler to pack and unpack the files before and after the transfers between MiG server and resource.
+
+As an example with an `input` directory containing a lot of input files packed up in `input.zip` we could do checksumming with:
+
+{{{
+::EXECUTE::
+unzip input.zip
+md5sum input/* > output.txt
+
+::INPUTFILES::
+input.zip
+
+::OUTPUTFILES::
+output.txt
+
+::CPUTIME::
+300
+}}}
+
+The same methods can be applied for output files by packing them up as the last command in the EXECUTE field. This is not always simpler than handling the files individually in INPUTFILES and OUTPUTFILES but it does provide a workaround for the missing recursive directory support.

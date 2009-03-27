@@ -1,0 +1,11 @@
+#summary FAQ - resource owners
+#labels Phase-Deploy
+
+= Frequently Asked Questions - Resource Owners =
+This page is a work in progress to gather some of the most often asked questions and the corresponding answers in relation to running MiG resources.
+
+----
+
+*I signed up my computer(s) to work as full MiG resources, but now when I try to start it in MiG it fails with a long message about scp and ssh errors.*
+
+Resources need to allow non-interactive ssh login from the MiG servers to the specified user account on the resource frontend. Please make sure that you can ssh into the specified MiG user account from the internet. When that works you should check that ssh key based login works, too.

@@ -1,0 +1,31 @@
+#summary FAQ - Users
+#labels Phase-Support
+
+= Frequently Asked Questions - Users =
+This page is a work in progress to gather some of the most often asked questions and the corresponding answers in relation to using MiG.
+
+----
+
+*How do I get onto the Grid*
+
+You need to have a Grid certificate to do anything on MiG as a user. Please refer to the [GettingStarted getting started] page for the details.
+
+
+*I can't get my job files properly included in my job description. They do not show up where I want them to be when the job runs! *
+
+File handling is actually simpler in MiG than in most other Grids, because files can simple be referenced directly from your MiG home directory. However, there still are a few pitfalls when trying to handle e.g. directories. Please take a look at UsingJobFiles and the different MiG user tutorials for detailed examples of the possible file handling methods. If you still can't manage to get your files into the desired locations for jobs, please [ContactUs contact us] so that we can help you and possibly expand the documentation.
+
+
+*My job status page show multiple lines of QUEUED times and one or more FAILED lines. What does this mean?*
+
+MiG jobs are put in a queue when they are submitted, and they get the first QUEUED status and timestamp then. When a suitable resource becomes available the job is scheduled and the status is updated to EXECUTING with a corresponding timestamp. If the job execution proceeds without problems, the job eventually ends up in the final FINISHED state where any results are available. This does not necessarily mean that your job commands did what you wanted them to, but just that the commands completed and that the job finished. If on the other hand the resource crashed or just didn't deliver any results within the time that you requested (plus some slack), the job execution will be terminated and the job rescheduled. The additional QUEUED lines are thus indicators of the automatic rescheduling because of an error during the previous execution. If a job keeps failing repeatedly it will finally be marked as failed and no further execution will be attempted. This happens after 5 attempts in the default MiG setup, but can be configured on a server by server basis.
+
+
+*My job just sits in QUEUED state seemingly forever *
+
+Any job you submit will be accepted as long as it adheres to the job specification rules. There is no guarantee, however, that any current or future resources will match your job, so it can remain queued virtually forever until it expires then. The default expire time is very high as we don't want demanding jobs to get expired just because a lot of other jobs take up the job slots first.
+So if your job remains QUEUED with no changes in status you should verify that the `parsed mrsl` link from the jobstatus page shows requirements that fit one or more of the resources that you have access to. The resource specs are available in the resource monitor pages of the VGrids that you are member or owner of. If you are not a member of any particular VGrid you only have access to the Generic VGrid.
+
+----
+
+Please [ContactUs contact us] if your question is not answered above!

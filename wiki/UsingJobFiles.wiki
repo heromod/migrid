@@ -1,7 +1,7 @@
 #summary Using Files in MiG Jobs
 #labels Phase-Support
 
-<wiki:toc max_depth="2" />
+<wiki:toc max_depth="3" />
 
 = Introduction =
 MiG includes a relatively simple file handling structure compared to many other grids. Thus it is not too hard to get started using the simple examples with basic file access.

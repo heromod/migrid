@@ -89,7 +89,7 @@ output.txt outputfiles/output.txt
 Now when MiG runs the job it will automatically send inputfiles/input.txt to the resource before the job is started and after the execution finishes the created output.txt  file is automatically sent back to outputfiles/output.txt in your home on the MiG server. Please note that the required directories are automatically created during the transfer to and from the resource.
 
 
-=== External Sources ===
+=== External Sources and Destinations ===
 Files for input and output in MiG are by default implicitly referenced in relation to your MiG home, but it is possibly to explicitly tell MiG to use an external source or destination instead. As long as the external source/destination is accessible from the resource using [http://curl.haxx.se/ cURL], it will work.
 
 Now let's repeat the renaming plain files example above but with a file from an external source instead.
@@ -114,9 +114,9 @@ output.txt myoutput.txt
 
 Now when MiG runs the job it will automatically download the monitor URL contents to input.txt on the resource before the job is started and after the execution finishes the output.txt file is automatically sent back to myoutput.txt in your home on the MiG server as above.
 
-In this example we used the HTTP protocol with an external web server as the source for our input, but we could have used any other server supported by `cURL`. For recent versions of curl the list of supported protocols include HTTP, HTTPS, FTP, FTPS, SCP, SFTP, TFTP, DICT, TELNET and LDAP. 
+In this example we used the HTTP protocol with an external web server as the source for our input, but we could have used any other server supported by `cURL`. For recent versions of cURL the list of supported protocols include HTTP, HTTPS, FTP, FTPS, SCP, SFTP, TFTP, DICT, TELNET and LDAP. 
 
-Please refer to the [http://curl.haxx.se/docs/manpage.html cURL manual page] for details about e.g. the login format used in curl adresses.
+Please refer to the [http://curl.haxx.se/docs/manpage.html cURL manual page] for details about e.g. the login format used in cURL adresses.
 
 We could also have used an external destination in the OUTPUTFILES field, but this may require a bit more preparation to work.
 External data destinations obviously require the executing resource to have outbound network access to the data destination. Thus HTTP or HTTPS are the most likely to be allowed even on network restricted resources. Please note however, that HTTP upload requires the destination web server to support the PUT operation, which is not generally enabled on all servers.

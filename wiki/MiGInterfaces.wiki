@@ -1,20 +1,20 @@
 #summary Introduction to MiG Interfaces
 
 = Introduction =
-In line with the minimum intrusion philosophy we do not require users to install any software to access MiG. This does not mean that no tools to improve the experience exists, however. The sections below describes some of the possibilities and alternative ways to access MiG.
+In line with the minimum intrusion philosophy we do not require users to install any software to access MiG. This does *not* mean that no tools to improve the user experience exists, however. The sections below describe some of the possibilities and alternative ways to access MiG.
 
 
 = Web Pages =
 The web pages are the simplest way to access MiG from basically anywhere with a browser. As long as you bring your MiG certificate files on e.g. a USB stick you will be able to use MiG from almost anywhere where you can find a computer with internet access.
-The web pages provide access to 99% of the MiG features, but they may be cumbersome to use when managing e.g. a lot of jobs. In that situation it may be more convenient to use the MiG user scripts from a command line. Another typical scenario where web pages don't quite allow enough flexibility is when Grid-enabling applications. That is, if you have an application which includes some heavy calculations that you would like to dispatch to the Grid while displaying the results in the usual fashion in the application. That scenario will work with either the user scripts or with the XMLRPC interface.
-We are still working on additional interfaces to allow even more flexible custom solutions.
+The web pages provide access to 99% of the MiG features, but they may be cumbersome to use when managing e.g. a lot of jobs. In that situation it may be more convenient to use the MiG user scripts from a command line. Another typical scenario where web pages don't quite allow enough flexibility is when Grid-enabling applications. That is, if you have an application which includes some heavy calculations that you would like to dispatch to the Grid while displaying the results in the usual fashion in the application. That scenario will work with either the user scripts or with the [http://www.xmlrpc.com/ XMLRPC] interface.
+We are still working on additional interfaces like [JSON http://www.json.org/] to allow even more flexible custom solutions.
 
 = Command Line =
 MiG includes a set of user scripts that you can run from the command line or wrap in your own job management. Python and Bourne Shell versions are available to support some common use cases, and a C API is on the planning board.
 You can obtain the user scripts including the miglib python library from Downloads on your personal MiG page.
 
 = XMLRPC =
-Direct access to MiG from just about any programming language is available throught the XMLRPC interface. We provide a python [http://code.google.com/p/migrid/source/browse/trunk/mig/user/xmlrpcsslclient.py XMLRPC client module] with a few examples in our repository. We do not have a lot of documentation on this topic yet, so the examples will have to do for now. Additional API details can be found in the actual server code in mig/shared/functionality/ but they may still change slightly over time.
+Direct access to MiG from just about any programming language is available through an XMLRPC interface. We provide a python [http://code.google.com/p/migrid/source/browse/trunk/mig/user/xmlrpcsslclient.py XMLRPC client module] with a few examples in our repository. We do not have a lot of documentation on this topic yet, so the examples will have to do for now. Additional API details can be found in the actual server code in `mig/shared/functionality/` but they may still change slightly over time.
 
 = JSON =
-We have a few students working on some very flexible and dynamic web solutions based on JSON. So we provide JSON as a output format, but this still much in development, so please [ContactUs contact us] if this is something you would like to know more about.
+We have a few students working on some very flexible and dynamic web solutions based on JSON. So we provide JSON as a output format, but this is still much in development, so please [ContactUs contact us] if this is something you would like to know more about.

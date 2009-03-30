@@ -18,6 +18,7 @@ On these pages you can communicate with the MiG team and find information about 
  * [UsingJobFiles Using Files in MiG Jobs]
  * [MiGOneClickCoding Coding MiG One-Click Jobs]
  * [SandboxResourceCoding Coding MiG Sandbox Jobs]
+ * [MiGInterfaces Overview of available MiG interfaces]
  * [MiGFSIntro Introduction to MiGFS Fuse based file access]
 
 = Resource Owner Topics =

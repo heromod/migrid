@@ -32,7 +32,9 @@ Now we would need to edit the following fields:
 Please be careful to copy the ssh host key as a single line of text.
 The remaining fields are left untouched for now.
 
-When we submit the form we will be informed that the resource creation request was submitted to the Grid administrators. They will verify the the request and add the resource to the Grid.
+When we submit the form we will be informed that the resource creation request was submitted to the Grid administrators. A ssh public key will be shown along with this information. You must allow the MiG server to log into the MiG job execution account on your resource using this public key. In short this means that you need to copy the public key string to /home/miguser/.ssh/autorized_keys on the resource host. More information about SSH with public keys is available on the [http://www.openssh.org/ OpenSSH page].
+
+The Grid administrators will verify the the request and add the resource to the Grid when they find the time.
 
 = Managing Your Resource =
 When the Grid administrators have handled your resource creation request, you will find a management entry for the new resource in your Resources page. There you can edit the resource configuration and control the state of the resource in the Grid. That is, you can start and stop execution nodes and the resource frontend, in order to enable/disable parts of or the entire resource in the Grid. When you stop an execution node, any running jobs will be killed and it will stop taking new jobs.

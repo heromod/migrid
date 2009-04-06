@@ -1,0 +1,43 @@
+#summary An example of setting up the simplest of full resources
+#labels Phase-Deploy
+
+= Introduction =
+Resource owners sign up their resources to MiG using the `Create a new MiG resource` link on their MiG `Resources` page. This brings up a resource editor form where all resource specifications can be entered.
+While some of the fields are quite obvious, there will most likely be at least a few ones that need further explanation. Luckily, most or all of those fields can just be left _as is_ initially and changed later if needed. Actually the only field that can't be changed later is the FQDN field, because it uniquely identifies the resource in MiG.
+
+We will not give a full explanation of all the fields here but explain an example with the simplest of resource setups. Additional information is available in the online help from the resource editor page.
+
+
+= Simple Local Resource =
+When not considering the Sandbox resources, the simplest of resources is just a single computer running all jobs as local processes without a `Local Resource Management System` (LRMS) like the PBS or SGE queue systems. That is, the possible separation of resource frontend and execution nodes is also ignored completely here.
+
+In general you can leave most fields untouched if you are not sure what they mean, or ou can learn more about each option using the `help` link to the right.
+
+Lets consider the example setup where we have our Linux host directly located on the internet on the address `amigos18.diku.dk` which maps to the IP address `192.38.109.148`. Our MiG job execution account is called `miguser` with home directory `/home/miguser`.
+We also need to find the public key of the ssh server on the host, and we can do so e.g. by looking in the `/etc/ssh/ssh_host_rsa_key.pub` file.
+
+Now we would need to edit the following fields:
+  * Host FQDN: amigos18.diku.dk
+  * MiG user: miguser
+  * MiG home: /home/miguser
+  * Host IP: 192.38.109.148
+  * Host key: ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEA5dDzq2Yal5BFz/DWk4BB8Vn6oIp3ua9SFDmBWWtOTAkYmT0LISA5U4ZGlUEC2qgIaZ3SYNG79vdPm9eBv/YsaK7rzIykHokMqxPAQzPmIJ/GO9f8zakknOmvaRNP/Ir4x95PL5+3HYNvT4mGZd0U/68319RRsyok3IX3gPuk5t0= root@mig-42
+  * Frontend node: amigos18.diku.dk
+  * Execution node(s): localhost
+  * Execute command: local
+  * Status command: local
+  * Stop command: local
+  * Clean command: local
+
+Please be careful to copy the ssh host key as a single line of text.
+The remaining fields are left untouched for now.
+
+When we submit the form we will be informed that the resource creation request was submitted to the Grid administrators. They will verify the the request and add the resource to the Grid.
+
+= Managing Your Resource =
+When the Grid administrators have handled your resource creation request, you will find a management entry for the new resource in your Resources page. There you can edit the resource configuration and control the state of the resource in the Grid. That is, you can start and stop execution nodes and the resource frontend, in order to enable/disable parts of or the entire resource in the Grid. When you stop an execution node, any running jobs will be killed and it will stop taking new jobs.
+
+All resources need to start the frontend node to be active in Grid. So start your new resource by clicking the (Re)start button in the Front End row under the resource configuration field. In the example above the row will start with an amigos18.diku.dk label. 
+The front end only communicates with MiG servers, it does not do any active job execution. Thus to start handling jobs you also need to start an execution node. For this example the execution node is called localhost, and again it is started by clicking the (Re)start button next to the name. The slightly cryptic output from the (Re)start actions should not contain any errors if everything is correct, but otherwise please check the [ResourceOwnerFAQ Resource Owner FAQ] for potential problems.
+
+At this point you should be able to see a couple of miguser processes on the resource and it should start taking jobs and show up on the monitor for the Generic VGrid.

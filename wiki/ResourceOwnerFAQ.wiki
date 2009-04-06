@@ -15,3 +15,8 @@ Further details about adding your machines as sandbox resources or dedicated MiG
 *I signed up my computer(s) to work as full MiG resources, but now when I try to start it in MiG it fails with a long message about scp and ssh errors. What is wrong?*
 
 Resources need to allow non-interactive ssh login from the MiG servers to the specified user account on the resource frontend. Please make sure that you can ssh into the specified MiG user account from the internet. When that works you should check that ssh key based login works, too.
+
+
+*How do I fill out the resource configuration for my server/supercomputer/cluster to work as a full MiG resource?
+
+There are plenty of possible configurations, but the recommended way to add your first resource to MiG, is to initially set up the resource for native local job execution. Then it is possible to make sure that the basics work before editing the configuration for the actual topology and so on. Please refer to the [SimpleLocalResource Simple Local Resource] example for details.

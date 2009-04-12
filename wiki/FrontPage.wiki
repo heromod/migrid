@@ -6,6 +6,7 @@
 Welcome to the public MiG Wiki!
 
 On these pages you can communicate with the MiG team and find information about the project.
+The following sections provide links to pages concerning particular topics, but if you can also choose to open the [http://code.google.com/p/migrid/w/list raw page index].
 
 
 = General Topics =

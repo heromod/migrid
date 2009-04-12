@@ -7,8 +7,7 @@ MiG is developed mainly by people from the E-science center at the University of
 
 Please contact Project leader Brian Vinter (brian.vinter AT gmail.com) to make an appointment or to get more information about getting your own new or existing project on MiG.
 
-Specific technical questions about the MiG middleware or support for our production Grid, are more efficiently handled on the MiG mailing list (http://www.imada.sdu.dk/mailman/listinfo/mig).
-
-We recommend using that list for questions in order to track the discussions and let the community around MiG evolve.
+Specific technical questions about the MiG middleware or support for our production Grid, are more efficiently handled on the [http://www.imada.sdu.dk/mailman/listinfo/mig MiG mailing list].
+We recommend using the list for questions in order to track the discussions and let the community around MiG evolve: You are probably not alone with your question!
 
 If you don't want to use the list it or don't think that your topic belongs there, you are welcome to contact one of the MiG developers directly instead. If You just send an email to e.g. Jonas Bardino (jonas.bardino AT gmail.com), we will forward it to the appropriate developer.

@@ -35,11 +35,11 @@ With full scale resources you are able to decide even more closely which VGrids 
 === One-click resource ===
 One-click resources are the simplest to set up - it just takes a single [https://mig-1.imada.sdu.dk/cgi-sid/oneclick.py click] from your browser and your computer will start handling Grid jobs. Stopping again is just as simple - simply close the browser window/tab or navigate to another web page.
 
-Please note that the One-click model requires the Java plugin to be installed in your browser. This is most likely already the case but otherwise you can download and install it from [http://www.java.com/en/download/manual.jsp Sun Java Downloads].
-
 The cost of this extreme simplicity is limitations in the jobs that this kind of resource can execute and in the efficiency of such jobs.
 
 One-click uses the Java Virtual Machine (JVM) installed by default in almost every browser available, so in 99% of all computers it requires absolutely no setup.
+Otherwise you can download and install it from [http://www.java.com/en/download/manual.jsp Java Downloads].
+
 
 Please note that unless you already have the MiG CA certificate imported in your java plugin of your browser, you will get a warning popup when you open the link above. Unfortunately it is quite tedious to import the MiG CA certificate in the java plugin, so the easiest solution is to answer yes to accept the certificate.
 

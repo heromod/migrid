@@ -38,7 +38,7 @@ One-click resources are the simplest to set up - it just takes a single [https:/
 The cost of this extreme simplicity is limitations in the jobs that this kind of resource can execute and in the efficiency of such jobs.
 
 One-click uses the Java Virtual Machine (JVM) installed by default in almost every browser available, so in 99% of all computers it requires absolutely no setup.
-Otherwise you can download and install it from [http://www.java.com/en/download/manual.jsp Java Downloads]. Unfortunately the IcedTea Java installed by default with some Linux distributions like Ubuntu does *not* work with the One-click applet. A workaround is to replace it by the Sun Java plugin for now.
+Otherwise you can download and install it from [http://www.java.com/en/download/manual.jsp Java Downloads]. Unfortunately the [http://iced-tea.org/wiki/Main_Page IcedTea Java] installed by default with some Linux distributions like Ubuntu does *not* work with the One-click applet. A workaround is to replace it by the Sun Java plugin for now.
 
 Please note that unless you already have the MiG CA certificate imported in your java plugin of your browser, you will get a warning popup when you open the link above. Unfortunately it is quite tedious to import the MiG CA certificate in the java plugin, so the easiest solution is to answer yes to accept the certificate.
 

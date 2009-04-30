@@ -105,6 +105,14 @@ def main(cert_name_no_spaces, user_arguments_dict):
 
     is_diku_email = False
     is_diku_org = False
+    
+    # Reject certs with the same name as the frontend server.
+    if cert_name.lower() == configuration.gadget_server_certificate_name.lower():
+        output_objects.append({'object_type': 'error_text', 'text'
+                              : 'invalid certificate user name - try another'
+                              })
+        return (output_objects, returnvalues.CLIENT_ERROR)
+        
     if email.find('@diku.dk') != -1:
         is_diku_email = True
     if 'DIKU' == org.upper():

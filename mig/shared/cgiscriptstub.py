@@ -49,11 +49,13 @@ def run_cgi_script(main):
     (out_obj, (ret_code, ret_msg)) = main(cert_name_no_spaces,
                                           user_arguments_dict)
 
-    # default to html
-
-    output_format = 'html'
-    if user_arguments_dict.has_key('output_format'):
-        output_format = user_arguments_dict['output_format'][0]
+    # default to html unless its an external frontend asking
+    if cert_name_no_spaces == configuration.gadget_server_certificate_name:
+        output_format = 'json'
+    else:
+        output_format = 'html'
+        if user_arguments_dict.has_key('output_format'):
+            output_format = user_arguments_dict['output_format'][0]
 
     if not do_output(ret_code, ret_msg, out_obj, output_format):
 

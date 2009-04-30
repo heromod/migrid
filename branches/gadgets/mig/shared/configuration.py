@@ -93,6 +93,7 @@ def fix_missing(config_file, verbose=True):
         'architectures': 'X86 AMD64 IA64 SPARC SPARC64 ITANIUM SUN4U SPARC-T1',
         'scriptlanguages': 'sh python java',
         'jobtypes': 'batch interactive bulk all',
+        'gadget_server_certificate_name': ''
         }
     scheduler_section = {'algorithm': 'FairFit',
                          'expire_after': '99999999999',
@@ -196,6 +197,7 @@ class Configuration:
     logger_obj = None
     logger = None
     peers = None
+    gadget_server_certificate_name = ''
 
     # Max number of jobs to migrate in each migration batch
 
@@ -341,8 +343,8 @@ class Configuration:
             self.sleep_update_totals = config.get('MONITOR',
                     'sleep_update_totals')
             self.slackperiod = config.get('MONITOR', 'slackperiod')
-            self.language = config.get('SETTINGS', 'language').split(' '
-                    )
+            self.language = config.get('SETTINGS', 'language').split(' ')
+            self.gadget_server_certificate_name = config.get('GLOBAL','gadget_server_certificate_name')
         except Exception, err:
 
             # logger.info("done reading settings from config")
@@ -461,7 +463,7 @@ class Configuration:
 
         logger.info('Added %d peer(s) from %s', len(peers_dict.keys()),
                     peerfile)
-        return peers_dict
+        return peers_dict 
 
 
 if "__main__" == __name__:

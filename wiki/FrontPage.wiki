@@ -30,6 +30,7 @@ The following sections provide links to pages ordered by topic, but you can also
  * [MiGRules MiG Project Rules]
  * [MiGCodingStyle MiG Coding Style]
  * [MiGDeveloperAccounts MiG Developer Accounts]
+ * [MiGJobFlow MiG Job Flow]
  * ...
 
 

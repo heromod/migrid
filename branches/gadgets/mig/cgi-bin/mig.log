@@ -1,0 +1,2 @@
+2009-03-25 14:30:41,501 ERROR /home/jaws/mig/mig/wwwuser/Jan_Wiberg/.settings could not be opened/unpickled! [Errno 2] No such file or directory: '/home/jaws/mig/mig/wwwuser/Jan_Wiberg/.settings'
+2009-04-29 14:43:01,288 ERROR Error in reloading configuration: No option 'migserver_http_url' in section: 'GLOBAL'

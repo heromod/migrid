@@ -33,7 +33,7 @@ import xmlrpclib
 from shared.output import validate
 import shared.returnvalues as returnvalues
 from shared.objecttypes import get_object_type_info
-
+from shared.conf import get_configuration_object
 
 class migCGIXMLRPCRequestHandler(CGIXMLRPCRequestHandler):
 
@@ -49,7 +49,16 @@ class migCGIXMLRPCRequestHandler(CGIXMLRPCRequestHandler):
 
 def object_type_info(object_type):
     return get_object_type_info(object_type)
+    
 
+def output_filter(i):
+    unwanted_OTs = [ 'start', 'error_text', 'header', 'sectionheader', 'text', 'link', 'multilinkline', 'html_form']
+    retain = True
+    if (i['object_type'] in unwanted_OTs \
+      or (i['object_type'] == 'title' and i.has_key('javascript'))):
+        retain = False
+        
+    return retain
 
 def mycertname():
 
@@ -90,8 +99,12 @@ def stub(function, user_arguments_dict):
                 returnvalues.INVALID_ARGUMENT)
 
     returnt = returnvalues.OK
+#    if user_arguments_dict.has_key("output_formats"):
+    #return user_arguments_dict
+    preferred_output_format = user_arguments_dict.pop("output_format", "raw")
+    
     try:
-
+        
         # return (user_arguments_dict)
 
         (output_objects, returnt) = main(cert_name_no_spaces,
@@ -110,7 +123,32 @@ def stub(function, user_arguments_dict):
                               : 'Validation error! %s' % val_msg},
                               {'object_type': 'title', 'text'
                               : 'Validation error!'}])
-    return (output_objects, returnt)
+
+    try:
+        filtered = filter(output_filter, output_objects)     
+    except Exception, exc:
+        return "Errah! %s"  % exc
+    if preferred_output_format == "raw":
+        return (output_objects, returnt)
+    elif preferred_output_format == "xmlrpc":
+        try:
+            import xmlrpclib
+            return xmlrpclib.dumps((filtered, ), allow_none=True)
+        except Exception, exc:
+            return 'xmlrpclib not available on server!  (%s)' % exc
+    elif preferred_output_format == "json":
+        try:
+            import json
+            try:
+                return json.dumps(filtered)
+            except AttributeError:
+                return json.write(filtered)
+        except Exception, exc:
+            return 'json not available on server! (%s)' % exc
+    else:
+        return 'Failure to determine correct output format'
+    
+    #    return (output_objects, returnt)
 
 
 def jobstatus(user_arguments_dict):

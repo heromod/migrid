@@ -24,7 +24,7 @@ The flow of an MiG One-Click job execution differs from a *normal* resource as i
 
   * The browser (or console) then loads the MiG One-Click environment from the `MiGOneclickCodebase.jar` located on the MiG server, this is done through https.
 
-  * The MiG One-Click environment starts to retrieve jobs from the MiG server. This is done in the same way as normal MiG resource retrieves jobs. The One-Click resource has a special runtime environment 'JVM_BYTECODE' which differentiates them from other resources. 
+  * The MiG One-Click environment starts to retrieve jobs from the MiG server. This is done in the same way as normal MiG resource retrieves jobs. The One-Click resource has a special platform setting, 'ONE-CLICK', which differentiates them from other resources. 
 
   * When a job is retrieved, the MiG One-Click environment loads the java classes needed for execution from the MiG homedir of the job owner, and then starts the execution in a thread. 
 
@@ -169,8 +169,8 @@ jabber: you@jabber.dk
 ::CPUTIME::
 100
 
-::RUNTIMEENVIRONMENT::
-JVM_BYTECODE
+::PLATFORM::
+ONE-CLICK
 
 ::SANDBOX::
 1

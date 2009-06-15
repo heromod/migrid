@@ -51,8 +51,12 @@ The same applies to the smallest PC sandboxes with only 100 MB of disk.
 The sandbox tool chain is available in the Sandbox VGrid.
 You can apply for membership on:
 
+https://mig-1.imada.sdu.dk/cgi-bin/vgridmemberrequest.py
+
 Then you can download the development image from:
+
 https://mig-1.imada.sdu.dk/cgi-bin/ls.py?path=Sandbox/Images;flags=a;output_format=html
+
 and start building your own binaries to run on sandboxes.
 
-There are further instructions available in the [https://mig-1.imada.sdu.dk/cert_redirect/Sandbox/Images/README README]
+There are further instructions available in the [https://mig-1.imada.sdu.dk/cert_redirect/Sandbox/Images/README README].

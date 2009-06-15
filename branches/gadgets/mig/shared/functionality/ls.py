@@ -303,6 +303,9 @@ def main(cert_name_no_spaces, user_arguments_dict):
     flags = ''.join(accepted['flags'])
     pattern_list = accepted['path']
     listing = []
+    
+    logger.info("Retrieved arguments %s vs %s" % (pattern_list, user_arguments_dict['path']))
+    logger.info("Retrieved argument types %s vs %s" % (str(type(pattern_list)), str(type(user_arguments_dict['path']))))
 
     # Please note that base_dir must end in slash to avoid access to other
     # user dirs when own name is a prefix of another user name

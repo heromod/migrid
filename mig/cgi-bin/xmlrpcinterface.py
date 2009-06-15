@@ -52,7 +52,8 @@ def object_type_info(object_type):
     
 
 def output_filter(i):
-    unwanted_OTs = [ 'start', 'error_text', 'header', 'sectionheader', 'text', 'link', 'multilinkline', 'html_form']
+    unwanted_OTs = [ 'start',  'header', 'sectionheader', 'text', 'link', 'multilinkline', 'html_form']
+    # potential others: 'error_text',
     retain = True
     if (i['object_type'] in unwanted_OTs \
       or (i['object_type'] == 'title' and i.has_key('javascript'))):
@@ -99,14 +100,15 @@ def stub(function, user_arguments_dict):
                 returnvalues.INVALID_ARGUMENT)
 
     returnt = returnvalues.OK
-#    if user_arguments_dict.has_key("output_formats"):
-    #return user_arguments_dict
-    preferred_output_format = user_arguments_dict.pop("output_format", "raw")
+    preferred_output_format = user_arguments_dict.pop("output_format", "native")
     
     try:
         
         # return (user_arguments_dict)
-
+        # Deliberately mangle the argument list to avoid confusing mig.
+        for key in user_arguments_dict:
+            user_arguments_dict[key] = [user_arguments_dict[key]]
+            
         (output_objects, returnt) = main(cert_name_no_spaces,
                 user_arguments_dict)
     except Exception, e:
@@ -120,33 +122,39 @@ def stub(function, user_arguments_dict):
         # output_objects = []
 
         output_objects.extend([{'object_type': 'error_text', 'text'
-                              : 'Validation error! %s' % val_msg},
+                              : 'XMLRPC Validation error! %s' % val_msg},
                               {'object_type': 'title', 'text'
-                              : 'Validation error!'}])
+                              : 'XMLRPC Validation error!'}])
 
-    try:
-        filtered = filter(output_filter, output_objects)     
-    except Exception, exc:
-        return "Errah! %s"  % exc
-    if preferred_output_format == "raw":
+    if preferred_output_format == "native":
         return (output_objects, returnt)
-    elif preferred_output_format == "xmlrpc":
-        try:
-            import xmlrpclib
-            return xmlrpclib.dumps((filtered, ), allow_none=True)
-        except Exception, exc:
-            return 'xmlrpclib not available on server!  (%s)' % exc
-    elif preferred_output_format == "json":
-        try:
-            import json
-            try:
-                return json.dumps(filtered)
-            except AttributeError:
-                return json.write(filtered)
-        except Exception, exc:
-            return 'json not available on server! (%s)' % exc
     else:
-        return 'Failure to determine correct output format'
+        try:
+            filtered = filter(output_filter, output_objects)     
+        except Exception, exc:
+            return "Filter did not process! %s"  % exc
+
+        if preferred_output_format == "file": # a specific output format that returns 1 line of header + bulk data
+            if not filtered[0].has_key('data'):
+                return 'No data key present in return structure'
+            return "Name: %s\n%s" % (filtered[0]['name'],filtered[0]['data'][1])
+        elif preferred_output_format == "xmlrpc":
+            try:
+                import xmlrpclib
+                return xmlrpclib.dumps((filtered, ), allow_none=True)
+            except Exception, exc:
+                return 'An error occured when converting to XML-RPC (%s)' % exc
+        elif preferred_output_format == "json":
+            try:
+                import json
+                try:
+                    return json.dumps(filtered[0])
+                except AttributeError:
+                    return json.write(filtered[0])
+            except Exception, exc:
+                return 'An error occurred when converting to JSON (%s)' % exc
+        else:
+            return 'Failure to determine correct output format'
     
     #    return (output_objects, returnt)
 
@@ -411,6 +419,10 @@ def getjobobj(user_arguments_dict):
     return stub('shared.functionality.getjobobj', user_arguments_dict)
 
 
+# Shindig
+def getfile(user_arguments_dict):
+    return stub('shared.functionality.getfile', user_arguments_dict)
+
 # ## Main ###
 
 server = migCGIXMLRPCRequestHandler()
@@ -481,6 +493,8 @@ server.register_function(signature)
 server.register_function(jobobjsubmit)
 server.register_function(getjobobj)
 
+# Shindig
+server.register_function(getfile)
 
 def dirserver():
     return dir(server)

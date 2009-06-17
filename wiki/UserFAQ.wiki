@@ -34,6 +34,9 @@ So if your job remains QUEUED with no changes in status you should verify that t
 You can also request a bit of scheduling information from the server by using the `Request schedule information` link on the individual job status page. Reload the job status page after the request to view the `Schedule result` field and the `Scheduled` time stamp for the last scheduling attempt. The Schedule result field will be GO if suitable resources are available and STAY otherwise. Please try again later if no scheduling info shows up, as that means scheduling is still pending.
 
 
+*How do I use the MiG user scripts?*
+After downloading the user scripts from your private MiG pages you may experience problems actually using the scripts if you haven't got the necessary tools or configuration. Please refer to the [http://www.migrid.org/MiG/Mig/user_introduction/user_scripts_intro.html tutortial] for the prerequisites and debug information...
+
 ----
 
 Please [ContactUs contact us] if your question is not answered above!

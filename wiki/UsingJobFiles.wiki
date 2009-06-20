@@ -185,3 +185,5 @@ output.txt
 }}}
 
 The same methods can be applied for output files by packing them up as the last command in the EXECUTE field. This is not always simpler than handling the files individually in INPUTFILES and OUTPUTFILES but it does provide a workaround for the missing recursive directory support.
+
+The example above does *not* consider the actual availability of the unzip command on the resource. In principle it should request an UNZIP runtime environment, which is not yet available, though.

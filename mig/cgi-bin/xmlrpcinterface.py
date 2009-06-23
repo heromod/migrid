@@ -29,6 +29,7 @@ from SimpleXMLRPCServer import CGIXMLRPCRequestHandler
 
 import cgi
 import os
+import traceback
 import xmlrpclib
 from shared.output import validate
 import shared.returnvalues as returnvalues
@@ -112,7 +113,7 @@ def stub(function, user_arguments_dict):
         (output_objects, returnt) = main(cert_name_no_spaces,
                 user_arguments_dict)
     except Exception, e:
-        return ('Error calling function: %s' % e, returnvalues.ERROR)
+        return ('Error calling function: %s (%s)' % (e, traceback.format_exc()), returnvalues.ERROR)
 
     (val_ret, val_msg) = validate(output_objects)
     if not val_ret:
@@ -126,36 +127,39 @@ def stub(function, user_arguments_dict):
                               {'object_type': 'title', 'text'
                               : 'XMLRPC Validation error!'}])
 
-    if preferred_output_format == "native":
-        return (output_objects, returnt)
-    else:
-        try:
-            filtered = filter(output_filter, output_objects)     
-        except Exception, exc:
-            return "Filter did not process! %s"  % exc
-
-        if preferred_output_format == "file": # a specific output format that returns 1 line of header + bulk data
-            if not filtered[0].has_key('data'):
-                return 'No data key present in return structure'
-            return "Name: %s\n%s" % (filtered[0]['name'],filtered[0]['data'][1])
-        elif preferred_output_format == "xmlrpc":
-            try:
-                import xmlrpclib
-                return xmlrpclib.dumps((filtered, ), allow_none=True)
-            except Exception, exc:
-                return 'An error occured when converting to XML-RPC (%s)' % exc
-        elif preferred_output_format == "json":
-            try:
-                import json
-                try:
-                    return json.dumps(filtered[0])
-                except AttributeError:
-                    return json.write(filtered[0])
-            except Exception, exc:
-                return 'An error occurred when converting to JSON (%s)' % exc
+    try:
+        if preferred_output_format == "native":
+            return (output_objects, returnt)
         else:
-            return 'Failure to determine correct output format'
-    
+            try:
+                filtered = filter(output_filter, output_objects)     
+            except Exception, exc:
+                return "Filter did not process! %s"  % exc
+
+            if preferred_output_format == "file": # a highly specific output format that returns 1 line of header + bulk data
+                if not filtered[0].has_key('data'):
+                    return 'No data key present in return structure'
+                return "Name: %s\n%s" % (filtered[0]['name'],filtered[0]['data'])
+            elif preferred_output_format == "xmlrpc":
+                try:
+                    import xmlrpclib
+                    return xmlrpclib.dumps((filtered, ), allow_none=True)
+                except Exception, exc:
+                    return 'An error occured when converting to XML-RPC (%s)' % exc
+            elif preferred_output_format == "json":
+                try:
+                    import json
+                    try:
+                        return json.dumps(filtered[0])
+                    except AttributeError:
+                        return json.write(filtered[0])
+                except Exception, exc:
+                    return 'An error occurred when converting to JSON (%s)' % exc
+            else:
+                return 'Failure to determine correct output format'
+    except Exception, outerExc:
+        return 'Total failure: %s' % outerExc
+        
     #    return (output_objects, returnt)
 
 
@@ -401,7 +405,6 @@ def showvgridmonitor(user_arguments_dict):
     return stub('shared.functionality.showvgridmonitor',
                 user_arguments_dict)
 
-
 def mv(user_arguments_dict):
     return stub('shared.functionality.mv', user_arguments_dict)
 
@@ -422,6 +425,13 @@ def getjobobj(user_arguments_dict):
 # Shindig
 def getfile(user_arguments_dict):
     return stub('shared.functionality.getfile', user_arguments_dict)
+
+def getuserdatastore(user_arguments_dict):
+    return stub('shared.functionality.getuserdatastore', user_arguments_dict)
+    
+def setuserdatastore(user_arguments_dict):
+    return stub('shared.functionality.setuserdatastore', user_arguments_dict)
+    
 
 # ## Main ###
 
@@ -495,6 +505,8 @@ server.register_function(getjobobj)
 
 # Shindig
 server.register_function(getfile)
+server.register_function(getuserdatastore)
+server.register_function(setuserdatastore)
 
 def dirserver():
     return dir(server)

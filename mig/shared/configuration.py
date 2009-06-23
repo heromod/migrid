@@ -93,7 +93,8 @@ def fix_missing(config_file, verbose=True):
         'architectures': 'X86 AMD64 IA64 SPARC SPARC64 ITANIUM SUN4U SPARC-T1',
         'scriptlanguages': 'sh python java',
         'jobtypes': 'batch interactive bulk all',
-        'gadget_server_certificate_name': ''
+        'gadget_server_certificate_name': '',
+        'gadget_server_userdatastore': 'shindig/userdatastore.pickle'
         }
     scheduler_section = {'algorithm': 'FairFit',
                          'expire_after': '99999999999',
@@ -198,6 +199,7 @@ class Configuration:
     logger = None
     peers = None
     gadget_server_certificate_name = ''
+    gadget_server_userdatastore = ''
 
     # Max number of jobs to migrate in each migration batch
 
@@ -345,6 +347,7 @@ class Configuration:
             self.slackperiod = config.get('MONITOR', 'slackperiod')
             self.language = config.get('SETTINGS', 'language').split(' ')
             self.gadget_server_certificate_name = config.get('GLOBAL','gadget_server_certificate_name')
+            self.gadget_server_userdatastore = config.get('GLOBAL','gadget_server_userdatastore')            
         except Exception, err:
 
             # logger.info("done reading settings from config")

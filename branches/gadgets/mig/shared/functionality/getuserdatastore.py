@@ -1,53 +1,35 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-getfile.py
+getuserdatastore - return the specified userdata store
+Note that the userdatastore is a fixed pickled dictionary. Getting/setting the 
+store means getting/setting the value of a specific key (called module) in that
+dictionary.
 
-# getfile - retrieves a single file from a users MiG filesystem. 
-# Unlike most scripts this does not have any knowledge of HTML at all, nor is it callable as a CGI script.
-# Based on editor.py. This existing mig file already reads a user file and is assumed to be as safe and bugfree as possible.
+Unlike most scripts this does not have any knowledge of HTML at all, 
+nor is it callable as a CGI script.
 
-Created by Jan Wiberg on 2009-06-09.
+Created by Jan Wiberg on 2009-06-23.
 """
 
 __version__ = '$Revision$'
 
-# $Id$
-
-import sys
 import os
+import pickle
 
 from shared.validstring import valid_user_path
 from shared.init import initialize_main_variables
-from shared.functional import validate_input_and_cert, REJECT_UNSET
+from shared.functional import validate_input_and_cert
 import shared.returnvalues as returnvalues
 
-
-
 def signature():
-    defaults = {'path': [''], 'current_dir': ['']}
+    defaults = {'module': ['']}
     return ['html_form', defaults]
-
-def read_file(path, real_path, logger):
-    """Reads a file in the users directory"""
-
-    text = ""
-    if os.path.isfile(real_path):
-        try:
-            fd = open(real_path, 'rb')
-            text = fd.read() # dont overload with massive reads.
-            fd.close()
-        except Exception, e:
-            return 'Failed to open file %s: %s' % (path, e)
-    logger.info("Retrieved text field of size %s" % str(len(text)))
-
-    return text        
-
 
 def main(cert_name_no_spaces, user_arguments_dict):
     """Main function used by front end"""
 
-    (configuration, logger, output_objects, op_name) = \
+    (configuration, logger, output_objects, _) = \
         initialize_main_variables(op_title=False, op_header=False)
     defaults = signature()[1]
     (validate_status, accepted) = validate_input_and_cert(
@@ -59,12 +41,13 @@ def main(cert_name_no_spaces, user_arguments_dict):
         allow_rejects=False,
         )
         
-    logger.info("Loaded getfile")
-
+    logger.info("Loaded getuserdatastore")
     if not validate_status:
         return (accepted, returnvalues.CLIENT_ERROR)
-    path = accepted['path'][-1]
-    current_dir = accepted['current_dir'][-1]
+                
+    module = accepted['module'][-1]
+
+    logger.info("getuserdatastore.module %s" % module)
 
     # Please note that base_dir must end in slash to avoid access to other
     # user dirs when own name is a prefix of another user name
@@ -78,25 +61,37 @@ def main(cert_name_no_spaces, user_arguments_dict):
     # possible to target the directory from the current dir.
 
     output_objects.append({'object_type': 'header', 'text'
-                          : 'Internal getfile operation'})
+                          : 'Internal getuserdatastore operation'})
 
-    if not path:
+    if not module:
         output_objects.append({'object_type': 'error_text', 'text'
-                              : 'No path supplied'})
+                              : 'No module supplied'})
         return (output_objects, returnvalues.CLIENT_ERROR)
 
-    orig_path = path
-    path = os.path.normpath(current_dir + path)
-    real_path = os.path.abspath(base_dir + current_dir + path)
+    real_path = os.path.abspath(base_dir + configuration.gadget_server_userdatastore)
+    
     if not valid_user_path(real_path, base_dir):
         # out of bounds!
         output_objects.append({'object_type': 'error_text', 'text'
-                              : "You're only allowed to edit your own files! (%s expands to an illegal path)"
-                               % path})
-        return (output_objects, returnvalues.CLIENT_ERROR)
-
-    filedata = read_file(path, real_path, logger)
+                              : "Unable to load the user data store. This probably signifies that your MiG account is not prepared for external access" })
+        return (output_objects, returnvalues.CLIENT_ERROR) # not really a client error
+        
+    if not os.path.isfile(real_path):
+        # make it
+        logger.debug("'%s' not available for user %s. Creating with empty dictionary." % (real_path, cert_name_no_spaces))
+        data = {}
+        writefd = open(real_path, 'wb')
+        pickle.dump(data, writefd)
+        writefd.close();
+        
+    filedescriptor = open(real_path, 'rb')
+    filedata = pickle.load(filedescriptor)
+    filedescriptor.close()        
+    
+    if not module in filedata:
+        filedata[module] = {}
+     
     output_objects.append({'object_type': 'file', 'data'
-                          : filedata, 'name':real_path})
+                          : filedata[module], 'name':module})
     return (output_objects, returnvalues.OK)
 

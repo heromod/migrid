@@ -124,8 +124,8 @@ External data destinations obviously require the executing resource to have outb
 So in short we do not recommend external output destinations unless you are familiar with such setups.
 
 
-== Plain Directories ==
-*Only files* and not directories are supported at the moment!
+== Plain Directories and wild cards ==
+*Only plain files* and not directories or wild cards are supported at the moment!
 
 Thus it is *not* possible to specify a directory as the source or destination in INPUTFILES or OUTPUTFILES. 
 
@@ -142,7 +142,6 @@ input.txt inputfiles/input.txt
 to achieve that.
 
 A workaround for the directory limitations is described in the Advanced File Access section. 
-
 
 
 = Advanced File Access =

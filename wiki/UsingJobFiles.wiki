@@ -69,31 +69,6 @@ Now when MiG runs the job it will automatically send myinput.txt to input.txt on
 Clearly this is a cumbersome way of achieving the same result as we would have gotten by replacing input.txt with myinput.txt and output.txt with myoutput.txt directly in the previous example, but this is just to show the format. When you run multiple jobs with more complex I/O the renaming often becomes more useful.
 
 
-=== A Single Script ===
-If your job consists of multiple or complex commands you may prefer to wrap them all up in a job shell script. For example you may create a file, myscript.sh, in your MiG home directory that you want to run in your job. You need to be careful with the execution on the resource, because the PATH environment may or may not include the current directory.
-Thus you need to explicitly specify where to run the script from.
-
-Now your job description could look like this:
-
-{{{
-::EXECUTE::
-./myscript.sh
-
-::CPUTIME::
-60
-}}}
-
-or e.g. 
-
-{{{
-::EXECUTE::
-bash myscript.sh
-
-::CPUTIME::
-60
-}}}
-
-
 === Nested Files ===
 If your input file was instead stored in inputfiles/input.txt and you wanted the output saved in outputfiles/output.txt the job could be changed to:
 
@@ -167,6 +142,31 @@ input.txt inputfiles/input.txt
 to achieve that.
 
 A workaround for the directory limitations is described in the Advanced File Access section. 
+
+
+=== A Single Script ===
+If your job consists of multiple or complex commands you may prefer to wrap them all up in a job shell script. For example you may create a file, myscript.sh, in your MiG home directory that you want to run in your job. You need to be careful with the execution on the resource, because the PATH environment may or may not include the current directory.
+Thus you need to explicitly specify where to run the script from.
+
+Now your job description could look like this:
+
+{{{
+::EXECUTE::
+./myscript.sh
+
+::CPUTIME::
+60
+}}}
+
+or e.g. 
+
+{{{
+::EXECUTE::
+bash myscript.sh
+
+::CPUTIME::
+60
+}}}
 
 
 = Advanced File Access =

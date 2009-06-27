@@ -127,9 +127,9 @@ So in short we do not recommend external output destinations unless you are fami
 == Plain Directories and wild cards ==
 *Only plain files* and not directories or wild cards are supported at the moment!
 
-Thus it is *not* possible to specify a directory as the source or destination in INPUTFILES or OUTPUTFILES. 
+Thus it is *not* possible to specify a directory or wild card pattern as the source or destination in EXECUTABLES, INPUTFILES or OUTPUTFILES. 
 
-This means that you can *not* e.g. use implicit destinations like:
+This also means that you can *not* e.g. use implicit destinations like:
 {{{
 ::INPUTFILES::
 input.txt inputfiles/

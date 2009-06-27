@@ -124,26 +124,6 @@ External data destinations obviously require the executing resource to have outb
 So in short we do not recommend external output destinations unless you are familiar with such setups.
 
 
-== Plain Directories and wild cards ==
-*Only plain files* and not directories or wild cards are supported at the moment!
-
-Thus it is *not* possible to specify a directory or wild card pattern as the source or destination in EXECUTABLES, INPUTFILES or OUTPUTFILES. 
-
-This also means that you can *not* e.g. use implicit destinations like:
-{{{
-::INPUTFILES::
-input.txt inputfiles/
-}}}
-to send input.txt into an inputfiles directory on the resource - you *must* use 
-{{{
-::INPUTFILES::
-input.txt inputfiles/input.txt
-}}}
-to achieve that.
-
-A workaround for the directory limitations is described in the Advanced File Access section. 
-
-
 === A Single Script ===
 If your job consists of multiple or complex commands you may prefer to wrap them all up in a job shell script. For example you may create a file, myscript.sh, in your MiG home directory that you want to run in your job. You need to be careful with the execution on the resource, because the PATH environment may or may not include the current directory.
 Thus you need to explicitly specify where to run the script from.
@@ -167,6 +147,26 @@ bash myscript.sh
 ::CPUTIME::
 60
 }}}
+
+
+== Plain Directories and wild cards ==
+*Only plain files* and not directories or wild cards are supported at the moment!
+
+Thus it is *not* possible to specify a directory or wild card pattern as the source or destination in EXECUTABLES, INPUTFILES or OUTPUTFILES. 
+
+This also means that you can *not* e.g. use implicit destinations like:
+{{{
+::INPUTFILES::
+input.txt inputfiles/
+}}}
+to send input.txt into an inputfiles directory on the resource - you *must* use 
+{{{
+::INPUTFILES::
+input.txt inputfiles/input.txt
+}}}
+to achieve that.
+
+A workaround for the directory limitations is described in the Advanced File Access section. 
 
 
 = Advanced File Access =

@@ -43,32 +43,6 @@ The CPUTIME field is mandatory so we just set it to 60 seconds, which should be 
 Now when MiG runs the job it will automatically send input.txt to the resource before the job is started and after the execution finishes the output.txt file is automatically sent back to your home on the MiG server.
 
 
-=== A Single Script ===
-If your job consists of multiple or complex commands you may prefer to wrap them all up in a job shell script. For example you may create a file, myscript.sh, in your MiG home directory that you want to run in your job. You need to be careful with the execution on the resource, because the PATH environment may or may not include the current directory.
-Thus you need to explicitly specify where to run the script from.
-
-Now your job description could look like this:
-
-{{{
-::EXECUTE::
-./myscript.sh
-
-::CPUTIME::
-60
-}}}
-
-or 
-
-{{{
-::EXECUTE::
-bash myscript.sh
-
-::CPUTIME::
-60
-}}}
-
-
-
 === Single File Renaming ===
 If your input file was instead called myinput.txt in your MiG home and you wanted the output file to be called myoutput.txt you could use the 
 {{{
@@ -93,6 +67,31 @@ output.txt myoutput.txt
 Now when MiG runs the job it will automatically send myinput.txt to input.txt on the resource before the job is started and after the execution finishes the output.txt file is automatically sent back to myoutput.txt in your home on the MiG server.
 
 Clearly this is a cumbersome way of achieving the same result as we would have gotten by replacing input.txt with myinput.txt and output.txt with myoutput.txt directly in the previous example, but this is just to show the format. When you run multiple jobs with more complex I/O the renaming often becomes more useful.
+
+
+=== A Single Script ===
+If your job consists of multiple or complex commands you may prefer to wrap them all up in a job shell script. For example you may create a file, myscript.sh, in your MiG home directory that you want to run in your job. You need to be careful with the execution on the resource, because the PATH environment may or may not include the current directory.
+Thus you need to explicitly specify where to run the script from.
+
+Now your job description could look like this:
+
+{{{
+::EXECUTE::
+./myscript.sh
+
+::CPUTIME::
+60
+}}}
+
+or e.g. 
+
+{{{
+::EXECUTE::
+bash myscript.sh
+
+::CPUTIME::
+60
+}}}
 
 
 === Nested Files ===

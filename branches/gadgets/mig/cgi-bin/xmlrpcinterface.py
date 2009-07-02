@@ -132,10 +132,13 @@ def stub(function, user_arguments_dict):
             return (output_objects, returnt)
         else:
             try:
+                (returnt_val, returnt_msg) = returnt
+                output_objects.extend([{'object_type': 'status', 'value': returnt_val, 'text':  returnt_msg } ]) 
                 filtered = filter(output_filter, output_objects)     
             except Exception, exc:
                 return "Filter did not process! %s"  % exc
-
+            # at this point, there must be at least 1 element in filtered, and the first is returned
+                
             if preferred_output_format == "file": # a highly specific output format that returns 1 line of header + bulk data
                 if not filtered[0].has_key('data'):
                     return 'No data key present in return structure'
@@ -150,13 +153,19 @@ def stub(function, user_arguments_dict):
                 try:
                     import json
                     try:
-                        return json.dumps(filtered[0])
+                        return json.dumps(filtered)
                     except AttributeError:
-                        return json.write(filtered[0])
+                        return json.write(filtered)
                 except Exception, exc:
                     return 'An error occurred when converting to JSON (%s)' % exc
+            elif preferred_output_format == "shindigjson": # special case as shindigs json parser doesnt follow JSON spec
+                import json
+                jsonnedlist = []
+                for element in filtered:
+                    jsonnedlist.append(json.write(filtered))
+                return jsonnedlist
             else:
-                return 'Failure to determine correct output format'
+                return 'Failure to determine correct output format from %s ' % preferred_output_format
     except Exception, outerExc:
         return 'Total failure: %s' % outerExc
         

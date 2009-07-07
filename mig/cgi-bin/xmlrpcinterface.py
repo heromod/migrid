@@ -88,9 +88,6 @@ def stub(function, user_arguments_dict):
 
     cert_name_no_spaces = common_name.replace(' ', '_')
     try:
-
-        # exec("from shared.functionality.jobstatusobj import main")
-
         exec 'from %s import main' % function
     except Exception, e:
         return ('Could not import module! %s: %s' % (function, e),
@@ -136,7 +133,7 @@ def stub(function, user_arguments_dict):
                 output_objects.extend([{'object_type': 'status', 'value': returnt_val, 'text':  returnt_msg } ]) 
                 filtered = filter(output_filter, output_objects)     
             except Exception, exc:
-                return "Filter did not process! %s"  % exc
+                return ('Filter did not process! %s'  % exc, returnvalues.SYSTEM_ERROR)
             # at this point, there must be at least 1 element in filtered, and the first is returned
                 
             if preferred_output_format == "file": # a highly specific output format that returns 1 line of header + bulk data
@@ -165,9 +162,9 @@ def stub(function, user_arguments_dict):
                     jsonnedlist.append(json.write(filtered))
                 return jsonnedlist
             else:
-                return 'Failure to determine correct output format from %s ' % preferred_output_format
+                return ('Failure to determine correct output format from %s ' % preferred_output_format, returnvalues.ERROR)
     except Exception, outerExc:
-        return 'Total failure: %s' % outerExc
+        return ('Total failure: %s' % outerExc, returnvalues.SYSTEM_ERROR)
         
     #    return (output_objects, returnt)
 
@@ -347,6 +344,8 @@ def rmvgridres(user_arguments_dict):
 def adminvgrid(user_arguments_dict):
     return stub('shared.functionality.adminvgrid', user_arguments_dict)
 
+def vgridadmin(user_arguments_dict):
+    return stub('shared.functionality.vgridadmin', user_arguments_dict)
 
 def updateresconfig(user_arguments_dict):
     return stub('shared.functionality.updateresconfig',
@@ -493,6 +492,7 @@ server.register_function(lsvgridres)
 server.register_function(addvgridres)
 server.register_function(rmvgridres)
 server.register_function(adminvgrid)
+server.register_function(vgridadmin)
 server.register_function(updateresconfig)
 server.register_function(createre)
 server.register_function(docs)

@@ -161,6 +161,18 @@ def valid_plain_text(
     valid_chars = VALID_TEXT_CHARACTERS + extra_chars
     __valid_contents(text, valid_chars, min_length, max_length)
 
+def valid_free_text(
+    text,
+    min_length=-1,
+    max_length=-1,
+    extra_chars='',
+    ):
+    """Verify that supplied text only contains characters that we consider
+    valid"""
+
+    return True
+
+
 
 def valid_path(
     path,
@@ -724,7 +736,9 @@ def guess_type(name):
     elif name.find('verifystatus') != -1:
         return valid_plain_text
     elif name.find('editarea') != -1:
-        return valid_plain_text
+        return valid_free_text
+    elif name.find('data') != -1:
+		return valid_free_text
     elif name.find('software_entries') != -1:
         return valid_numeric
     elif name.find('environment_entries') != -1:

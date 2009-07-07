@@ -46,7 +46,7 @@ def main(cert_name_no_spaces, user_arguments_dict):
         return (accepted, returnvalues.CLIENT_ERROR)
                 
     module = accepted['module'][-1]
-    module = accepted['data'][-1]
+    data = accepted['data'][-1]
 
     logger.info("setuserdatastore.module %s, data %s" % (module, data))
 
@@ -80,13 +80,15 @@ def main(cert_name_no_spaces, user_arguments_dict):
         # make it
         logger.debug("'%s' not available for user %s. Creating with empty dictionary." % (real_path, cert_name_no_spaces))
         data = {}
-        filedescriptor = open(real_path, 'wb')
+        filedescriptor = open(real_path, 'w')
         pickle.dump(data, filedescriptor)
         filedescriptor.close();
         
-    filedescriptor = open(real_path, 'rwb')
+    filedescriptor = open(real_path, 'r')
     filedata = pickle.load(filedescriptor)
     logger.info("filedata: %s" % filedata)
+    filedescriptor.close()
+    filedescriptor = open(real_path, 'w')
     filedata[module] = data
     pickle.dump(filedata, filedescriptor)
     filedescriptor.close()        

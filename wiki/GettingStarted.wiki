@@ -7,7 +7,7 @@
 
 == As a user ==
 If You want to try out MiG as a user, all you need is a MiG certificate and a web browser.
-Please request a user certificate using the link on the [http://www.migrid.org/MiG/Components/index_html MiG Components page]
+Please request a user certificate using the link on the [http://www.migrid.org/MiG/Actions/index_html MiG Actions page]
 
 Depending on your supplied motivation for requesting the certificate we will try to provide you with access to a suitable subset of the available Grid resources. In case you just want to try it out, this will most likely be the least trusted resources. If on the other hand You have a scientific project to run on the Grid, there's good chances of getting access to more powerful resources.
 

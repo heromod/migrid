@@ -53,7 +53,7 @@ Grid jobs running inside a qemu VM are additionally significantly less limited a
 Still, it should not scare you away from trying out the SSS model, as the efficiency advantages really makes such resources much more valuable than One-click resources.
 With MiG-SSS resources you additionally get more control over the exact resource settings including limiting the bandwidth to the sandbox. 
 
-You can install MiG-SSS on your computer by following the MiG-SSS link on the [http://www.migrid.org/MiG/Components/index_html MiG Components page].
+You can install MiG-SSS on your computer by following the MiG-SSS link on the [http://www.migrid.org/MiG/Actions/index_html MiG Actions page].
 
 === Full scale resources ===
 The full scale resource model is mainly for dedicated Grid resources such as super computers or cluster computers. They require a Linux/UNIX based system with the _bash_ shell and inbound ssh access to at least one user account from the MiG servers. When those prerequisites are fulfilled, it takes no more installation or daemons to utilize the computer(s) as a MiG resource. Furthermore MiG is very firewall friendly so in most cases you do not need to add new firewall rules to run a MiG resource.

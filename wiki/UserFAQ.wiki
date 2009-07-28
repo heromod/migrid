@@ -37,7 +37,7 @@ You can also request a bit of scheduling information from the server by using th
 
 == How do I use the MiG user scripts? ==
 
-After downloading the user scripts from your private MiG pages you may experience problems actually using the scripts if you haven't got the necessary tools or configuration. Please refer to the [http://www.migrid.org/MiG/Mig/user_introduction/user_scripts_intro.html user scripts intro] for full information about the prerequisites and configuration.
+After downloading the user scripts from your private MiG pages you may experience problems actually using the scripts if you haven't got the necessary tools or configuration. Please refer to the [http://www.migrid.org/MiG/Documents/user_introduction/user_scripts_intro.html user scripts intro] for full information about the prerequisites and configuration.
 
 ----
 

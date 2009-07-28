@@ -41,13 +41,12 @@ def main(cert_name_no_spaces, user_arguments_dict):
         allow_rejects=False,
         )
         
-    logger.info("Loaded getuserdatastore")
     if not validate_status:
         return (accepted, returnvalues.CLIENT_ERROR)
                 
     module = accepted['module'][-1]
 
-    logger.info("getuserdatastore.module %s" % module)
+    logger.info("Loaded getuserdatastore for '%s', module %s" % (cert_name_no_spaces, module))
 
     # Please note that base_dir must end in slash to avoid access to other
     # user dirs when own name is a prefix of another user name

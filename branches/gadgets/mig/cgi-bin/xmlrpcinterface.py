@@ -29,7 +29,8 @@ from SimpleXMLRPCServer import CGIXMLRPCRequestHandler
 
 import cgi
 import os
-import traceback
+import re
+import traceback # for debugging
 import xmlrpclib
 from shared.output import validate
 import shared.returnvalues as returnvalues
@@ -72,13 +73,22 @@ def mycertname():
         return 'NO_CERT_NAME_NO_SPACES_FOUND'
     cert_name_no_spaces = common_name.replace(' ', '_')
     return cert_name_no_spaces
-
+    
+proxycn_p = re.compile(r'\A.+,CN=([\w ]+),')
+def getproxycn(full_dn):
+  """
+  Extract actual user name from certificate DN string.
+  """
+  cn = proxycn_p.match(full_dn).group(1)
+  return cn.replace(' ', '_')
 
 def stub(function, user_arguments_dict):
     """ 
     Get status of job(s)
     """
-
+    configuration = get_configuration_object()
+    logger = configuration.logger
+    
     # get CN of user currently logged in
 
     common_name = str(os.getenv('SSL_CLIENT_S_DN_CN'))
@@ -87,6 +97,14 @@ def stub(function, user_arguments_dict):
                 , returnvalues.AUTHENTICATION_ERROR)
 
     cert_name_no_spaces = common_name.replace(' ', '_')
+    # intercept shindig requests
+#    logger.info("Gadget user %s, current user %s, pucdn %s" % (configuration.gadget_server_certificate_name, \
+#                cert_name_no_spaces, user_arguments_dict))
+    if cert_name_no_spaces == configuration.gadget_server_certificate_name:
+        if not user_arguments_dict.has_key('proxy_user_certificate_dn'):
+          return ('Remote frontend server cannot operate without a specified proxy user (proxy_user_certificate_dn)', returnvalues.ERROR)
+        cert_name_no_spaces = getproxycn(user_arguments_dict.pop('proxy_user_certificate_dn')) 
+          
     try:
         exec 'from %s import main' % function
     except Exception, e:

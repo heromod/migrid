@@ -109,7 +109,7 @@ def main(cert_name_no_spaces, user_arguments_dict):
     # Reject certs with the same name as the frontend server.
     if cert_name.lower() == configuration.gadget_server_certificate_name.lower():
         output_objects.append({'object_type': 'error_text', 'text'
-                              : 'invalid certificate user name - try another'
+                              : 'invalid certificate user name - please pick another'
                               })
         return (output_objects, returnvalues.CLIENT_ERROR)
         

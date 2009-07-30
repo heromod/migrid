@@ -3,12 +3,15 @@
 
 <wiki:toc max_depth="2"/>
 
+
 = Introduction =
 MiG started out as a few separate subprojects and after the initial core design and development by Henrik Høy Karlsen a number of developers contributed code without caring too much about style consistency. Most of the developers have a solid background in C and to some extent Java, so the initial code is rather un-pythonic in terms of issues like naming and layout.
 
 As the code developed we realised the need to converge on a consistent coding style and came across the official [http://www.python.org/dev/peps/pep-0008/ Python Coding style] proposals. Those guidelines were chosen as general guidelines for all new MiG code. Furthermore we try to update old code to fit the standards but that is mostly done when changing existing code anyway.
 
+
 = Python =
+
 == Naming ==
 Naming conventions are probably the most important style rules as module and variable names may be cumbersome to change - especially when they stay long enough to make their way into several files. 
 
@@ -19,10 +22,11 @@ To sum up and elaborate on the official naming scheme:
  * Classes are given [http://en.wikipedia.org/wiki/Camelcase CamelCase] names and should preferably be implemeted in their own separate file of the same name, but in all lowercase. That is, the `BestFitScheduler` class should be implemented in `bestfitscheduler.py`.
  * Function, package, method and variable names should be all lower case with underscores ({{{'_'}}}) as word separators. These names should focus more on being descriptive than necessarily being short. An example of a function for acquiring an editing lock on a file is: 
 {{{
-def acquire_edit_lock(real_path, cert_name_no_spaces):
+def acquire_edit_lock(real_path, client_id):
 }}}
 
 NB: if you think that these long names are annoying to type, consider using an editor with variable expansion support
+
 
 == Layout ==
 Please try to write code that is easy to read i.e. use:
@@ -30,37 +34,46 @@ Please try to write code that is easy to read i.e. use:
  * telling function and variable names that adhere to the naming conventions
  * split long lines (preferably) in a way so that lines are shorter than 80 characters
 
+
 == Strings ==
-There's at least three different ways to build (concatenate) strings in python:
+There's at least four different ways to build (concatenate) strings in python:
 
 {{{
 my_string + " " + str(my_integer)
 "%s %d" % (my_string, my_integer) 
+"%(my_string)s %(my_integer)d" % {'my_string': my_string, 'my_integer': my_integer}
 my_string, my_integer
 }}}
 
-We've considered and tried to consistently use a single one, but in reality it turns out that some situations are much easier to handle with the first one, whereas other situations are best handled with the second way. The third way does not add significant value and it may interfere in function argument lists, so the first two ways are preferred.
+We've considered and tried to consistently use a single one, but in reality it turns out that some situations are much easier to handle with the first one, whereas other situations are best handled with the second or third way. The fourth way does not add significant value and it may interfere in function argument lists, so the first three ways are preferred with a slight preference towards the second or third form.
+
 
 == Objects/Classes ==
 Among the original MiG developers there's a general opinion that classes are (a sometimes necessary) evil. Thus the code so far only uses classes very sparingly. 
 For performance seasons the use of classes/objects should be kept to a minimum in short-lived scripts where they infer a relatively big overhead. It's fine to use classes where inheritance is possible/required, but we generally use a strategy of _not_ using classes except when it's actually needed. Obviously new developers may have a different view on these issues, but it will probably take a fair amount of good reasons to change this strategy :-) 
 
+
 == Documentation ==
 The guidelines also contain information about proposed use of python _docstrings_ to document the code. Although it may be boring, please try to document your code whenever it isn't obvious what it does and why. Even a short doc string to introduce modules/functions/classes can be very helpful for other developers working with the code. Inline comments are also welcome in places where the code or algorithm isn't self explaining.
 
+
 == Interpreter Versions ==
-We are pretty much bound to the python version available at the MiG servers and should always aim at not requiring a more recent python version if at all possible. As of 2009 we use python 2.4 on the servers, and we expect to move to 2.5 soon, so 2.6 and 3.0 specific features will not be available for quite a while.
+We are pretty much bound to the python version available at the MiG servers and should always aim at not requiring a more recent python version if at all possible. In 2009 we upgraded to python 2.5 on the servers, so 2.6 and 3.0 specific features will not be available for quite a while.
+
 
 == Tools ==
 Apart from the guide there are a few tools to help coding in a way that adheres to the official style:
 
 [http://www.logilab.org/projects/pylint PyLint] is a nice tool for statically checking correctness and style of python source code.
 
+[http://pypi.python.org/pypi/pyflakes PyFlakes] is a simple and fast tool for statically checking correctness of python source code.
+
 [http://pychecker.sourceforge.net/ PyChecker] is a similar tool which is more focused on dynamic correctness of the code.
 
 [http://pypi.python.org/pypi/PythonTidy/ PythonTidy] actively fixes some of the coding style errors.
 
 PyLint catches most style errors and PythonTidy corrects only some of them, so it may be a good idea to use the two programs in combination.
+
 
 = Bourne Shell =
 A number of resource scripts are currently only available as (ba)sh scripts. Additionally user scripts are available in a sh version. The whitespace guidelines conflicts with variable assignment in sh, so that part can not be used. There's a tradition of using all upper case variable names in sh scripts, so that is acceptable. Alternatively the all lower case with underscores style used in python can be used. This makes especially user scripts easier to keep in sync with the python version.
@@ -71,7 +84,7 @@ Another important aspect of the Bourne shell scripts is portability. We must be 
 
 
 = HTML =
-We use HTML formatting quite a lot in the cgi scripts at the time of writing. However, we do not have official style guidelines for that part, which has resulted in a lot of inconsistency. With Henrik's work on the generic output system we can now keep all HTML formatting in a single location separated from the functionality for far easier maintenance. We still need to migrate a few old remaining scripts including resource_edit to the new structure.
+We use HTML formatting quite a lot in the wsgi/cgi scripts at the time of writing. However, we do not have official style guidelines for that part, which has resulted in a lot of inconsistency. With Henrik's work on the generic output system we can now keep all HTML formatting in a single location, shared/output.py , separated from the functionality for far easier maintenance. We still need to migrate some old remaining scripts including `put` to the new structure with separated wsgi/cgi front end and functionality back end. Furthermore we should replace all occurrences of the html_form object_type with specialized object_types that are only translated to e.g. html in the output module. Please take a look at the handling of the sandboxinfos object_type in sssmonitor for an example of this solution.
 
 
 = Other Programming Languages =

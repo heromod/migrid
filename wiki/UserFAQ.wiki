@@ -14,7 +14,7 @@ You need to have a Grid certificate to do anything on MiG as a user. Please refe
 
 == Where can I get MiG help and support? ==
 
-There's a MiG community on [http://groups.google.com/group/migrid Google Groups] where you are welcome to look for answers or ask your own questions to the MiG developers, administrators and users.
+There's a [http://groups.google.com/group/migrid MiG community on Google Groups] where you are welcome to look for answers or ask your own questions to the MiG developers, administrators and users.
 Please always include at least JOB ID when your questions are related to specific jobs. Complete job status output for the job from the `Jobs` -> `View status of individual jobs` page is often  useful, too.
 
 

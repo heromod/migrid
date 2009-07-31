@@ -1,0 +1,414 @@
+/* tags */
+
+body {
+  background: #63a4f0;
+  color: #000;
+  font-family: "Trebuchet MS", "Bitstream Vera Serif", Utopia, "Times New Roman", times, serif;
+  margin: 0%;
+  /* padding: 5px 5px; */
+  text-align: center;
+  font-weight: lighter; 
+}
+
+a {
+  color: #369;
+  text-decoration: none;
+}
+
+a:hover, a:active {
+  color: #000;
+  text-decoration: underline;
+}
+
+img {
+  border:  0px;
+}
+
+tr, td {
+  padding: 2px;
+}
+
+
+h1{
+  padding: 4px;
+  border-top: px solid #000;
+  border-bottom: 1px solid #000;
+  font-size: 16px;  
+  color: #000;
+  background: #acf;
+  text-align: center;
+}
+
+h2 {
+  border-bottom: 1px solid #000;
+  font-size: 14px;  
+  padding: 2px;
+}
+
+h3 {
+  border-bottom: 1px solid darkgrey;
+  font-size: 16px;  
+  padding: 3px;
+}
+
+
+div.container {
+  width: 98%;
+  margin: 1%;
+}
+
+
+/* Horizontal Menu */
+.navmenu {
+  width: 98%;
+  font-size: 16px;
+  background: none;
+}
+
+.navmenu ul {
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.navsubmenu ul {
+  margin: 0;
+  padding: 0;
+}
+
+.navmenu ul li, .navsubmenu ul li {
+  list-style-type: none;
+  display: inline;
+  float: center;
+}
+
+.navmenu ul li.dashboard a {
+  background-image: url('/images/icons/application.png');
+}
+.navmenu ul li.submitjob a {
+  background-image: url('/images/icons/cog_add.png');
+}
+.navmenu ul li.files a {
+  background-image: url('/images/icons/drive.png');
+}
+.navmenu ul li.jobs a {
+  background-image: url('/images/icons/cog.png');
+}
+.navmenu ul li.vgrids a {
+  background-image: url('/images/icons/folder.png');
+}
+.navmenu ul li.vmachines a {
+  background-image: url('/images/icons/computer.png');
+}
+.navmenu ul li.resources a {
+  background-image: url('/images/icons/server.png');
+}
+.navmenu ul li.downloads a {
+  background-image: url('/images/icons/download.png');
+}
+.navmenu ul li.runtimeenvs a {
+  background-image: url('/images/icons/database.png');
+}
+.navmenu ul li.settings a {
+  background-image: url('/images/icons/wrench.png');
+}
+.navmenu ul li.shell a {
+  background-image: url('/images/icons/application_osx_terminal.png');
+}
+
+.navmenu ul li a:hover, .navsubmenu ul li a:hover {     
+  background-color: #369;
+  color: white;
+}
+
+.navmenu ul  li a.selected {    
+  background-color: #147;
+  color: white;
+}
+
+.navmenu ul li a, .navsubmenu ul li a {
+  -moz-border-radius:4px;
+  display: inline;
+  
+  background-repeat: no-repeat;
+  background-position: 5px 50%;
+  
+  border:1px solid #fff;
+  color: white;
+  font-size:13px;
+  font-weight:bold;
+  padding:3px 5px 3px 24px;
+  text-decoration:none;
+  background-color: #63a4f0;
+  margin-right: 10px;
+}
+
+.navsubmenu ul li a {
+  display: inline;
+  float: left;
+}
+
+
+
+#migheader {
+  font-size:30px;
+  letter-spacing:0.2em;
+  margin:0;
+  /*padding:  20px 10px 10px 10px;*/
+  width: 96%;
+  text-align: center;
+}
+
+
+table {
+  background: #eef;
+   color: #000;
+  margin-right: auto;
+  margin-left: auto;
+  text-align: left;
+  width: 98%;
+  border: 1px solid #000;
+}
+
+table.submitstatus {}
+
+table.files {}
+table.fileupload {}
+table.stats {}
+table.wc {}
+
+table.jobs {
+  padding: 2px;
+}
+table.resubmit {}
+table.changedstatusjobs {}
+table.saveschedulejobs {}
+
+
+table.vgrids {
+  padding: 2px;
+}
+
+table.resources {
+  padding: 2px;
+  text-align: left;
+}
+table.sandboxlogintext {
+  width: 80%;
+}
+table.sandboxlogin {}
+table.sandboxinfo {}
+table.sandboxcreateimg {}
+
+
+table.downloads {
+  text-align: center;
+}
+
+table.runtimeenvs {
+  padding: 2px;
+}
+
+table.runtimeenvdetails {
+  padding: 2px;
+}
+table.runtimeenvsw {
+  border: 0px solid #000;
+}
+table.runtimeenventry {
+  border: 0px solid #000;
+}
+table.runtimeenvvars {
+  border: 0px solid #000;
+}
+
+table.monitor {
+  font-size: 10px;
+  border-collapse: collapse;
+}
+table.monitorstats {}
+table.monitorjobs {
+  border: 0px solid #000;
+}
+table.monitorresreq {
+  border: 0px solid #000;
+}
+table.monitorruntimeenvreq {
+  border: 0px solid #000;
+}
+
+/* MiG logo */
+#topspace {
+  padding: 2px;
+}
+#toplogo {
+  border: 0;
+  background:  url('/images/background-top.png');
+  height: 80px;
+  border-spacing: 0;
+  border: 0px solid #000;
+  text-align: center;
+}
+#logoimage {
+  opacity: 0.7;
+  z-index: 1;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 25px 30px;
+  display: inline;
+  vertical-align: middle;
+}
+#logotitle {
+  font-size: 20px;
+  font-weight: bold;
+  color: #63a4f0;
+  padding: 20px;
+  display: inline;
+  vertical-align: middle;
+}
+
+
+/* MiG credits footer */
+#exitcode {
+  font-family: Small Fonts, VT100, Arial, Helvetica;
+  font-size: 8px;
+}
+#bottomspace {
+  padding: 2px;
+}
+#bottomlogo {
+  border: 0;
+  background: url('/images/background-bottom.png');
+  height: 80px;
+  padding: 0px;
+  border-spacing: 0;
+  border: 0px solid #000;
+  text-align: center;
+}
+#credits {
+  font-family: Small Fonts, VT100, Arial, Helvetica;
+  font-size: 10px;
+  padding: 60px 0px 0px 0px;
+  color: #63a4f0;
+  vertical-align: middle;
+}
+#credits a {
+  color: #369;
+}
+
+
+#content {
+  /* background: #ccc; */
+  background: #fff;
+  border: 2px ridge #63a4f0;
+  margin: 2%;
+  padding: 5px 5px;
+  text-align: center;
+}
+.migcontent {
+  background: #fff;
+  border: 0;
+  padding: 5px;
+  width: 96%;
+  text-align: center;
+}
+
+.rawtext {
+  background: #fff;
+  border: 0;
+  padding: 5px;
+  text-align: left;
+}
+
+.smallcontent{
+  font-size: 10px;
+}
+
+.subsection{
+  background: #fff;
+  padding: 0px 0px 5px 0px;
+  border:  0px;
+  width: 98%;
+  text-align: center;
+  font-size:17px;
+  font-weight:bold;
+}
+
+#miginput {
+  background: #fff;
+  border: 0px solid #000;
+  padding: 0px 0px;
+  width: 98%;
+  text-align: center;
+}
+
+#miginput input, #miginput textarea{
+  background: #fff;
+  border: 1px solid #999;
+  font-size: 12px;
+  padding:  0;
+}
+
+#miginput input:focus, #miginput textarea:focus{
+  background: #eef5ff;
+}
+
+.lefttext {
+  text-align: left;
+}
+
+.centertext {
+  text-align: center;
+}
+
+.righttext {
+  text-align: right;
+}
+
+.centerall {
+  margin: 0;
+  text-align: center;
+}
+
+.title {
+  font-weight: bold;
+}
+
+.errortext {
+  color: red;
+}
+
+.warningtext {
+  color: orange;
+}
+
+.even_row {
+  background: #eef;
+}
+
+.odd_row {
+  background: #ddf;
+}
+
+.status_unavailable {
+  color: grey;
+}
+
+.status_online {
+  color: green;
+}
+
+.status_slack {
+  color: orange;
+}
+
+.status_offline {
+  color: red;
+}
+
+.optional {
+  color: black;
+}
+
+.mandatory {
+  color: blue;
+}

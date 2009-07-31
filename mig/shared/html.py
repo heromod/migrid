@@ -86,21 +86,21 @@ def get_cgi_html_header(
         menu_items = (
             {'class': 'dashboard', 'url': 'dashboard.py', 'title'
              : 'Dashboard'},
-            {'class': 'submitjob', 'url': 'submitjob.py', 'title'
-             : 'Submit Job'},
-            {'class': 'files', 'url': 'ls.py', 'title': 'Files'},
+#            {'class': 'submitjob', 'url': 'submitjob.py', 'title'
+#             : 'Submit Job'},
+#            {'class': 'files', 'url': 'ls.py', 'title': 'Files'},
             {'class': 'jobs', 'url': 'managejobs.py', 'title': 'Jobs'},
-            {'class': 'vgrids', 'url': 'vgridadmin.py', 'title'
-             : 'VGrids'},
+#            {'class': 'vgrids', 'url': 'vgridadmin.py', 'title'
+#             : 'VGrids'},
             {'class': 'resources', 'url': 'resadmin.py', 'title'
              : 'Resources'},
-            {'class': 'downloads', 'url': 'downloads.py', 'title'
-             : 'Downloads'},
-            {'class': 'runtimeenvs', 'url': 'redb.py', 'title'
-             : 'Runtime Envs'},
+#            {'class': 'downloads', 'url': 'downloads.py', 'title'
+#             : 'Downloads'},
+#            {'class': 'runtimeenvs', 'url': 'redb.py', 'title'
+#             : 'Runtime Envs'},
             {'class': 'settings', 'url': 'settings.py', 'title'
              : 'Settings'},
-            {'class': 'shell', 'url': 'shell.py', 'title': 'Shell'},
+#            {'class': 'shell', 'url': 'shell.py', 'title': 'Shell'},
             )
 
         menu_lines = render_menu('navmenu', menu_items, current_page)

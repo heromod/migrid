@@ -196,6 +196,7 @@ Such a proxy file can be created using the command-line tool
 voms-proxy-init, and can be found in /tmp/x509up_u&lt;your UID&gt;.<br>
 <input type="file" name="fileupload" size="40">
 <input type="hidden" name="path" value="proxy.pem">
+<input type="hidden" name="restrict" value="true">
 &nbsp;
 <input type="submit" value="Send file">
 </form>
@@ -444,18 +445,20 @@ class Ui:
 #        jobListFile.close()
 #        for line in lines:
 #            (jobId, jobName) = line.strip().split('#')
-            logger.debug('Querying job =', jobId, jobName)
+            logger.debug('Querying job %s (%s)' % (jobId, jobName))
             jobList[jobId] = {}
             jobList[jobId]['name'] = jobName
-            status = 0
-            exitCode = 0
+            status = None
+            exitCode = None
+            sub_time = None
 
             self.__lockArclib()
             try:
                 # jobInfo = arclib.GetJobInfoDirect(jobId)
-                jobInfo = arclib.GetJobInfo(jobId)
-                status = jobInfo.status
+                jobInfo  = arclib.GetJobInfo(jobId)
+                status   = jobInfo.status
                 exitCode = jobInfo.exitcode
+                sub_time = jobInfo.submission_time.__str__()
             except arclib.FTPControlError:
                 logger.error('Failed to query job %s' % jobName)
                 status = 'REMOVED'
@@ -464,6 +467,7 @@ class Ui:
 
             jobList[jobId]['status'] = status
             jobList[jobId]['error'] = exitCode
+            jobList[jobId]['submitted'] = sub_time
             logger.debug(' %s: %s' % (jobId, jobList[jobId]))
 
         return jobList
@@ -496,6 +500,7 @@ class Ui:
                 info = arclib.GetJobInfo(jobId)
                 jobInfo['status'] = info.status
                 jobInfo['error']  = info.exitcode
+                jobInfo['submitted'] = info.submission_time
             except arclib.ARCLibError, err:
                 logger.error('Could not query: %s' % err.what())
                 jobInfo['status'] = 'UNABLE TO RETRIEVE: ' + err.what(),

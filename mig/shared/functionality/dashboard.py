@@ -36,7 +36,7 @@ from shared.init import initialize_main_variables
 from shared.functional import validate_input_and_cert
 import shared.returnvalues as returnvalues
 from shared.useradm import client_id_dir
-
+import shared.arcwrapper as arc
 
 def signature():
     """Signature of the main function"""
@@ -134,6 +134,26 @@ Keep in mind that the frontend prototype is connected to production systems!
 Your user certificate expires on %s .
 """ % os.environ['SSL_CLIENT_V_END']
     output_objects.append({'object_type': 'text', 'text': cert_info})
+
+    try:
+        dir = os.path.join(configuration.user_home,client_dir)
+        session_Ui = arc.Ui(dir)
+        proxy = session_Ui.getProxy()
+        output_objects.append({'object_type': 'text', 
+                               'text': 'Proxy will expire on %s (%s sec.)' \
+                                       % (proxy.Expires(),
+                                          proxy.getTimeleft())})
+    except arc.NoProxyError, err:
+        
+        output_objects.append({'object_type':'error_text',
+                               'text': 'No proxy found: %s' \
+                                       % err.what()})
+        output_objects = output_objects + arc.askProxy()
+
+    except Exception, err:
+        output_objects.append({'object_type':'error_text',
+                               'text': 'Error while initialising.\n %s' \
+                                       % err}) 
 
     #env_info = """Env %s""" % os.environ
     #output_objects.append({'object_type': 'text', 'text': env_info})

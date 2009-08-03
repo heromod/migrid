@@ -403,7 +403,11 @@ class Ui:
             name = Job name
             status = ARC job states, ACCPTED, SUBMIT, INLRMS etc
             error = Error status
-            
+            sub_time = string(submission_time)
+            completion = string(completion_time)
+            cpu_time = string(used_cpu_time)
+            wall_time = string(used_wall_time)
+
         If there was an error, an empty dictionary is returned.
             
         Example:
@@ -459,15 +463,25 @@ class Ui:
                 status   = jobInfo.status
                 exitCode = jobInfo.exitcode
                 sub_time = jobInfo.submission_time.__str__()
+                completed= jobInfo.completion_time.__str__()
+                cpu_time = jobInfo.used_cpu_time.__str__()
+                wall_time= jobInfo.used_wall_time.__str__()
+
             except arclib.FTPControlError:
                 logger.error('Failed to query job %s' % jobName)
                 status = 'REMOVED'
                 exitCode = -1
+                completed = None
+                cpu_time = None
+                wall_time = None
             self.__unlockArclib()
 
             jobList[jobId]['status'] = status
-            jobList[jobId]['error'] = exitCode
+            jobList[jobId]['error' ] = exitCode
             jobList[jobId]['submitted'] = sub_time
+            jobList[jobId]['completed'] = completed
+            jobList[jobId]['cpu_time' ] = sub_time
+            jobList[jobId]['wall_time'] = sub_time
             logger.debug(' %s: %s' % (jobId, jobList[jobId]))
 
         return jobList

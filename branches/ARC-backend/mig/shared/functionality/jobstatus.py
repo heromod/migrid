@@ -27,19 +27,16 @@
 
 """Job status back end functionality"""
 
-import glob
 import os
 import time
 
 import shared.returnvalues as returnvalues
 from shared.functional import validate_input_and_cert
-from shared.fileio import unpickle
-from shared.job import output_dir, get_job_ids_with_specified_project_name
 from shared.parseflags import verbose, sorted
 from shared.init import initialize_main_variables
-from shared.validstring import valid_user_path
 from shared.useradm import client_id_dir
 
+import shared.arcwrapper as arc
 
 def signature():
     """Signature of the main function"""
@@ -92,22 +89,21 @@ def main(client_id, user_arguments_dict):
     if sorted(flags):
         order = 'sorted '
     patterns = accepted['job_id']
-    project_names = accepted['project_name']
-
-    if len(project_names) > 0:
-        for project_name in project_names:
-            project_name_job_ids = \
-                get_job_ids_with_specified_project_name(client_id,
-                    project_name, configuration.mrsl_files_dir, logger)
-            patterns.extend(project_name_job_ids)
-
-    # Please note that base_dir must end in slash to avoid access to other
-    # user dirs when own name is a prefix of another user name
-
-    base_dir = \
-        os.path.abspath(os.path.join(configuration.mrsl_files_dir,
-                        client_dir)) + os.sep
-
+#    project_names = accepted['project_name']
+#
+#    if len(project_names) > 0:
+#        for project_name in project_names:
+#            project_name_job_ids = \
+#                get_job_ids_with_specified_project_name(client_id,
+#                    project_name, configuration.mrsl_files_dir, logger)
+#            patterns.extend(project_name_job_ids)
+#
+#    # Please note that base_dir must end in slash to avoid access to other
+#    # user dirs when own name is a prefix of another user name
+#
+#    base_dir = \
+#        os.path.abspath(os.path.join(configuration.mrsl_files_dir,
+#                        client_dir)) + os.sep
     output_objects.append({'object_type': 'header', 'text'
                           : 'MiG %s job status' % order})
 
@@ -122,188 +118,104 @@ def main(client_id, user_arguments_dict):
                                   : '%s using flag: %s' % (op_name,
                                   flag)})
 
-    if not os.path.isdir(base_dir):
-        output_objects.append({'object_type': 'error_text', 'text'
-                              : 'You have not been created'
-                               + ' as a user on the MiG server!'
-                               + ' Please contact the MiG team.'})
-        return (output_objects, returnvalues.CLIENT_ERROR)
+#    if not os.path.isdir(base_dir):
+#        output_objects.append({'object_type': 'error_text', 'text'
+#                              : 'You have not been created'
+#                               + ' as a user on the MiG server!'
+#                               + ' Please contact the MiG team.'})
+#        return (output_objects, returnvalues.CLIENT_ERROR)
 
-    filelist = []
-    for pattern in patterns:
-        pattern = pattern.strip()
+    try: 
+        dir = os.path.join(configuration.user_home,client_dir)
+        session_Ui = arc.Ui(dir)
 
-        # Backward compatibility - keyword ALL should match all jobs
+        if patterns == ['*']:
+            jobvalues = session_Ui.AllJobStatus()
+            logger.debug(jobvalues)
+        else:
+            jobs = [] # for now, should be GetJobIDs => filter by match 
+            jobvalues = []
+            for job in jobs:
+                jobval = session_Ui.jobStatus(job)
+                jobvalues[job] = jobval
 
-        if pattern == 'ALL':
-            pattern = '*'
+    except arc.NoProxyError, err:
+        logger.error('No valid proxy found for job status: %s' % err.what())
+        output_objects.append({'output_type':'warning',
+                               'text':'Could not retrieve status: %s' % err})
+        return(output_objects, returnvalues.ERROR)
+    except Exception, err:
+        logger.error('Exception while retrieving job status\n%s' % err) 
+        output_objects.append({'output_type':'warning',
+                               'text':'Could not retrieve status: %s' % err})
+        return(output_objects, returnvalues.ERROR)
 
-        # Check directory traversal attempts before actual handling to
-        # avoid leaking information about file system layout while
-        # allowing consistent error messages
-
-        unfiltered_match = glob.glob(base_dir + pattern + '.mRSL')
-        match = []
-        for server_path in unfiltered_match:
-            real_path = os.path.abspath(server_path)
-            if not valid_user_path(real_path, base_dir, True):
-
-                # out of bounds - save user warning for later to allow
-                # partial match:
-                # ../*/* is technically allowed to match own files.
-
-                logger.error('%s tried to use %s %s outside own home! (pattern %s)'
-                              % (client_id, op_name, real_path,
-                             pattern))
-                continue
-
-            # Insert valid job files in filelist for later treatment
-
-            match.append(real_path)
-
-        # Now actually treat list of allowed matchings and notify if
-        # no (allowed) match....
-
-        if not match:
+    # format output, iterating over jobvalues:
+    
+    if not jobvalues:
             output_objects.append({'object_type': 'error_text', 'text'
                                   : '%s: You do not have any matching job IDs!'
                                    % pattern})
             status = returnvalues.CLIENT_ERROR
-        else:
-            filelist += match
-
-    if sorted(flags):
-        sort(filelist)
-
-    if max_jobs < len(filelist):
+    
+    if max_jobs < len(jobvalues):
         output_objects.append({'object_type': 'text', 'text'
                               : 'Only showing first %d of the %d matching jobs as requested'
-                               % (max_jobs, len(filelist))})
-        filelist = filelist[:max_jobs]
+                               % (max_jobs, len(jobvalues))})
+        jobvalues = jobvalues[:max_jobs]
 
     # Iterate through jobs and print details for each
 
     job_list = {'object_type': 'job_list', 'jobs': []}
 
-    for filepath in filelist:
+    for job_id in jobvalues.keys():
+        job_obj = {'object_type': 'job', 
+                   'job_id': ' (' + jobvalues[job_id]['name'] + ')' + job_id }
+        job_obj['status'] = jobvalues[job_id]['status']
+        job_obj['received_timestamp'] = jobvalues[job_id]['submitted']
+        if jobvalues[job_id].has_key('completed'):
+            job_obj['finished_timestamp'] = jobvalues[job_id]['completed']
 
-        # Extract job_id from filepath (replace doesn't modify filepath)
-
-        mrsl_file = filepath.replace(base_dir, '')
-        job_id = mrsl_file.replace('.mRSL', '')
-        job_dict = unpickle(filepath, logger)
-        if not job_dict:
-            status = returnvalues.CLIENT_ERROR
-
-            output_objects.append({'object_type': 'error_text', 'text'
-                                  : 'You can only list status of your own jobs.'
-
-                                   + ' Please verify that you submitted the mRSL file '
-
-                                   + "with job id '%s' (Could not unpickle mRSL file %s)"
-                                   % (job_id, filepath)})
-            continue
-
-        # Check that file belongs to the user requesting the status
-
-        if client_id != job_dict['USER_CERT']:
-            output_objects.append({'object_type': 'text', 'text'
-                                  : 'The job you are trying to get status for does not belong to you!'
-                                  })
-            status = returnvalues.CLIENT_ERROR
-            continue
-
-        job_obj = {'object_type': 'job', 'job_id': job_id}
-        job_obj['status'] = job_dict['STATUS']
-
-        fields = [
-            'VERIFIED',
-            'VERIFIED_TIMESTAMP',
-            'RECEIVED_TIMESTAMP',
-            'QUEUED_TIMESTAMP',
-            'SCHEDULE_TIMESTAMP',
-            'EXECUTING_TIMESTAMP',
-            'FINISHED_TIMESTAMP',
-            'FAILED_TIMESTAMP',
-            'CANCELED_TIMESTAMP',
-            ]
-        for name in fields:
-            if job_dict.has_key(name):
-
-                # time objects cannot be marshalled, asctime if timestamp
-
-                try:
-                    job_obj[name.lower()] = time.asctime(job_dict[name])
-                except Exception, exc:
-
-                    # not a time object, just add
-
-                    job_obj[name.lower()] = job_dict[name]
-
-        execution_histories = []
-        if verbose(flags):
-            if job_dict.has_key('EXECUTE'):
-                command_line = '; '.join(job_dict['EXECUTE'])
-                if len(command_line) > 256:
-                    job_obj['execute'] = '%s ...' % command_line[:252]
-                else:
-                    job_obj['execute'] = command_line
-
-            if job_dict.has_key('EXECUTION_HISTORY'):
-                counter = 0
-                for history_dict in job_dict['EXECUTION_HISTORY']:
-                    execution_history = \
-                        {'object_type': 'execution_history'}
-
-                    if history_dict.has_key('QUEUED_TIMESTAMP'):
-                        execution_history['queued'] = \
-                            time.asctime(history_dict['QUEUED_TIMESTAMP'
-                                ])
-                    if history_dict.has_key('EXECUTING_TIMESTAMP'):
-                        execution_history['executing'] = \
-                            time.asctime(history_dict['EXECUTING_TIMESTAMP'
-                                ])
-                    if history_dict.has_key('FAILED_TIMESTAMP'):
-                        execution_history['failed'] = \
-                            time.asctime(history_dict['FAILED_TIMESTAMP'
-                                ])
-                    if history_dict.has_key('FAILED_MESSAGE'):
-                        execution_history['failed_message'] = \
-                            history_dict['FAILED_MESSAGE']
-                    execution_histories.append({'execution_history'
-                            : execution_history, 'count': counter})
-                    counter += 1
-            if job_dict.has_key('SCHEDULE_HINT'):
-                job_obj['schedule_hint'] = job_dict['SCHEDULE_HINT']
-
-        job_obj['execution_histories'] = execution_histories
+        # hacked in more values here...
+        if jobvalues[job_id].has_key('cpu_time') \
+            and jobvalues[job_id].has_key('cpu_time'): 
+            job_obj['execution_histories'] = \
+                [{'count':'',
+                  'execution_history':{'executing':
+                                  'CPU time: %s, Wall time: %s'\
+                                    % (jobvalues[job_id]['cpu_time' ],
+                                       jobvalues[job_id]['wall_time'])}}]
+        else:
+            job_obj['execution_histories'] = []
 
         job_obj['statuslink'] = {'object_type': 'link',
                                  'destination': 'ls.py?path=%s/%s/*'\
-                                  % (output_dir, job_id), 'text': 'View status files'}
+                                  % ('.', job_id), 
+                                  'text': 'View status files'}
         job_obj['mrsllink'] = {'object_type': 'link',
                                'destination': 'mrslview.py?job_id=%s'\
                                 % job_id,
                                'text': 'View parsed mRSL contents'}
 
-        if job_dict.has_key('OUTPUTFILES') and job_dict['OUTPUTFILES']:
+#        if job_dict.has_key('OUTPUTFILES') and job_dict['OUTPUTFILES']:
+#
+#            # Create a single ls link with all supplied outputfiles
+#
+#            path_string = ''
+#            for path in job_dict['OUTPUTFILES']:
+#
+#                # OUTPUTFILES is either just combo path or src dst paths
+#
+#                parts = path.split()
+#
+#                # Always take last part as destination
+#
+#                path_string += 'path=%s;' % parts[-1]
+#
+#            job_obj['outputfileslink'] = {'object_type': 'link',
+#                    'destination': 'ls.py?%s' % path_string,
+#                    'text': 'View output files'}
 
-            # Create a single ls link with all supplied outputfiles
-
-            path_string = ''
-            for path in job_dict['OUTPUTFILES']:
-
-                # OUTPUTFILES is either just combo path or src dst paths
-
-                parts = path.split()
-
-                # Always take last part as destination
-
-                path_string += 'path=%s;' % parts[-1]
-
-            job_obj['outputfileslink'] = {'object_type': 'link',
-                    'destination': 'ls.py?%s' % path_string,
-                    'text': 'View output files'}
         job_obj['resubmitlink'] = {'object_type': 'link',
                                    'destination': 'resubmit.py?job_id=%s'\
                                     % job_id, 'text': 'Resubmit job'}
@@ -317,6 +229,7 @@ def main(client_id, user_arguments_dict):
         job_obj['liveoutputlink'] = {'object_type': 'link',
                 'destination': 'liveoutput.py?job_id=%s' % job_id,
                 'text': 'Request live update'}
+
         job_list['jobs'].append(job_obj)
 
     output_objects.append(job_list)

@@ -45,12 +45,18 @@ logger = get_configuration_object().logger
 try:
     import arclib
 except:
-    logger.error('arclib not found. Aborting whole execution.')
-    sys.exit(255)
+    logger.error('problems importing arclib... trying workaround')
+    try:
+        sys.path.append('/opt/nordugrid/lib/python2.4/site-packages')
+        import arclib
+    except:
+        logger.error('arclib not found. Aborting whole execution.')
+        logger.error('sys.path was %s' % sys.path)
+        sys.exit(255)
 
 # (trivially inheriting) exception class of our own
 class ARCWrapperError(arclib.ARCLibError):
-    def __init__(self,msg):
+   def __init__(self,msg):
         arclib.ARCLibError.__init__(self, msg)
 
 class NoProxyError(arclib.ARCLibError):
@@ -99,9 +105,9 @@ class Proxy(arclib.Certificate):
                      ,'hours':60*60, 'hour':60*60
                       ,'minutes':60, 'minute':60
                       ,'seconds':1, 'second':1}
-            timeLeftParts = split(timeLeftStr,',')
+            timeLeftParts = timeLeftStr.split(',')
             for part in timeLeftParts:
-                [val,item] = split(part)
+                [val,item] = part.split()
                 f = factor[item]
                 if f: 
                     timeleft = timeleft + int(val)*f
@@ -174,6 +180,28 @@ def popen(cmd, env=None):
 
     return f
 
+# asking the user for a proxy. This will be called from many places, 
+# thus centralised here (though too specific ).
+def askProxy():
+        output_objects = []
+        output_objects.append({'object_type':'sectionheader',
+                               'text':'Proxy upload'})
+        output_objects.append({'object_type':'html_form',
+                              'text':"""
+<form action="upload.py"
+enctype="multipart/form-data" method="post">
+<p>
+Please specify a proxy file to upload:<br>
+Such a proxy file can be created using the command-line tool 
+voms-proxy-init, and can be found in /tmp/x509up_u&lt;your UID&gt;.<br>
+<input type="file" name="fileupload" size="40">
+<input type="hidden" name="path" value="proxy.pem">
+&nbsp;
+<input type="submit" value="Send file">
+</form>
+                              """})
+        return output_objects
+
 class Ui:
 
     """ARC middleware user interface class."""
@@ -220,17 +248,16 @@ class Ui:
                 Proxy(os.path.join(self._userdir, Ui.proxy_name))
             if self._proxy.IsExpired():
                 raise NoProxyError('Expired.')
-            return self
 
         except NoProxyError, err:
-            logger.info(err.what())
-            return None
+            logger.error('Proxy error: %s' % err.what())
+            raise NoProxyError(err.what())
         except arclib.ARCLibError, err:
             logger.error('Cannot initialise: %s' % err.what())
-            return None
+            raise ARCWrapperError(err.what())
         except Exception, other:
             logger.error('Unexpected error during initialisation.\n %s' % other)
-            return None
+            raise ARCWrapperError(err.what())
 
     def __initQueues(self):
         """ Initialises possible queues for a job submission."""
@@ -280,6 +307,10 @@ class Ui:
         os.environ['X509_USER_PROXY'] = self._proxy.getFilename()
         os.environ['HOME'] = self._userdir
         return
+
+    def getProxy(self):
+        """ returns the proxy interface used"""
+        return self._proxy
 
     def submit(self, xrslFilename, jobName=''):
         """Submit xrsl file as job to available ARC resources.

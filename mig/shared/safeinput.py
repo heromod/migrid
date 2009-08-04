@@ -309,7 +309,8 @@ def valid_job_id_pattern(
     pattern,
     min_length=1,
     max_length=255,
-    extra_chars='.*?',
+    # tweaked for ARC job IDs (URLs)
+    extra_chars='.*?:/',
     ):
     """Verify that supplied pattern only contains characters that
     we consider valid in paths. Valid wild card characters are added

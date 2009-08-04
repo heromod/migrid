@@ -141,12 +141,14 @@ def main(client_id, user_arguments_dict):
 
     except arc.NoProxyError, err:
         logger.error('No valid proxy found for job status: %s' % err.what())
-        output_objects.append({'output_type':'warning',
-                               'text':'Could not retrieve status: %s' % err})
+        output_objects.append({'object_type':'warning',
+                               'text':'Proxy error while retrieving job status:\n'
+                               +' %s' % err})
+        output_objects = output_objects + arc.askProxy()
         return(output_objects, returnvalues.ERROR)
     except Exception, err:
         logger.error('Exception while retrieving job status\n%s' % err) 
-        output_objects.append({'output_type':'warning',
+        output_objects.append({'object_type':'warning',
                                'text':'Could not retrieve status: %s' % err})
         return(output_objects, returnvalues.ERROR)
 
@@ -188,33 +190,18 @@ def main(client_id, user_arguments_dict):
         else:
             job_obj['execution_histories'] = []
 
+        # get the suffix (local job directory):
+        (prefix, job_dir) = arc.splitJobId(job_id)
+                
         job_obj['statuslink'] = {'object_type': 'link',
                                  'destination': 'ls.py?path=%s/%s/*'\
-                                  % ('.', job_id), 
-                                  'text': 'View status files'}
+                                  % ('.', job_dir), 
+                                  'text': 'View local output files'}
+        # changed the meaning here:
         job_obj['mrsllink'] = {'object_type': 'link',
-                               'destination': 'mrslview.py?job_id=%s'\
+                               'destination': 'downloadjob.py?job_id=%s'\
                                 % job_id,
-                               'text': 'View parsed mRSL contents'}
-
-#        if job_dict.has_key('OUTPUTFILES') and job_dict['OUTPUTFILES']:
-#
-#            # Create a single ls link with all supplied outputfiles
-#
-#            path_string = ''
-#            for path in job_dict['OUTPUTFILES']:
-#
-#                # OUTPUTFILES is either just combo path or src dst paths
-#
-#                parts = path.split()
-#
-#                # Always take last part as destination
-#
-#                path_string += 'path=%s;' % parts[-1]
-#
-#            job_obj['outputfileslink'] = {'object_type': 'link',
-#                    'destination': 'ls.py?%s' % path_string,
-#                    'text': 'View output files'}
+                               'text': 'Download job output'}
 
         job_obj['resubmitlink'] = {'object_type': 'link',
                                    'destination': 'resubmit.py?job_id=%s'\

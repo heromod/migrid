@@ -128,10 +128,10 @@ def splitJobId(jobId):
     """
     if not jobId.endswith('/'):
         jobId = jobId + '/'
-    jobURL = arclib.URL(jobID)
+    jobURL = arclib.URL(jobId)
     path = os.path.split(jobURL.Path())[0]
     return (jobURL.Protocol() + '://' + jobURL.Host() + ':' 
-            + jobURL.Port() + os.path.dirname(path) + '/'
+            + str(jobURL.Port()) + os.path.dirname(path) + '/'
            , os.path.basename(path))
 
 # hack: issue a command line, return output and exit code
@@ -263,7 +263,7 @@ class Ui:
     def __initQueues(self):
         """ Initialises possible queues for a job submission."""
 
-        print ('init queues for job submission')
+        logger.debug('init queues (for job submission/resource display)')
 
         try:
             # init data: cluster information (obtained per user) 
@@ -274,12 +274,18 @@ class Ui:
             for cl in self._clusters:
                 qs = arclib.GetQueueInfo(cl)
                 self._queues = self._queues + qs
+            self.__unlockArclib()
             logger.debug('ARC Init, discovered queues are')
             for q in self._queues:
                 logger.debug('\t %s' % q)
 
-        except ARCLiberror, err:
-            print ('ARC queue initialisation error: %s' % err )
+        except NoProxyError, err:
+            self.__unlockArclib()
+            logger.error('Proxy error during queue initialisation: %s' % err )
+            raise err
+        except Exception, err:
+            self.__unlockArclib()
+            logger.error('ARC queue initialisation error: %s' % err )
             self._clusters = []
             self._queues = []
 
@@ -337,7 +343,9 @@ class Ui:
 
                 xrslSplit = xrslAll.SplitMulti()
 
-                # clusters and their queues have been retrieved in init.
+                # retrieve clusters and their queues
+                # might throw a NoProxyError, leading us to the end
+                self.__initQueues()
 
                 # Construct submission targets
 
@@ -355,7 +363,6 @@ class Ui:
                 if len(targets) > 0:
                     currDir = os.getcwd()
                     [jobDir, filename] = os.path.split(xrslFilename)
-                    self._arclibLock.acquire()
                     self.__lockArclib()
                     os.chdir(jobDir, force=True)
                     for xrsl in xrslSplit:
@@ -372,26 +379,35 @@ class Ui:
                     return (0, jobIds)
                 else:
                     return (-1, jobIds)
+
+        except NoProxyError, err:
+            if self._arclibLock.locked(): # should not happen!
+                                          # we come here from initQueues
+                logger.error('submit: still locked???')
+                self.__unlockArclib()
+            logger.error('Proxy error during job submission: ' + err.what())
+            os.chdir(currDir, force=True)
+            raise err
         except arclib.XrslError, message:
-                logger.error('Ui: XrslError: ' + message)
-                os.chdir(currDir, force=True)
-                self.__unlockArclib()
-                return (-1, [])
+            self.__unlockArclib()
+            logger.error('Ui: XrslError: ' + message)
+            os.chdir(currDir, force=True)
+            return (-1, [])
         except arclib.JobSubmissionError, message:
-                logger.error('Ui: JobSubmissionError: ' + message)
-                os.chdir(currDir, force=True)
-                self.__unlockArclib()
-                return (-1, [])
+            self.__unlockArclib()
+            logger.error('Ui: JobSubmissionError: ' + message)
+            os.chdir(currDir, force=True)
+            return (-1, [])
         except arclib.TargetError, message:
-                logger.error('Ui: TargetError: ' + str(message))
-                os.chdir(currDir, force=True)
-                self.__unlockArclib()
-                return (-1, [])
+            self.__unlockArclib()
+            logger.error('Ui: TargetError: ' + str(message))
+            os.chdir(currDir, force=True)
+            return (-1, [])
         except:
-                logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-                os.chdir(currDir, force=True)
-                self.__unlockArclib()
-                return (-1, [])
+            self.__unlockArclib()
+            logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
+            os.chdir(currDir, force=True)
+            return (-1, [])
 
     def AllJobStatus(self):
         """Query status of jobs in joblist.
@@ -464,8 +480,8 @@ class Ui:
                 exitCode = jobInfo.exitcode
                 sub_time = jobInfo.submission_time.__str__()
                 completed= jobInfo.completion_time.__str__()
-                cpu_time = jobInfo.used_cpu_time.__str__()
-                wall_time= jobInfo.used_wall_time.__str__()
+                # cpu_time = jobInfo.used_cpu_time.__str__()
+                # wall_time= jobInfo.used_wall_time.__str__()
 
             except arclib.FTPControlError:
                 logger.error('Failed to query job %s' % jobName)
@@ -480,8 +496,8 @@ class Ui:
             jobList[jobId]['error' ] = exitCode
             jobList[jobId]['submitted'] = sub_time
             jobList[jobId]['completed'] = completed
-            jobList[jobId]['cpu_time' ] = sub_time
-            jobList[jobId]['wall_time'] = sub_time
+            # jobList[jobId]['cpu_time' ] = sub_time
+            # jobList[jobId]['wall_time'] = sub_time
             logger.debug(' %s: %s' % (jobId, jobList[jobId]))
 
         return jobList
@@ -489,7 +505,7 @@ class Ui:
     def jobStatus(self, jobId):
         """Retrieve status of a particular job.
         
-           returns: dictionary containing keys name, status, error
+           returns: dictionary containing keys name, status, error...
            (see allJobStatus)."""
 
         logger.debug('Requesting job status for %s.' % jobId)
@@ -500,8 +516,9 @@ class Ui:
         self.__lockArclib()
         job_ = arclib.GetJobIDs([jobId])
         self.__unlockArclib()
-        jobName = [ j for j in job_ ][0]
 
+        # ugly! GetJobIDs return some crap if not found...
+        jobName = [ j for j in job_ ][0]
         if jobName == '': # job not found
             logger.debug('Job %s was not found.' % jobId)
         else:
@@ -514,11 +531,16 @@ class Ui:
                 info = arclib.GetJobInfo(jobId)
                 jobInfo['status'] = info.status
                 jobInfo['error']  = info.exitcode
-                jobInfo['submitted'] = info.submission_time
+                jobInfo['submitted'] = info.submission_time.__str__()
+                jobInfo['completed'] = info.completion_time.__str__()
+                # jobInfo['cpu_time' ] = info.used_cpu_time.__str__() 
+                # jobInfo['wall_time'] = info.used_wall_time.__str__()
+
             except arclib.ARCLibError, err:
                 logger.error('Could not query: %s' % err.what())
                 jobInfo['status'] = 'UNABLE TO RETRIEVE: ' + err.what(),
-
+                jobInfo['error'] = 255
+                jobInfo['submitted'] = 'unknown'
             self.__unlockArclib()
         logger.debug(' Returned %s' % jobInfo)
         return jobInfo
@@ -531,10 +553,12 @@ class Ui:
         @param jobID: jobId URL identifier."""
 
         logger.debug('Trying to stop job %s' % jobId )
+        success = False
 
         self.__lockArclib()
         try:
             arclib.Cancel(jobId)
+            success = True
         except arclib.FTPControlError, err:
             logger.error('Error canceling job %s: %s' % (jobId, err.what()))
             if logger.getLogLevel == 'DEBUG':
@@ -544,6 +568,7 @@ class Ui:
                 except arclib.ARCLibError, err:
                     logger.debug('No job status known')
         self.__unlockArclib()
+        return success
 
     def clean(self, jobId):
         """Removes a (finished?) job from a remote cluster.
@@ -567,10 +592,12 @@ class Ui:
         @type  jobId: string
         @param jobID: jobId URL identifier.
         @type  downloadDir: string
-        @param downloadDir: Download results to specified directory."""
+        @param downloadDir: Download results to specified directory.
+        @rtype: list
+        @return: list of downloaded files (strings)"""
 
         logger.debug('Downloading files from job %s' % jobId )
-        complete = False
+        complete = []
         currDir = os.getcwd()
 
         # jobID is a valid URL for the job directory.
@@ -592,12 +619,18 @@ class Ui:
                     raise ARCWrapperError(downloadDir 
                                           + ' exists, not a directory.')
                 os.chdir(downloadDir)
-            os.mkdir(jobBasename)
-
+            if not os.path.exists(jobBasename):
+                os.mkdir(jobBasename)
+            else:
+                if not os.path.isdir(jobBasename):
+                    raise ARCWrapperError('Cannot create job directory,'
+                                          +' existing file %s in the way.'\
+                                          % jobBasename)
+            os.chdir(jobBasename)
         except Exception, err:
             logger.error('Error creating job directory: %s' % err)
             os.chdir(currDir)
-            return complete
+            raise err
 
         logger.debug('downloading output summary file')
         self.__lockArclib()
@@ -614,28 +647,36 @@ class Ui:
 
             (tmp,tmpname) = tempfile.mkstemp(prefix='output', text=True)
             os.close(tmp)
-            ftp.Download(arclib.URL(jobInfodir + '/output'), tmpname)
+            ftp.Download(arclib.URL(jobInfoDir + '/output'), tmpname)
             lines = file(tmpname).readlines()
             os.remove(tmpname)
+            logger.debug('Downloading these files: %s' % lines)
             for f in lines:
                 try:
-                    if f.endswith('/'):
-                        ftp.DownloadDirectory(arclib.URL(jobDir + '/' + f), f)
+                    f = f.strip() # remove whitespaces around the name 
+                    if f.endswith('/'): # todo: this doznwok!
+                        ftp.DownloadDirectory(arclib.URL(jobDir + f), f[1:])
                         # ... which operates recursively
+                        complete.append( f[1:] + '/ (dir)')
                     else:
-                        ftp.Download(arclib.URL(jobDir + '/' + f), f)
-                except ARCLibError, err: 
+                        ftp.Download(arclib.URL(jobDir + f), f[1:])
+                        complete.append( f[1:] )
+                except arclib.ARCLibError, err: 
                     logger.error('Error while downloading %s: %s' % (f,err.what()))
 
-            complete = True
-
-        except ARCLibError, err:
+        except arclib.ARCLibError, err:
             logger.error('ARCLib error while downloading: %s' % err.what())
+            self.__unlockArclib()
+            os.chdir(currDir)
+            raise Exception(err.what())
         except Exception, err:
-            logger.error('Error while downloading: %s' % err.what())
+            logger.error('Error while downloading.\n %s' % err)
+            self.__unlockArclib()
+            os.chdir(currDir)
+            raise err
 
-        # unlock and return
-        self.__unlockArclib()
+        # return
+        os.chdir(currDir)
         return complete
 
     def lsJobDir(self, jobId):
@@ -661,7 +702,7 @@ class Ui:
         self.__lockArclib()
         try:
             files = ftp.ListDir(url)
-        except ARCLibError, err:
+        except arclib.ARCLibError, err:
             logger.debug('Error during file listing: %s' % err.what())
             errmsg = FileInfo()
             errmsg.filename = err.what

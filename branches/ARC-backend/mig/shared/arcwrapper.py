@@ -651,20 +651,34 @@ class Ui:
             ftp.Download(arclib.URL(jobInfoDir + '/output'), tmpname)
             lines = file(tmpname).readlines()
             os.remove(tmpname)
-            logger.debug('Downloading these files: %s' % lines)
-            for f in lines:
-                try:
-                    f = f.strip() # remove whitespaces around the name 
-                    if f.endswith('/'): # todo: this doznwok!
-                        ftp.DownloadDirectory(arclib.URL(jobDir + f), f[1:])
-                        # ... which operates recursively
-                        complete.append( f[1:] + '/ (dir)')
-                    else:
-                        ftp.Download(arclib.URL(jobDir + f), f[1:])
-                        complete.append( f[1:] )
-                except arclib.ARCLibError, err: 
-                    logger.error('Error while downloading %s: %s' % (f,err.what()))
+            files = [ l.strip().strip('/') for l in lines ]
 
+            # also get the entire directory listing from the server
+            dir = ftp.ListDir(arclib.URL(jobDir),True)
+            basenames = [os.path.basename(x.filename) for x in dir ]
+
+            if '' in files:
+                logger.debug('downloading _all_ files')
+                # TODO for files which are already there?
+                ftp.DownloadDirectory(arclib.URL(jobDir),'.')
+                complete = basenames
+            else:
+                for f in files:
+                    if f in basenames:
+                        # we should download this one
+                        try:
+                            if x.isdir:
+                                logger.debug('DownloadDir %s' % f )
+                                ftp.DownloadDirectory(arclib.URL(jobDir+f), f)
+                                # ... which operates recursively
+                                complete.append( f + '/ (dir)')
+                            else:
+                                logger.debug('Download %s' % f )
+                                ftp.Download(arclib.URL(jobDir + f), f)
+                                complete.append( f )
+                        except arclib.ARCLibError, err: 
+                            logger.error('Error downloading %s: %s' \
+                                         % (f,err.what()))
         except arclib.ARCLibError, err:
             logger.error('ARCLib error while downloading: %s' % err.what())
             self.__unlockArclib()
@@ -677,6 +691,7 @@ class Ui:
             raise err
 
         # return
+        logger.debug(string.join(['downloaded:'] + complete, ' '))
         os.chdir(currDir)
         return complete
 

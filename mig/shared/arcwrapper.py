@@ -196,7 +196,9 @@ Please specify a proxy file to upload:<br>
 Such a proxy file can be created using the command-line tool 
 voms-proxy-init, and can be found in /tmp/x509up_u&lt;your UID&gt;.<br>
 <input type="file" name="fileupload" size="40">
-<input type="hidden" name="path" value="proxy.pem">
+<input type="hidden" name="path" value=""" + \
+                                     '"' + Ui.proxy_name + '"' + \
+                                     """>
 <input type="hidden" name="restrict" value="true">
 &nbsp;
 <input type="submit" value="Send file">
@@ -215,7 +217,7 @@ class Ui:
     benedict =\
       arclib.URL('ldap://benedict.grid.aau.dk:2135/o=grid/mds-vo-name=local')
     # hard-wired: expected proxy name
-    proxy_name = 'proxy.pem'
+    proxy_name = '.proxy.pem'
 
     def __init__(self, userdir):
         """Class constructor"""

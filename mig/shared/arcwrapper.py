@@ -47,11 +47,12 @@ try:
 except:
     logger.error('problems importing arclib... trying workaround')
     try:
-        sys.path.append('/opt/nordugrid/lib/python2.4/site-packages')
+        logger.debug('Current sys.path is %s' % sys.path )
+        sys.path.append(os.environ['NORDUGRID_LOCATION'] 
+                        + '/lib/python2.4/site-packages')
         import arclib
     except:
         logger.error('arclib not found. Aborting whole execution.')
-        logger.error('sys.path was %s' % sys.path)
         sys.exit(255)
 
 # (trivially inheriting) exception class of our own
@@ -87,9 +88,9 @@ class Proxy(arclib.Certificate):
         except arclib.CertificateError, err:
             raise NoProxyError(err.what())
         # just testing...
-        logger.debug('Proxy Certificate %s from %s\n' \
+        logger.debug('Proxy Certificate %s from %s' \
                      % (self.GetSN(), self.getFilename()))
-        logger.debug('time left in seconds: %d\n' % self.getTimeleft())
+        logger.debug('time left in seconds: %d' % self.getTimeleft())
 
     def getFilename(self):
         """Return the proxy filename."""

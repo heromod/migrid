@@ -3,7 +3,7 @@
 #
 # --- BEGIN_HEADER ---
 #
-# upload_proxy - upload a proxy file, then redirect to dashboard
+# downloadjob.py - download output files for a particular job_id
 # Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.

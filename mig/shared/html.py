@@ -101,7 +101,7 @@ def get_cgi_html_header(
             {'class': 'settings', 'url': 'settings.py', 'title'
              : 'Settings'},
 #            {'class': 'shell', 'url': 'shell.py', 'title': 'Shell'},
-             {'class': 'settings', 'url': 'upload_proxy.py', 'title': 'Proxy'},
+             {'class': 'settings', 'url': 'uploadproxy.py', 'title': 'Proxy'},
             )
 
         menu_lines = render_menu('navmenu', menu_items, current_page)

@@ -25,16 +25,6 @@
 # -- END_HEADER ---
 #
 
-"""Script for uploading a proxy to a specific location"""
-
-import cgi
-import cgitb
-cgitb.enable()
-
-from shared.cgiscriptstub import run_cgi_script
-
-# the functionality we implement... could go into shared/functionality/
-
 import os
 from shared.init import initialize_main_variables
 from shared.functional import validate_input_and_cert, REJECT_UNSET
@@ -51,7 +41,7 @@ def signature():
 def upload(client_id, user_args_dict):
     """Main function used by front end"""
     (configuration, logger, output_objects, op_name) = \
-        initialize_main_variables()
+        initialize_main_variables(op_header=False)
     client_dir = client_id_dir(client_id)
     defaults = signature()[1]
     (validate_status, accepted) = validate_input_and_cert(
@@ -98,7 +88,3 @@ def upload(client_id, user_args_dict):
     output_objects = output_objects + arc.askProxy()
 
     return (output_objects, returnvalues.OK)
-
-# the call
-run_cgi_script(upload)
-

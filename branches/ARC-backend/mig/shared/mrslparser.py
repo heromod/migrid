@@ -216,6 +216,31 @@ def parse(
 
         return (True, '')
 
+#sketch of how to proceed:
+#- translate mRSL to xRSL (no checks, already checked everything above)
+#- submit job to ARC resource (using the arcwrapper interface)
+#- return ARC jobID
+#In the final version later, the MiG server should poll all submitted 
+#jobs regularly and upon request, and download results automatically.
+#Most useful would be to save the assigned ARC jobID in the mRSL structure.
+# - save ARC jobID in pickled mRSL file
+# - announce job for polling by a separate thread (which needs the user ID,
+#   stops when results are retrieved/job is cleaned, or when proxy expires)
+#MiG operates on the mRSL, so we will keep it as a job status file for 
+#that architecture. 
+
+    (xrsl,script,name) = mrsltoxrsl.translate(replaced_dict)
+
+    logger.debug('XRSL:\n%s\nScript (%s):\n%s\n)' % (xrsl,name,script))
+
+    # TODO:
+    # write <script> into file named <name>
+    # submit <xrsl> using arclib / arcwrapper
+
+    return (False,'Submission to ARC resource not implemented')
+
+    # below: unreachable original code
+
     # tell 'grid_script'
 
     message = 'USERJOBFILE %s/%s\n' % (client_dir, job_id)

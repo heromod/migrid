@@ -86,9 +86,9 @@ def get_cgi_html_header(
         menu_items = (
             {'class': 'dashboard', 'url': 'dashboard.py', 'title'
              : 'Dashboard'},
-#            {'class': 'submitjob', 'url': 'submitjob.py', 'title'
-#             : 'Submit Job'},
-#            {'class': 'files', 'url': 'ls.py', 'title': 'Files'},
+            {'class': 'submitjob', 'url': 'submitjob.py', 'title'
+             : 'Submit Job'},
+            {'class': 'files', 'url': 'ls.py', 'title': 'Files'},
             {'class': 'jobs', 'url': 'managejobs.py', 'title': 'Jobs'},
 #            {'class': 'vgrids', 'url': 'vgridadmin.py', 'title'
 #             : 'VGrids'},

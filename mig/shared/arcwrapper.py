@@ -276,7 +276,7 @@ class Ui:
             self._queues = []
             for cl in self._clusters:
                 qs = arclib.GetQueueInfo(cl)
-                self._queues = self._queues + qs
+                self._queues = self._queues + list(qs)
             self.__unlockArclib()
             logger.debug('ARC Init, discovered queues are')
             for q in self._queues:
@@ -322,7 +322,7 @@ class Ui:
         """ returns the proxy interface used"""
         return self._proxy
 
-    def submit(self, xrslFilename, jobName=''):
+    def submitFile(self, xrslFilename, jobName=''):
         """Submit xrsl file as job to available ARC resources.
         
         @type  xrslFilename: string
@@ -332,7 +332,6 @@ class Ui:
         code of the ARC command, jobIds is a list of jobID strings."""
 
         logger.debug( 'Submitting a job from file %s...' % xrslFilename )
-        currDir = ''
         try:
 
                 # Convert XRSL file into a string
@@ -341,9 +340,23 @@ class Ui:
                 xrslString = f.read()
                 f.close()
                 xrslAll = arclib.Xrsl(xrslString)
+                return (submit(self, xrslAll, jobName))
+        except arclib.XrslError, err:
+            logger.error('Ui: XrslError: ' + message)
+            return (-1, [])
 
-                # Check for multiple xrsl file
+    def submit(self, xrslAll, jobName=''):
+        """Submit xrsl object as job to available ARC resources.
+        
+        @type  xrslAll: arclib.Xrsl
+        @param xrslAll: job description in XRSL (arclib object).
+        @rtype list:
+        @return: list containing [resultVal, jobIds] resultVal is the return
+        code of the ARC command, jobIds is a list of jobID strings."""
 
+        currDir = ''
+        try:
+                # Check for multiple xrsl
                 xrslSplit = xrslAll.SplitMulti()
 
                 # retrieve clusters and their queues
@@ -367,7 +380,7 @@ class Ui:
                     currDir = os.getcwd()
                     [jobDir, filename] = os.path.split(xrslFilename)
                     self.__lockArclib()
-                    os.chdir(jobDir, force=True)
+                    os.chdir(jobDir)
                     for xrsl in xrslSplit:
                         jobId = arclib.SubmitJob(xrsl, targets)
                         jobIds.append(jobId)
@@ -377,37 +390,40 @@ class Ui:
                                 ).GetSingleValue()
 
                         arclib.AddJobID(jobId, jobName)
-                    os.chdir(currDir, force=True)
+                    os.chdir(currDir)
                     self.__unlockArclib()
                     return (0, jobIds)
                 else:
                     return (-1, jobIds)
 
         except NoProxyError, err:
+            logger.error('Proxy error during job submission: ' + err.what())
             if self._arclibLock.locked(): # should not happen!
                                           # we come here from initQueues
                 logger.error('submit: still locked???')
                 self.__unlockArclib()
-            logger.error('Proxy error during job submission: ' + err.what())
             os.chdir(currDir, force=True)
             raise err
         except arclib.XrslError, message:
-            self.__unlockArclib()
             logger.error('Ui: XrslError: ' + message)
+            if self._arclibLock.locked(): # should not happen!
+                self.__unlockArclib()
             os.chdir(currDir, force=True)
             return (-1, [])
         except arclib.JobSubmissionError, message:
-            self.__unlockArclib()
             logger.error('Ui: JobSubmissionError: ' + message)
+            self.__unlockArclib()
             os.chdir(currDir, force=True)
             return (-1, [])
         except arclib.TargetError, message:
-            self.__unlockArclib()
             logger.error('Ui: TargetError: ' + str(message))
+            if self._arclibLock.locked(): # should not happen!
+                self.__unlockArclib()
             os.chdir(currDir, force=True)
             return (-1, [])
         except:
-            self.__unlockArclib()
+            if self._arclibLock.locked(): # should not happen!
+                self.__unlockArclib()
             logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
             os.chdir(currDir, force=True)
             return (-1, [])

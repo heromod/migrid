@@ -32,11 +32,13 @@ import shared.mrslkeywords as mrslkeywords
 import shared.parser as parser
 from shared.refunctions import is_runtime_environment
 from shared.vgrid import user_allowed_vgrids, any_vgrid, default_vgrid
-from shared.fileio import unpickle, pickle, send_message_to_grid_script
+from shared.fileio import \
+        unpickle, pickle, send_message_to_grid_script, write_file
 from shared.conf import get_configuration_object
 from shared.useradm import client_id_dir
 
 import shared.mrsltoxrsl as mrsltoxrsl
+import shared.arcwrapper as arc
 
 def parse(
     localfile_spaces,
@@ -230,16 +232,29 @@ def parse(
 #MiG operates on the mRSL, so we will keep it as a job status file for 
 #that architecture. 
 
+    # translate
     (xrsl,script,name) = mrsltoxrsl.translate(replaced_dict)
 
-    logger.debug('translation done, stopping here')
+    user_home = os.path.join(configuration.user_home, client_dir)
 
-    # TODO:
-    # write <script> into file named <name>
-    # submit <xrsl> using arclib / arcwrapper
+    # write script (to a tmp dir in user home)
+    script_path = os.path.abspath(os.path.join(user_home, 'tmp', name))
+    write_file(script, script_path, logger)
 
-    return (False,'Submission to ARC resource not implemented')
+    os.chdir(os.path.join(user_home, 'tmp'))
+    try:
+        session = arc.Ui(user_home)
+        (success, arc_job_ids) = session.submit(xrsl)
+        if success == 0:
+            return (True, '')
+        else:
+            return (False, 'Could not submit.')
+    except arc.ARCWrapperError, err:
+        return (False, err.what())
+    except Exception, err:
+        return (False, err.__str__())
 
+###################################################################        
     # below: unreachable original code
 
     # tell 'grid_script'

@@ -36,6 +36,7 @@ from shared.fileio import unpickle, pickle, send_message_to_grid_script
 from shared.conf import get_configuration_object
 from shared.useradm import client_id_dir
 
+import shared.mrsltoxrsl as mrsltoxrsl
 
 def parse(
     localfile_spaces,
@@ -231,7 +232,7 @@ def parse(
 
     (xrsl,script,name) = mrsltoxrsl.translate(replaced_dict)
 
-    logger.debug('XRSL:\n%s\nScript (%s):\n%s\n)' % (xrsl,name,script))
+    logger.debug('translation done, stopping here')
 
     # TODO:
     # write <script> into file named <name>

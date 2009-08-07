@@ -25,6 +25,7 @@
 
 import string
 import random
+import math
 
 # MiG utilities:
 from shared.conf import get_configuration_object
@@ -54,32 +55,43 @@ def translate(mrsl_dict, name = None):
        
        Returns arclib.Xrsl object.
        Throws exception if errors in the xRSL generation occur."""
+       
+    logger.debug('to translate:\n%s' % mrsl_dict)
+    
     try:
         # every xrsl-specified job is a conjunction at the top level
         xrsl = arclib.Xrsl(arclib.operator_and)
 
-        if mrsl_dict.hasKey('JOB_ID'):
+        if 'JOB_ID' in mrsl_dict:
             j_name = mrsl_dict['JOB_ID']
         else:
             # random string. should not happen anyway...
             j_name = ''.join(random.choice(string.letters) \
                              for i in xrange(12))
+#        j_name = mrsl_dict.get('JOB_ID', 
+#                               ''.join(random.choice(string.letters)  \
+#                                       for i in xrange(12)))
 
         # use JOBID as ARC jobname to avoid presenting only ARC IDs
         addRel(xrsl,'jobname', 
-               ''.join(mrsl_dict.get('JOBNAME',''),'(',j_name,')'))
+               ''.join([mrsl_dict.get('JOBNAME',''),'(',j_name,')']))
 
         # inputfiles + executables, outputfiles
         # make double lists, 2nd part perhaps empty
         # output files, always including stdout
-        if mrsl_dict.hasKey('OUTPUTFILES'):
-            outfiles = map(file_mapping, mrsl_dict['OUTPUTFILES'])
-        else:
-            outfiles = []
-        addRel(xrsl, 'stdout', '.'.join(j_name,'stdout'))
-        outfiles.append(['.'.join(j_name,'stdout'),''])
-        addRel(xrsl, 'stderr', '.'.join(j_name,'stderr'))
-        outfiles.append(['.'.join(j_name,'stderr'),''])
+        tmpoutfiles = map(file_mapping, mrsl_dict.get('OUTPUTFILES',[]))
+        outfiles = []
+        for [f,target] in tmpoutfiles:
+            if -1 == target.find('://'): # not remote target, should copy
+                target = '' # means: keep for manual fetch. 
+                            # TODO This is not correct, we should respect
+                            # the desired local name given by the user. 
+                            # TODO: insert MiG server URL (automatic download)
+            outfiles.append([f,target])
+        addRel(xrsl, 'stdout', '.'.join([j_name,'stdout']))
+        outfiles.append(['.'.join([j_name,'stdout']),''])
+        addRel(xrsl, 'stderr', '.'.join([j_name,'stderr']))
+        outfiles.append(['.'.join([j_name,'stderr']),''])
         addRel(xrsl, 'outputfiles', outfiles)
         # do not merge stdout and stderr
         addRel(xrsl, 'join', 'no')
@@ -90,36 +102,32 @@ def translate(mrsl_dict, name = None):
         # and to have a certain name which we return.
         addRel(xrsl,'executable','/bin/sh')
         # HEADS UP: this is the script name we wire in.
-        script_name = '.'.join(j_name,'sh')
+        script_name = '.'.join([j_name,'sh'])
         addRel(xrsl,'arguments', script_name)
 
         # executable input files, always including the execute script
-        if mrsl_dict.hasKey('EXECUTABLES'):
-            execfiles = map(file_mapping, mrsl_dict['EXECUTABLES'])
-        else:
-            execfiles = []
+        execfiles = map(file_mapping, mrsl_dict.get('EXECUTABLES',[]))
         # HEADS UP: the script name again!
         execfiles.append([script_name,''])
 
         # (non-executable) input files
-        if mrsl_dict.hasKey('INPUTFILES'):
-            infiles = map(file_mapping, mrsl_dict['INPUTFILES'])
-        else:
-            infiles = []
+        infiles = map(file_mapping, mrsl_dict.get('INPUTFILES',[]))
 
-        addRel(xrsl, 'inputfiles', execfiles + infiles)
+        # both execfiles and infiles are inputfiles for ARC
+        addRel(xrsl, 'inputfiles', map(flip_for_input, execfiles + infiles))
 
+        # execfiles are made executable 
+        # (specified as the remote name, relative to the session dir)
         def fst(list):
             return list[0]
         addRel(xrsl, 'executables', map(fst, execfiles))
-
 
         # more stuff...
 
         # requested runtime, given in minutes in (user) xrsl ...
         time = mrsl_dict.get('CPUTIME')
         if time:
-            addRel(xrsl, 'cputime', str(float(time)/60))
+            addRel(xrsl, 'cputime', str(int(math.ceil(float(time)/60))))
 
         # simply copy the values for these:
         copy_items = ['MEMORY', 'DISK', 'NODECOUNT'] 
@@ -127,42 +135,47 @@ def translate(mrsl_dict, name = None):
         # NB: we have to ignore CPUCOUNT, not supported by ARC xrsl
 
         for x in copy_items: # we ignore the ones which are not there
-            if mrsl_dict.hasKey(x):
+            if x in mrsl_dict:
                 addRel(xrsl,xrsl_name[x],mrsl_dict[x])
                 # and these are all single values
 
-        if mrsl_dict.hasKey('ARCHITECTURE'):
+        if 'ARCHITECTURE' in mrsl_dict:
             addRel(xrsl,'architecture',
                    translate_arch(mrsl_dict['ARCHITECTURE']))
 
-        if mrsl_dict.hasKey('ENVIRONMENT'):
-            var_val = []
-            for definition in mrsl_dict['ENVIRONMENT']:
-                vv = definition.strip().split('=')
-                var_val.append(vv.strip())
-            addRel(xrsl,'environment',var_val)
+        if 'ENVIRONMENT' in mrsl_dict:
 
-        if mrsl_dict.hasKey('RUNTIMEENVIRONMENT'):
+# these have already been mangled into pairs (name,value) before
+#            var_val = []
+#            for definition in mrsl_dict['ENVIRONMENT']:
+#                vv = definition.strip().split('=')
+#                var_val.append(vv.strip())
+#            addRel(xrsl,'environment',var_val)
+            
+            addRel(xrsl,'environment',map(list,mrsl_dict['ENVIRONMENT']))
+            
+        if 'RUNTIMEENVIRONMENT' in mrsl_dict:
             for line in mrsl_dict['RUNTIMEENVIRONMENT']:
-                addRel(xrsl,'runtimeenvironment', line.strip())
+                addRel(xrsl,'runTimeEnvironment', line.strip())
 
-        if mrsl_dict.hasKey('NOTIFY'):
+        if 'NOTIFY' in mrsl_dict:
             addresses = []
-            for line in filter(is_mail, mrsl_dict['NOTIFY'])[0:2]: # max 3
+            for line in filter(is_mail, mrsl_dict['NOTIFY'])[:3]: # max 3
                 # remove whites before, then "email:" prefix, then strip
                 address = line.lstrip()[6:].strip()
                 if address != 'SETTINGS':
                     addresses.append(address)
 #                else:
+#                    # this should be replaced already, but...
 #                    # FIXME: get it from the settings :-P
 #                    addresses.append('*FROM THE SETTINGS*') 
             if addresses:
                 addRel(xrsl,'notify', 'ec ' + ' '.join(addresses))
 
-        logger.debug('translated: %s' % xrsl)
+        logger.debug('XRSL:\n%s\nScript (%s):\n%s\n)' % (xrsl,script_name,script))
     except arclib.XrslError, err:
         logger.error( 'Error generating Xrsl: %s' % err )
-    return (xrsl,script,'.'.join(j_name,'sh'))
+    return (xrsl,script,script_name)
 
 # helper functions and constants used:
 
@@ -170,30 +183,41 @@ def translate(mrsl_dict, name = None):
 # and is polymorphic in a: a = String, a = List(String), a = List(List(String))
 # the C version of XrslRelation is... so we emulate it here:
 def write_pair(name, values):
-    if instanceof(values,list):
-        if instanceof(values[0],list):
+    if isinstance(values,list):
+        if isinstance(values[0],list):
             con = arclib.XrslRelationDoubleList
+            val = values # should cast all to strings, but only used with them
         else:
             con = arclib.XrslRelationList
+            val = values # should cast all to strings, but only used with them
     else:
         con = arclib.XrslRelation
-    return con(name,arclib.operator_eq,values)
+        val = values.__str__()
+    return con(name,arclib.operator_eq,val)
 
-# used all the time...
+# used all the time... shortcut.
 def addRel(xrsl,name,values):
+    # sometimes we receive empty stuff from the caller. 
+    # No point writing it out at all.
+    if isinstance(values,list) and len(values) == 0:
+        return
+    if values == '':
+        return
     xrsl.AddRelation(write_pair(name,values))
 
 # architectures
-architectures = [{'X86':'i686', 'AMD64':'x86-64', 'IA64':'ia64', 
+architectures = {'X86':'i686', 'AMD64':'x86-64', 'IA64':'ia64', 
                   'SPARC':'sparc64', 'SPARC64':'sparc64', 
-                  'ITANIUM':'???ia64???', 
+                  # 'ITANIUM':'???ia64???', 
                   'SUN4U':'sun4u', 'SPARC-T1':'sparc64', 'SPARC-T2':'sparc64', 
-                  'PS3':'??unknown??', 
-                  'CELL':'cell'}]
+                  # 'PS3':'??unknown??', 
+                  'CELL':'cell'}
 def translate_arch(mig_arch):
 
-    if architectures.hasKey(mig_arch):
+    if mig_arch in architectures:
         return architectures[mig_arch]
+    else:
+        return ''
 
 def is_mail(str):
     return str.lstrip().startswith('email:')
@@ -214,6 +238,11 @@ def file_mapping(line):
         remote = parts[1]
     return [local,remote]
 
+def flip_for_input(list):
+    if list[1] == '':
+        return[list[0],'']
+    else:   
+        return [list[1],list[0]]
 
 if __name__ == '__main__':
     print len(sys.argv)

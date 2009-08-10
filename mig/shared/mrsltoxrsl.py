@@ -97,7 +97,9 @@ def translate(mrsl_dict, name = None):
         addRel(xrsl, 'join', 'no')
         
         # what we want to do: EXECUTE (should be there)
-        script = mrsl_dict['EXECUTE']
+        scriptlines = mrsl_dict['EXECUTE']
+        script = '\n'.join(['# generated script from mRSL EXECUTE'] 
+                           + scriptlines)
         # the script is expected to be present as an input file,
         # and to have a certain name which we return.
         addRel(xrsl,'executable','/bin/sh')

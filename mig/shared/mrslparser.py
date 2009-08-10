@@ -251,6 +251,8 @@ def parse(
             return (False, 'Could not submit.')
     except arc.ARCWrapperError, err:
         return (False, err.what())
+    except arc.NoProxyError, err:
+        return (False, 'No Proxy found: %s' % err.what())
     except Exception, err:
         return (False, err.__str__())
 

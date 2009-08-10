@@ -340,9 +340,17 @@ class Ui:
                 xrslString = f.read()
                 f.close()
                 xrslAll = arclib.Xrsl(xrslString)
-                return (submit(self, xrslAll, jobName))
+
+                currDir = os.getcwd()
+                [jobDir, filename] = os.path.split(xrslFilename)
+                os.chdir(jobDir)
+
+                result = (submit(self, xrslAll, jobName))
+                os.chdir(currDir)
+                return result
         except arclib.XrslError, err:
             logger.error('Ui: XrslError: ' + message)
+            os.chdir(currDir)
             return (-1, [])
 
     def submit(self, xrslAll, jobName=''):
@@ -354,7 +362,6 @@ class Ui:
         @return: list containing [resultVal, jobIds] resultVal is the return
         code of the ARC command, jobIds is a list of jobID strings."""
 
-        currDir = ''
         try:
                 # Check for multiple xrsl
                 xrslSplit = xrslAll.SplitMulti()
@@ -377,10 +384,7 @@ class Ui:
 
                 logger.debug('Ui: Submitting job  .')
                 if len(targets) > 0:
-                    currDir = os.getcwd()
-                    [jobDir, filename] = os.path.split(xrslFilename)
                     self.__lockArclib()
-                    os.chdir(jobDir)
                     for xrsl in xrslSplit:
                         jobId = arclib.SubmitJob(xrsl, targets)
                         jobIds.append(jobId)
@@ -402,31 +406,26 @@ class Ui:
                                           # we come here from initQueues
                 logger.error('submit: still locked???')
                 self.__unlockArclib()
-            os.chdir(currDir, force=True)
             raise err
         except arclib.XrslError, message:
             logger.error('Ui: XrslError: ' + message)
             if self._arclibLock.locked(): # should not happen!
                 self.__unlockArclib()
-            os.chdir(currDir, force=True)
-            return (-1, [])
+            raise message
         except arclib.JobSubmissionError, message:
             logger.error('Ui: JobSubmissionError: ' + message)
             self.__unlockArclib()
-            os.chdir(currDir, force=True)
-            return (-1, [])
+            raise message
         except arclib.TargetError, message:
             logger.error('Ui: TargetError: ' + str(message))
-            if self._arclibLock.locked(): # should not happen!
+            if self._arclibLock.locked(): # should not be...
                 self.__unlockArclib()
-            os.chdir(currDir, force=True)
-            return (-1, [])
-        except:
-            if self._arclibLock.locked(): # should not happen!
+            raise message
+        except Exception, err:
+            if self._arclibLock.locked(): # ...
                 self.__unlockArclib()
-            logger.error('Unexpected error: ' + str(sys.exc_info()[0]))
-            os.chdir(currDir, force=True)
-            return (-1, [])
+            logger.error('Unexpected error: %s' % err )
+            raise err
 
     def AllJobStatus(self):
         """Query status of jobs in joblist.

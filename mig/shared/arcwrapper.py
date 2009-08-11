@@ -322,6 +322,13 @@ class Ui:
         """ returns the proxy interface used"""
         return self._proxy
 
+    def getQueues(self):
+        """ returns the queues we discovered for the clusters.
+            TODO: should only return _allowed_ queues 
+            (__initQueues to change).""" 
+        self.__initQueues()
+        return self._queues
+    
     def submitFile(self, xrslFilename, jobName=''):
         """Submit xrsl file as job to available ARC resources.
         

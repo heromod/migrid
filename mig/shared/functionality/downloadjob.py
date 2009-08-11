@@ -90,7 +90,7 @@ def download(client_id, user_args_dict):
     else:
         output_objects.append(\
             {'object_type':'text',
-             'text': 'Files downloaded: %s'})
+             'text': 'Files downloaded:'})
 
         for f in files:
             output_objects.append(\

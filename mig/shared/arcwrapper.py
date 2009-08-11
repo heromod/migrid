@@ -692,12 +692,13 @@ class Ui:
                         try:
                             if x.isdir:
                                 logger.debug('DownloadDir %s' % f )
-                                ftp.DownloadDirectory(arclib.URL(jobDir+f), f)
+                                ftp.DownloadDirectory(\
+                                    arclib.URL(jobDir + '/' + f), f)
                                 # ... which operates recursively
                                 complete.append( f + '/ (dir)')
                             else:
                                 logger.debug('Download %s' % f )
-                                ftp.Download(arclib.URL(jobDir + f), f)
+                                ftp.Download(arclib.URL(jobDir + '/' + f), f)
                                 complete.append( f )
                         except arclib.ARCLibError, err: 
                             logger.error('Error downloading %s: %s' \

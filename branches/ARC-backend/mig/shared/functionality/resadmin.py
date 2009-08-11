@@ -43,14 +43,14 @@ from shared.fileio import unpickle
 from shared.init import initialize_main_variables
 from shared.findtype import is_owner
 from shared.functional import validate_input_and_cert
-
+import shared.arcwrapper as arc
+from shared.useradm import client_id_dir
 
 def signature():
     """Signature of the main function"""
 
     defaults = {'benchmark': 'false'}
     return ['html_form', defaults]
-
 
 def display_resource(
     resourcename,
@@ -339,6 +339,51 @@ from the certificate.<br>
     return html
 
 
+def display_arc_queue(queue):
+    """Format and print information about a queue to submit to.
+    """
+
+    html = '<p><a name="%s"></a>\n' % (q_anchor(queue))
+    html += \
+    '<table class=resources><tr class=title><td colspan=2>' + \
+    '<h3>%s</h3></td>' % q_displayname(queue)
+    html += '<td>Status: %s</td></tr>\n' % queue.status
+
+    def row(col1, col2=None, col3=None):
+        if col2 and col3:
+            return ('<tr><td>%s<td>%s<td>%s</tr>\n' % (col1, col2, col3))
+        elif col2:
+            return ('<tr><td>%s<td colspan=2>%s</tr>\n' % (col1, col2))
+        else:
+            return ('<tr><td colspan=3>%s</tr>\n' % (col1))
+
+    html += \
+    row('Architecture: %s' % queue.cluster.architecture,
+        'Running Jobs: %s' % queue.grid_running,
+        'Max. runnable jobs: %s' % queue.max_running)
+    html += \
+    row('Total CPUs: %s' %  queue.total_cpus, 
+        'Queued Jobs:  %s' % queue.grid_queued,
+        'Max. time per job: %s sec.' % queue.max_wall_time)
+    html += \
+    row('%s' % queue.node_cpu,
+        '(%s)' % queue.mds_validfrom,' ')
+    html += \
+    row('Node Memory: %s' % queue.node_memory,' ', ' ')
+    html += \
+    row('<b>Available runtime env.s:</b> ' +
+        ', '.join([re.__str__()
+                   for re in queue.cluster.runtime_environments]))
+
+    html += '</table></p>'
+    return html
+
+# shared functions to name things:
+def q_anchor(q):
+    return ('__'.join([q.name,q.cluster.hostname]))
+def q_displayname(q):
+    return ('%s on %s' % (q.name, q.cluster.alias))
+
 def main(client_id, user_arguments_dict):
     """Main function used by front end"""
 
@@ -359,6 +404,48 @@ def main(client_id, user_arguments_dict):
     benchmark = accepted['benchmark'][-1].lower() != 'false'
     start_time = time.time()
 
+    user_dir = os.path.join(configuration.user_home, 
+                            client_id_dir(client_id))
+
+    output_objects.append({'object_type': 'title', 'text'
+                          : 'ARC Resource Display'})
+    output_objects.append({'object_type': 'header', 'text'
+                          : 'ARC Resources available'})
+    try:
+        session = arc.Ui(user_dir)
+        queues = session.getQueues()
+
+    except NoProxyError, err:
+        output_objects.append({'object_type': 'error_text', 'text'
+                              : 'Error while retrieving: %s' % err.what()
+                              })
+        output_objects += arc.askProxy()
+        return (output_objects, returnvalues.ERROR)
+    except Exception, err:
+        logger.error('Exception while retrieving ARC resources\n%s' % err) 
+        output_objects.append({'object_type':'warning', 'text'
+                               :'Could not retrieve information: %s' % err})
+        return(output_objects, returnvalues.ERROR)
+        
+    output_objects.append({'object_type': 'sectionheader', 'text'
+                              : 'Job queues discovered'})
+
+    for q in queues:
+        output_objects.append({'object_type': 'text', 'text' 
+                               :'<p><a href="#%s">%s</a>' % \
+                               (q_anchor(q),q_displayname(q))})
+
+    output_objects.append({'object_type': 'sectionheader', 'text'
+                              : 'Queue details'})
+    for q in queues:
+        output_objects.append({'object_type': 'text', 'text' 
+                               : display_arc_queue(q) })
+
+    return ( output_objects, returnvalues.OK )
+
+
+##################################### OLD CODE
+    
     (re_stat, re_list) = list_runtime_environments(configuration)
     if not re_stat:
         output_objects.append({'object_type': 'error_text', 'text'

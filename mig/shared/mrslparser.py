@@ -238,13 +238,14 @@ def parse(
     user_home = os.path.join(configuration.user_home, client_dir)
 
     # write script (to a tmp dir in user home)
-    script_path = os.path.abspath(os.path.join(user_home, 'tmp', name))
+    script_path = os.path.abspath(os.path.join(user_home, name))
     write_file(script, script_path, logger)
 
-    os.chdir(os.path.join(user_home, 'tmp'))
+    os.chdir(user_home)
     try:
         session = arc.Ui(user_home)
         (success, arc_job_ids) = session.submit(xrsl)
+        os.remove(name)
         if success == 0:
             return (True, '')
         else:

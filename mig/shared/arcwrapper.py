@@ -374,7 +374,7 @@ class Ui:
 
                 logger.debug('Ui: Constructing targets:')
                 allTargets = arclib.ConstructTargets(self._queues, xrslAll)
-                targets = PerformStandardBrokering(allTargets)
+                targets = arclib.PerformStandardBrokering(allTargets)
                 for t in targets:
                     logger.debug('\t %s' % t)
 
@@ -394,7 +394,6 @@ class Ui:
                                 ).GetSingleValue()
 
                         arclib.AddJobID(jobId, jobName)
-                    os.chdir(currDir)
                     self.__unlockArclib()
                     return (0, jobIds)
                 else:

@@ -356,7 +356,7 @@ class Ui:
                 os.chdir(currDir)
                 return result
         except arclib.XrslError, err:
-            logger.error('Ui: XrslError: ' + message)
+            logger.error('Ui: XrslError: ' + message.what())
             os.chdir(currDir)
             return (-1, [])
 
@@ -414,12 +414,12 @@ class Ui:
                 self.__unlockArclib()
             raise err
         except arclib.XrslError, message:
-            logger.error('Ui: XrslError: ' + message)
+            logger.error('Ui: XrslError: ' + message.what())
             if self._arclibLock.locked(): # should not happen!
                 self.__unlockArclib()
             raise message
         except arclib.JobSubmissionError, message:
-            logger.error('Ui: JobSubmissionError: ' + message)
+            logger.error('Ui: JobSubmissionError: ' + message.what())
             self.__unlockArclib()
             raise message
         except arclib.TargetError, message:

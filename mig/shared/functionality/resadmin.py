@@ -415,7 +415,7 @@ def main(client_id, user_arguments_dict):
         session = arc.Ui(user_dir)
         queues = session.getQueues()
 
-    except NoProxyError, err:
+    except arc.NoProxyError, err:
         output_objects.append({'object_type': 'error_text', 'text'
                               : 'Error while retrieving: %s' % err.what()
                               })

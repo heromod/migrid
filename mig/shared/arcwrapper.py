@@ -255,13 +255,13 @@ class Ui:
 
         except NoProxyError, err:
             logger.error('Proxy error: %s' % err.what())
-            raise NoProxyError(err.what())
+            raise err
         except arclib.ARCLibError, err:
             logger.error('Cannot initialise: %s' % err.what())
-            raise ARCWrapperError(err.what())
+            raise err
         except Exception, other:
             logger.error('Unexpected error during initialisation.\n %s' % other)
-            raise ARCWrapperError(err.what())
+            raise ARCWrapperError(other.__str__())
 
     def __initQueues(self):
         """ Initialises possible queues for a job submission."""
@@ -467,7 +467,15 @@ class Ui:
 # GetJobIDs returns a multimap, mapping job names to JobIDs...
         self.__lockArclib()
         try:
-            jobIds = arclib.GetJobIDs()
+            # ATTENTION: GetJobIDs does not throw an exception 
+            # if the .ngjobs file is not found. Instead, it 
+            # only complains on stderr and returns {}.
+            if not os.path.isfile( \
+                        os.path.join(self._userdir, '.ngjobs')):
+                logger.debug('No Job file found, skipping')
+                return jobList
+            else: 
+                jobIds = arclib.GetJobIDs()
         except Exception, err:
             logger.error('could not get job IDs: %s', err)
             self.__unlockArclib()

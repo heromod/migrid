@@ -134,7 +134,7 @@ def main(client_id, user_arguments_dict):
             logger.debug(jobvalues)
         else:
             jobs = [] # for now, should be GetJobIDs => filter by match 
-            jobvalues = []
+            jobvalues = {}
             for job in jobs:
                 jobval = session_Ui.jobStatus(job)
                 jobvalues[job] = jobval
@@ -154,10 +154,10 @@ def main(client_id, user_arguments_dict):
 
     # format output, iterating over jobvalues:
     
-    if not jobvalues:
+    if len(jobvalues) == 0 :
             output_objects.append({'object_type': 'error_text', 'text'
                                   : '%s: You do not have any matching job IDs!'
-                                   % pattern})
+                                   % patterns})
             status = returnvalues.CLIENT_ERROR
     
     if max_jobs < len(jobvalues):

@@ -15,7 +15,10 @@ some linux command line tasks.
 
 
 = SSH Access =
-For security reasons, the MiG servers require ssh logins to use public key encryption instead of passwords only. When your request an account on a development server, please provide a ssh public key. If you haven't got a ssh key that you would like to use for this purpose you can simply create a new one:
+For security reasons, the MiG servers require ssh logins to use public key encryption instead of passwords only. When your request an account on a development server, please provide a ssh public key. 
+
+== Dedicated key ==
+If you haven't got a ssh key that you would like to use for this purpose you can simply create a new one:
 
 {{{
 ssh-keygen -b 2048
@@ -24,6 +27,16 @@ ssh-keygen -b 2048
 You will be prompted for a passphrase and a location for the generated key file(s). Please use a nontrivial passphrase to avoid spoiling the point of using public key encryption. Obviously it's not a good idea to leave your private key lying around on untrusted computers either.
 
 The public key is the file which is by default saved to ~/.ssh/id_rsa.pub during the key generation.
+
+== Existing key from MiG user certificate ==
+Alternatively you can use your MiG user key as your SSH key. If you unpacked your certificate and key to ~/.mig/ you can generate the corresponding public key with:
+
+{{{
+ssh-keygen -y -f ~/.mig/key.pem > ~/.mig/key.pub
+}}}
+
+Then you can send us the generated public key, ~/.mig/key.pub , and use you MiG key for login (ssh -i ~/.mig/key.pem ...).
+
 
 = Server specs =
 Most of our servers run Debian Stable on AMD64 systems:

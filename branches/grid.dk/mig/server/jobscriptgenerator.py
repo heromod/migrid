@@ -37,7 +37,7 @@ import genjobscriptjava
 from shared.ssh import copy_file_to_resource
 from shared.fileio import write_file, pickle, make_symlink
 from shared.useradm import client_id_dir
-
+import shared.mrsltoxrsl as mrsltoxrsl
 
 def create_empty_job(
     unique_resource_name,
@@ -372,6 +372,62 @@ def create_job_script(
             logger.error('could not remove ' + inputfiles_path)
     return (sessionid, iosessionid)
 
+
+def create_arc_job(
+    job,
+    localjobname,
+    configuration,
+    logger,
+    ):
+    """Analogon to create_job_script for ARC jobs:
+    Creates symLinks for receiving result files, translates job dict to ARC xrsl,
+    and stores resulting job script (xrsl + sh script) for submitting.
+    
+    We do _not_ create a separate job_dict with copies and SESSIONID inside,
+    as opposed to create_job_script, all we need is the link from 
+    webserver_home / sessionID into the user's home directory 
+    ("job_output/job['JOB_ID']" is added to the result upload URLs in the 
+    translation). 
+    """
+
+    job_dict = {'':''}
+    sessionid = hexlify(open('/dev/urandom').read(32))
+    iosessionid = hexlify(open('/dev/urandom').read(32))
+
+    client_id = str(job['USER_CERT'])
+
+    # we do not want to see empty jobs here. Test as done in create_job_script.
+    if client_id == configuration.empty_job_name:
+        return ('Error. empty job for ARC?', None)
+
+    # make symbolic links inside webserver_home:
+    # we only need the owner's dir. to receive results
+    # (otherwise consider this: 
+    # map (lambda (dest,loc): make_symlink(dest,loc,logger), linklist)
+
+    client_dir = client_id_dir(client_id)
+
+    linkdest = configuration.user_home + client_dir
+    linkloc = configuration.webserver_home + sessionid
+    make_symlink(linkdest, linkloc, logger)
+
+    (xrsl, script, script_name) = mrsltoxrsl.translate(job, sessionid)
+    
+    if not xrsl:
+        # an error occurred, pass a message to the caller.
+        return ('Error translating to xRSL.', None)
+
+    # TODO: write out script, return whether successful
+    # we should also submit directly (the other version above does copyFileToResource
+    # and gen_job_script generates all files for a job
+
+    # TODO: errors in here should be handled inside grid_script. 
+    # Does not happen up to now, AFAICT.
+    # in our case, one potential error is that the proxy is invalid,
+    # which should be checked inside the parser, before informing 
+    # grid_script about the new job.
+    
+    return ("implement me!", None)
 
 def gen_job_script(
     job_dictionary,

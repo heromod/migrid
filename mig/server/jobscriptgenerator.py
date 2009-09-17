@@ -39,6 +39,9 @@ from shared.fileio import write_file, pickle, make_symlink
 from shared.useradm import client_id_dir
 import shared.mrsltoxrsl as mrsltoxrsl
 
+import shared.arcwrapper as arc
+
+
 def create_empty_job(
     unique_resource_name,
     exe,
@@ -388,11 +391,11 @@ def create_arc_job(
     webserver_home / sessionID into the user's home directory 
     ("job_output/job['JOB_ID']" is added to the result upload URLs in the 
     translation). 
+    
+    Returns message (None if no error) and sessionid (None if error)
     """
 
-    job_dict = {'':''}
     sessionid = hexlify(open('/dev/urandom').read(32))
-    iosessionid = hexlify(open('/dev/urandom').read(32))
 
     client_id = str(job['USER_CERT'])
 
@@ -411,23 +414,62 @@ def create_arc_job(
     linkloc = configuration.webserver_home + sessionid
     make_symlink(linkdest, linkloc, logger)
 
-    (xrsl, script, script_name) = mrsltoxrsl.translate(job, sessionid)
-    
-    if not xrsl:
-        # an error occurred, pass a message to the caller.
-        return ('Error translating to xRSL.', None)
+    # the translation generates an xRSL object which specifies to execute
+    # a shell script with script_name. If sessionid != None, results will
+    # be uploaded to sid_redirect/sessionid/job_output/job_id  
 
-    # TODO: write out script, return whether successful
-    # we should also submit directly (the other version above does copyFileToResource
-    # and gen_job_script generates all files for a job
+    try:
+        (xrsl, script, script_name) = mrsltoxrsl.translate(job, sessionid)
+
+    except Exception, err:
+        # error during translation, pass a message
+        logger.error('Error during xRSL translation: %s' % err.__str__())
+        return (err.__str__(), None)
+    
+        # we submit directly from here (the other version above does 
+        # copyFileToResource and gen_job_script generates all files)
+
+    # we have to put the generated script somewhere..., and submit from there.
+    # inputfiles are given by the user as relative paths from his home,
+    # so we should use that location (and clean up afterwards).
+
+    # write script (to user home)
+    user_home = os.path.join(configuration.user_home, client_dir)
+    script_path = os.path.abspath(os.path.join(user_home, script_name))
+    write_file(script, script_path, logger)
+
+    os.chdir(user_home)
+
+    msg = None
+    try:
+        session = arc.Ui(user_home)
+        (success, arc_job_ids) = session.submit(xrsl)
+
+    # when errors occurred, pass a message to the caller.
+    except arc.ARCWrapperError, err:
+        msg = err.what()
+        success = 1 # unsuccessful
+    except arc.NoProxyError, err:
+        msg = 'No Proxy found: %s' % err.what()
+        success = 1 # unsuccessful
+    except Exception, err:
+        msg = err.__str__()
+        success = 1 # unsuccessful
+
+    # always remove the generated script
+    os.remove(script_name)
+
+    if success != 0: # means: submitted
+        logger.error('Unsuccessful ARC job submission: %s' % msg)
+        return (msg, None)
+    else:
+        return (None, sessionid)
 
     # TODO: errors in here should be handled inside grid_script. 
     # Does not happen up to now, AFAICT.
     # in our case, one potential error is that the proxy is invalid,
     # which should be checked inside the parser, before informing 
     # grid_script about the new job.
-    
-    return ("implement me!", None)
 
 def gen_job_script(
     job_dictionary,

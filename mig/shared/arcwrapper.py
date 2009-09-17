@@ -362,12 +362,16 @@ class Ui:
 
     def submit(self, xrslAll, jobName=''):
         """Submit xrsl object as job to available ARC resources.
+        The method expects an arclib.Xrsl object and its current
+        working directory to contain the referenced files (rel. paths).
         
         @type  xrslAll: arclib.Xrsl
         @param xrslAll: job description in XRSL (arclib object).
         @rtype list:
-        @return: list containing [resultVal, jobIds] resultVal is the return
-        code of the ARC command, jobIds is a list of jobID strings."""
+        @return: (resultVal, list of jobIds) resultVal is a return
+        code (0 for success), jobIds is a list of jobID strings.
+        
+        Exceptions are forwarded to the caller."""
 
         try:
                 # Check for multiple xrsl

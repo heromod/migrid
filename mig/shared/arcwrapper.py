@@ -36,7 +36,8 @@ import tempfile
 
 # MiG utilities:
 from shared.conf import get_configuration_object
-logger = get_configuration_object().logger
+config = get_configuration_object()
+logger = config.logger
 
 # to make this succeed: 
 # install nordugrid-arc-client and nordugrid-arc-python
@@ -52,8 +53,8 @@ except:
                         + '/lib/python2.4/site-packages')
         import arclib
     except:
-        logger.error('arclib not found. Aborting whole execution.')
-        sys.exit(255)
+        logger.error('arclib not found.')
+        pass
 
 # (trivially inheriting) exception class of our own
 class ARCWrapperError(arclib.ARCLibError):
@@ -216,6 +217,8 @@ class Ui:
     #  and benedict cluster URL... for first tests
     benedict =\
       arclib.URL('ldap://benedict.grid.aau.dk:2135/o=grid/mds-vo-name=local')
+    fyrgrid =\
+      arclib.URL('ldap://fyrgrid.grid.aau.dk:2135/o=grid/mds-vo-name=local')
     # hard-wired: expected proxy name
     proxy_name = '.proxy.pem'
 
@@ -271,8 +274,20 @@ class Ui:
         try:
             # init data: cluster information (obtained per user) 
             self.__lockArclib()
+
+            # this takes ages:
             # self._clusters = arclib.GetResources(Ui.giis)
-            self._clusters = [ Ui.benedict ]
+            self._clusters = []
+            logger.debug(config.arc_clusters)
+            for url_str in config.arc_clusters:
+                if url_str.startswith('ldap://'):
+                    self._clusters.append(arclib.URL(url_str))
+                elif url_str in ['benedict','fyrgrid']:
+                    self._clusters.append(eval('Ui.' + url_str))
+            logger.debug('clusters: ')
+            for c in self._clusters:
+                logger.debug('\t %s' % c)
+            
             self._queues = []
             for cl in self._clusters:
                 qs = arclib.GetQueueInfo(cl)
@@ -291,6 +306,7 @@ class Ui:
             logger.error('ARC queue initialisation error: %s' % err )
             self._clusters = []
             self._queues = []
+            raise err
 
     def __lockArclib(self):
         """ ensures exclusive access to the interface and sets the environment

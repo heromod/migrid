@@ -222,6 +222,13 @@ class Configuration:
     # directory for usage records, initially None (means: do not generate)
 
     usage_record_dir = None
+
+    # ARC resource configuration (list)
+    # wired-in shorthands in arcwrapper: 
+    # fyrgrid, benedict. Otherwise, ldap://bla.bla:2135/...
+    
+    arc_clusters = [] 
+
     config_file = None
 
     # constructor
@@ -508,6 +515,12 @@ class Configuration:
         if config.has_option('GLOBAL', 'usage_record_dir'):
             self.usage_record_dir = config.get('GLOBAL',
                     'usage_record_dir')
+
+        # if arc cluster URLs configured, read them in:
+
+        if config.has_option('ARC', 'arc_clusters'):
+            self.arc_clusters = config.get('ARC',
+                    'arc_clusters').split(' ')
 
     def parse_peers(self, peerfile):
 

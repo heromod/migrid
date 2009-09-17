@@ -82,43 +82,41 @@ def translate(mrsl_dict, session_id = None):
                ''.join([mrsl_dict.get('JOBNAME',''),'(',j_name,')']))
 
         # inputfiles + executables, outputfiles
+        if session_id:
+            # we have been given a destination to put output files. Insert 
+            # MiG server URL (automatic output download, will use PUT)
+            destination = '/'.join([config.migserver_https_url
+                                   , 'sid_redirect'
+                                   , session_id
+                                   , 'job_output'
+                                   , j_name,''])
+        else:
+            destination = ''
+
         # make double lists, 2nd part perhaps empty
         # output files, always including stdout
         tmpoutfiles = map(file_mapping, mrsl_dict.get('OUTPUTFILES',[]))
         outfiles = []
         for [f,target] in tmpoutfiles:
-            if -1 == target.find('://'): # not remote target, should copy
-                target = '' # means: keep for manual fetch. 
-                            # ARC does not allow local file names as target
+            if target == '':
+                target = f # same file name if none given
+            elif -1 == target.find('://'): # not remote target, should copy
+                    # (ARC does not allow local file names as target)
+                target = ''.join([destination,target])
+                    # means: automatic upload to jobdir on MiG server. 
             outfiles.append([f,target])
 
         # job output, maybe transfer automatically to MiG server
         stdout = '.'.join([j_name,'stdout'])
         stderr = '.'.join([j_name,'stderr'])
-        if session_id:
-            # we have been given a destination to put output files. Insert 
-            # MiG server URL (automatic output download, will use PUT)
-            destination = ''.join([config.migserver_https_url
-                                   , '/sid_redirect/'
-                                   , session_id
-                                   , '/job_output/'
-                                   , j_name])
-        else:
-            destination = None
 
         # do not merge stdout and stderr
         addRel(xrsl, 'join', 'no')
 
         addRel(xrsl, 'stdout', stdout)
-        if destination:
-            outfiles.append(stdout, '.'.join([destination, 'stdout']))
-        else:
-            outfiles.append(stdout, '')
-        addRel(xrsl, 'stderr', '.'.join([j_name,'stderr']))
-        if destination:
-            outfiles.append(stderr, '.'.join([destination, 'stderr']))
-        else:
-            outfiles.append(stderr, '')
+        outfiles.append([stdout, ''.join([destination, stdout])])
+        addRel(xrsl, 'stderr', stderr)
+        outfiles.append([stderr, ''.join([destination, stderr])])
 
         addRel(xrsl, 'outputfiles', outfiles)
         
@@ -203,7 +201,7 @@ def translate(mrsl_dict, session_id = None):
         logger.debug('XRSL:\n%s\nScript (%s):\n%s\n)' % (xrsl,script_name,script))
     except arclib.XrslError, err:
         logger.error( 'Error generating Xrsl: %s' % err )
-        return (None, None, None)
+        raise err
     return (xrsl,script,script_name)
 
 # helper functions and constants used:
@@ -274,7 +272,30 @@ def flip_for_input(list):
         return [list[1],list[0]]
 
 if __name__ == '__main__':
-    print len(sys.argv)
+    print 'starting translation test. Args: ' , len(sys.argv)
+    logger.debug('translation for file ' + sys.argv[1] + ' starts')
     if len(sys.argv) > 1:
         fname = sys.argv[1]
+        parsed = '.'.join([fname,'parsed'])
+        translated = '.'.join([parsed,'xrsl'])
+
+        try:
+            import shared.mrslparser as p
+            import shared.fileio as fileio
+
+            (presult,errors) = p.parse(fname, 'test-id',
+                                       '+No+Client+Id',None,parsed)
+            if not presult:
+                print('Errors: \n',errors)
+            else:
+                print 'Parsing OK, now translating'
+                mrsl_dict = fileio.unpickle(parsed,logger)
+                (xrsl,script,name) = translate(mrsl_dict,'test-name')
+                print '\n'.join(['Job name',name,'script',script,'XRSL'])
+                print xrsl
+                print (str(xrsl).replace('(', '\t').replace(')', '\n'))
+                print 'done'
+        except Exception, err:
+            print 'Error.'
+            print err.__str__()
 

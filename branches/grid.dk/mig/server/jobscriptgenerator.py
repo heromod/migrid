@@ -378,7 +378,6 @@ def create_job_script(
 
 def create_arc_job(
     job,
-    localjobname,
     configuration,
     logger,
     ):
@@ -395,8 +394,9 @@ def create_arc_job(
     Returns message (ARC job ID if no error) and sessionid (None if error)
     """
 
-    sessionid = hexlify(open('/dev/urandom').read(32))
-
+    if not job['JOBTYPE'] == 'arc':
+        return ('Error. This is not an ARC job', None)
+    
     client_id = str(job['USER_CERT'])
 
     # we do not want to see empty jobs here. Test as done in create_job_script.
@@ -410,10 +410,13 @@ def create_arc_job(
     # map(symlink, linklist)
     # but we only need one: owner's dir. to receive results
 
+    sessionid = hexlify(open('/dev/urandom').read(32))
+
     client_dir = client_id_dir(client_id)
 
     linkdest = configuration.user_home + client_dir
     linkloc = configuration.webserver_home + sessionid
+    logger.debug('session ID (creating link): %s' % sessionid)
     make_symlink(linkdest, linkloc, logger)
 
     # the translation generates an xRSL object which specifies to execute
@@ -422,6 +425,8 @@ def create_arc_job(
 
     try:
         (xrsl, script, script_name) = mrsltoxrsl.translate(job, sessionid)
+        logger.debug('translated to xRSL: %s' % xrsl)
+        logger.debug('script:\n %s' % script)
 
     except Exception, err:
         # error during translation, pass a message
@@ -443,6 +448,7 @@ def create_arc_job(
     os.chdir(user_home)
 
     try:
+        logger.debug('submitting job to ARC')
         session = arc.Ui(user_home)
         (success, arc_job_ids) = session.submit(xrsl)
         if success != 0:
@@ -468,6 +474,8 @@ def create_arc_job(
 
     if not result:
         logger.error('Unsuccessful ARC job submission: %s' % msg)
+    else:
+        logger.debug('submitted to ARC as job %s' % msg)
     return (msg, result)
 
     # errors are handled inside grid_script. For ARC jobs, set status = FAILED

@@ -389,6 +389,50 @@ while True:
         dict_userjob['OWNER'] = user_id
         dict_userjob['MIGRATE_COUNT'] = str(0)
 
+        # ARC jobs: directly submit, and put in executing_queue
+        if dict_userjob['JOBTYPE'] == 'arc':
+            logger.debug('ARC Job' )
+            (arc_id, session_id) = jobscriptgenerator.create_arc_job(\
+                                    dict_userjob, configuration, logger)
+            if not session_id:
+                # something has gone wrong
+                logger.error('Job NOT submitted (%s)' % arc_id) 
+                # discard this job (as FAILED, including message)
+                # see gridscript::requeue_job for how to do this...
+                
+                dict_userjob['STATUS'] = 'FAILED'
+                dict_userjob['FAILED_TIMESTAMP'] = time.gmtime()
+                # and create an execution history (basically empty)
+                dict_userjob['EXECUTION_HISTORY'] = [].append(\
+                    {'QUEUED_TIMESTAMP': dict_userjob['QUEUED_TIMESTAMP'],
+                     'EXECUTING_TIMESTAMP': dict_userjob['FAILED_TIMESTAMP'],
+                     'FAILED_TIMESTAMP': dict_userjob['FAILED_TIMESTAMP'],
+                     'FAILED_MESSAGE': ('ARC Submission failed: %s' % arc_id),
+                     'UNIQUE_RESOURCE_NAME': 'ARC',})
+
+                # should also notify the user (if requested)
+                # not implented for this branch.
+
+            else:
+                # all fine, job is now in some ARC queue
+                logger.debug('Job submitted (%s,%s)' % (session_id,arc_id) )
+                # set some job fields for job status retrieval, and
+                # put in exec.queue for job status queries and timeout
+                dict_userjob['SESSIONID'] = session_id
+                # abuse these two fields, 
+                # expected by timeout thread to be there anyway
+                dict_userjob['UNIQUE_RESOURCE_NAME'] = arc_id
+                dict_userjob['EXE'] = arc_id
+                
+            # Either way, save the job mrsl. 
+            # Status is QUEUED or FAILED
+            pickle(dict_userjob, file_userjob, logger)
+
+            # go on with scheduling loop (do not use scheduler magic below)
+            continue
+
+        # following: non-ARC code
+        
         # put job in queue
 
         job_queue.enqueue_job(dict_userjob, job_queue.queue_length())

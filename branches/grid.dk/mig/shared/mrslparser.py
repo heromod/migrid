@@ -223,7 +223,7 @@ def parse(
     # if this is an ARC job (indicated by a flag), check proxy existence 
     # and lifetime. grid_script will submit the job directly.
     
-    if replaced_dict['JOBTYPE'] == 'ARC':
+    if replaced_dict['JOBTYPE'] == 'arc':
         logger.debug('Received job for ARC.')
         user_home = os.path.join(configuration.user_home, client_dir)
         try:

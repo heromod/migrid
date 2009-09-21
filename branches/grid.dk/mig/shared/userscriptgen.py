@@ -3,7 +3,7 @@
 #
 # --- BEGIN_HEADER ---
 #
-# userscriptgen - [insert a few words of module description on this line]
+# userscriptgen - Generator backend for user scripts
 # Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
@@ -31,8 +31,6 @@
 # TODO: mig-ls.* -r fib.out incorrectly lists entire home recursively
 # TODO: ls -r is not recursive -> use -R!
 
-# Generator version (automagically updated by cvs)
-
 """Generate MiG user scripts for the specified programming
 languages. Called without arguments the generator creates scripts
 for all supported languages. If one or more languages are supplied
@@ -40,6 +38,9 @@ as arguments, only those languages will be generated.
 """
 
 import sys
+import getopt
+
+# Generator version (automagically updated by cvs)
 
 __version__ = '$Revision: 2591 $'
 
@@ -159,6 +160,12 @@ def get_usage_function(lang, extension):
     s = ''
     s += begin_function(lang, 'usage', [])
     s += basic_usage_options(usage_str, lang)
+    recursive_usage_string = '-r\t\tact recursively'
+    if lang == 'sh':
+        s += '\n\techo "%s"' % recursive_usage_string
+    elif lang == 'python':
+        s += '\n\tprint "%s"' % recursive_usage_string
+
     s += end_function(lang, 'usage')
 
     return s
@@ -198,12 +205,15 @@ def ls_usage_function(lang, extension):
     s += basic_usage_options(usage_str, lang)
     all_usage_string = "-a\t\tDo not hide entries starting with '.'"
     long_usage_string = '-l\t\tDisplay long format'
+    recursive_usage_string = '-r\t\tact recursively'
     if lang == 'sh':
         s += '\n\techo "%s"' % all_usage_string
         s += '\n\techo "%s"' % long_usage_string
+        s += '\n\techo "%s"' % recursive_usage_string
     elif lang == 'python':
         s += '\n\tprint "%s"' % all_usage_string
         s += '\n\tprint "%s"' % long_usage_string
+        s += '\n\tprint "%s"' % recursive_usage_string
 
     s += end_function(lang, 'usage')
 
@@ -259,19 +269,19 @@ def put_usage_function(lang, extension):
     s += begin_function(lang, 'usage', [])
     s += basic_usage_options(usage_str, lang)
 
+    package_usage_string = \
+        '-p\t\tSubmit mRSL files (also in packages if -x is specified) after upload'
+    recursive_usage_string = '-r\t\tact recursively'
     extract_usage_string = \
         '-x\t\tExtract package (.zip etc) after upload'
     if lang == 'sh':
+        s += '\n\techo "%s"' % package_usage_string
+        s += '\n\techo "%s"' % recursive_usage_string
         s += '\n\techo "%s"' % extract_usage_string
     elif lang == 'python':
-        s += '\n\tprint "%s"' % extract_usage_string
-
-    package_usage_string = \
-        '-p\t\tSubmit mRSL files (also in packages if -x is specified) after upload'
-    if lang == 'sh':
-        s += '\n\techo "%s"' % package_usage_string
-    elif lang == 'python':
         s += '\n\tprint "%s"' % package_usage_string
+        s += '\n\tprint "%s"' % recursive_usage_string
+        s += '\n\tprint "%s"' % extract_usage_string
 
     s += end_function(lang, 'usage')
 
@@ -321,6 +331,11 @@ def rm_usage_function(lang, extension):
     s = ''
     s += begin_function(lang, 'usage', [])
     s += basic_usage_options(usage_str, lang)
+    recursive_usage_string = '-r\t\tact recursively'
+    if lang == 'sh':
+        s += '\n\techo "%s"' % recursive_usage_string
+    elif lang == 'python':
+        s += '\n\tprint "%s"' % recursive_usage_string
     s += end_function(lang, 'usage')
 
     return s
@@ -376,16 +391,14 @@ def status_usage_function(lang, extension):
     s += begin_function(lang, 'usage', [])
     s += basic_usage_options(usage_str, lang)
     max_jobs_usage_string = '-m M\t\tShow status for at most M jobs'
-    if lang == 'sh':
-        s += '\n\techo "%s"' % max_jobs_usage_string
-    elif lang == 'python':
-        s += '\n\tprint "%s"' % max_jobs_usage_string
-
     sort_jobs_usage_string = '-S\t\tSort jobs by modification time'
     if lang == 'sh':
+        s += '\n\techo "%s"' % max_jobs_usage_string
         s += '\n\techo "%s"' % sort_jobs_usage_string
     elif lang == 'python':
+        s += '\n\tprint "%s"' % max_jobs_usage_string
         s += '\n\tprint "%s"' % sort_jobs_usage_string
+
     s += end_function(lang, 'usage')
 
     return s
@@ -1179,91 +1192,92 @@ def test_function(lang, curl_cmd, curl_flags=''):
            return 1
         fi
            
+        path_prefix=`dirname $0`
         echo \"running $op test(s)\"
-        cmd=\"%s${op}.%s\"
+        cmd=\"$path_prefix/%s${op}.%s\"
         declare -a cmd_args
         declare -a verify_cmd
         case $op in
            'cancel')
-              pre_cmd='migsubmit.sh mig-test.mRSL'
+              pre_cmd=\"$path_prefix/migsubmit.sh mig-test.mRSL\"
               cmd_args[1]='DUMMY_JOB_ID'
               ;;
            'cat')
-              pre_cmd='migput.sh mig-test.txt .'
+              pre_cmd=\"$path_prefix/migput.sh mig-test.txt .\"
               cmd_args[1]='mig-test.txt'
-              post_cmd='migrm.sh -r mig-test.txt'
+              post_cmd=\"$path_prefix/migrm.sh -r mig-test.txt\"
               ;;
            'doc')
               cmd_args[1]=''
               ;;
            'get')
-              pre_cmd='migput.sh mig-test.txt .'
+              pre_cmd=\"$path_prefix/migput.sh mig-test.txt .\"
               cmd_args[1]='mig-test.txt .'
-              post_cmd='migrm.sh -r mig-test.txt'
+              post_cmd=\"$path_prefix/migrm.sh -r mig-test.txt\"
               ;;
            'head')
-              pre_cmd='migput.sh mig-test.txt .'
+              pre_cmd=\"$path_prefix/migput.sh mig-test.txt .\"
               cmd_args[1]='mig-test.txt'
-              post_cmd='migrm.sh -r mig-test.txt'
+              post_cmd=\"$path_prefix/migrm.sh -r mig-test.txt\"
               ;;
            'ls')
-              pre_cmd='migput.sh mig-test.txt .'
+              pre_cmd=\"$path_prefix/migput.sh mig-test.txt .\"
               cmd_args[1]='mig-test.txt'
-              post_cmd='migrm.sh -r mig-test.txt'
+              post_cmd=\"$path_prefix/migrm.sh -r mig-test.txt\"
               ;;
            'mkdir')
-              pre_cmd='migrm.sh -r mig-test-dir'
+              pre_cmd=\"$path_prefix/migrm.sh -r mig-test-dir\"
               cmd_args[1]='mig-test-dir'
-              verify_cmd[1]='migls.sh mig-test-dir'
-              post_cmd='migrm.sh -r mig-test-dir'
+              verify_cmd[1]=\"$path_prefix/migls.sh mig-test-dir\"
+              post_cmd=\"$path_prefix/migrm.sh -r mig-test-dir\"
               ;;
            'mv')
-              pre_cmd='migput.sh mig-test.txt .'
+              pre_cmd=\"$path_prefix/migput.sh mig-test.txt .\"
               cmd_args[1]='mig-test.txt mig-test-new.txt'
-              post_cmd='migrm.sh mig-test-new.txt'
+              post_cmd=\"$path_prefix/migrm.sh mig-test-new.txt\"
               ;;
            'put')
-              pre_cmd[1]='migrm.sh mig-test.txt'
+              pre_cmd[1]=\"$path_prefix/migrm.sh mig-test.txt\"
               cmd_args[1]='mig-test.txt .'
-              verify_cmd[1]='migls.sh mig-test.txt'
-              post_cmd[1]='migrm.sh mig-test.txt'
+              verify_cmd[1]=\"$path_prefix/migls.sh mig-test.txt\"
+              post_cmd[1]=\"$path_prefix/migrm.sh mig-test.txt\"
               cmd_args[2]='mig-test.t*t mig-test.txt'
-              verify_cmd[2]='migrm.sh mig-test.txt'
+              verify_cmd[2]=\"$path_prefix/migrm.sh mig-test.txt\"
               cmd_args[3]='mig-test.txt mig-test.txt'
-              verify_cmd[3]='migrm.sh mig-test.txt'
+              verify_cmd[3]=\"$path_prefix/migrm.sh mig-test.txt\"
               cmd_args[4]='mig-test.txt mig-remote-test.txt'
-              verify_cmd[4]='migrm.sh mig-remote-test.txt'
+              verify_cmd[4]=\"$path_prefix/migrm.sh mig-remote-test.txt\"
               cmd_args[5]='mig-test.txt mig-test-dir/'
-              verify_cmd[5]='migrm.sh mig-test-dir/mig-test.txt'
+              verify_cmd[5]=\"$path_prefix/migrm.sh mig-test-dir/mig-test.txt\"
               cmd_args[6]='mig-test.txt mig-test-dir/mig-remote-test.txt'
-              verify_cmd[6]='migrm.sh mig-test-dir/mig-remote-test.txt'
+              verify_cmd[6]=\"$path_prefix/migrm.sh mig-test-dir/mig-remote-test.txt\"
 
               # Disabled since put doesn't support wildcards in destination (yet?)
               # cmd_args[]='mig-test.txt 'mig-test-d*/''
               # cmd_args[]='mig-test.txt 'mig-test-d*/mig-remote-test.txt''
-              # verify_cmd[]='migrm.sh mig-test-dir/mig-remote-test.txt'
-              # verify_cmd[]='migrm.sh mig-test-dir/mig-remote-test.txt'
+              # verify_cmd[]=\"$path_prefix/migrm.sh mig-test-dir/mig-remote-test.txt\"
+              # verify_cmd[]=\"$path_prefix/migrm.sh mig-test-dir/mig-remote-test.txt\"
               ;;
            'read')
-              pre_cmd='migput.sh mig-test.txt .'
+              pre_cmd=\"$path_prefix/migput.sh mig-test.txt .\"
               cmd_args[1]='0 16 mig-test.txt -'
-              post_cmd='migrm.sh -r mig-test.txt'
+              post_cmd=\"$path_prefix/migrm.sh -r mig-test.txt\"
               ;;
            'rm')
-              pre_cmd='migput.sh mig-test.txt .'
+              pre_cmd=\"$path_prefix/migput.sh mig-test.txt .\"
               cmd_args[1]='mig-test.txt'
-              verify_cmd[1]='migls.sh mig-test.txt'
+              verify_cmd[1]=\"$path_prefix/migls.sh mig-test.txt\"
               ;;
            'rmdir')
-              pre_cmd='migmkdir mig-test-dir'
+              pre_cmd=\"$path_prefix/migmkdir.sh mig-test-dir\"
               cmd_args[1]='mig-test-dir'
-              verify_cmd[1]='migls.sh mig-test-dir'
-              post_cmd='migrm.sh -r mig-test-dir'
+              verify_cmd[1]=\"$path_prefix/migls.sh mig-test-dir\"
+              post_cmd=\"$path_prefix/migrm.sh -r mig-test-dir\"
               ;;
            'stat')
-              pre_cmd='migput.sh mig-test.txt .'
+              pre_cmd=\"$path_prefix/migput.sh mig-test.txt .\"
               cmd_args[1]='mig-test.txt'
-              post_cmd='migrm.sh -r mig-test.txt'
+              post_cmd=\"$path_prefix/migrm.sh -r mig-test.txt\"
               ;;
            'status')
               cmd_args[1]=''
@@ -1272,30 +1286,30 @@ def test_function(lang, curl_cmd, curl_flags=''):
               cmd_args[1]='mig-test.mRSL'
               ;;
            'tail')
-              pre_cmd='migput.sh mig-test.txt .'
+              pre_cmd=\"$path_prefix/migput.sh mig-test.txt .\"
               cmd_args[1]='mig-test.txt'
-              post_cmd[1]='migrm.sh mig-test.txt'
+              post_cmd[1]=\"$path_prefix/migrm.sh mig-test.txt\"
               ;;
            'touch')
-              pre_cmd[1]='migrm.sh mig-test.txt'
+              pre_cmd[1]=\"$path_prefix/migrm.sh mig-test.txt\"
               cmd_args[1]='mig-test.txt'
-              verify_cmd[1]='migls.sh mig-test.txt'
-              post_cmd[1]='migrm.sh mig-test.txt'
+              verify_cmd[1]=\"$path_prefix/migls.sh mig-test.txt\"
+              post_cmd[1]=\"$path_prefix/migrm.sh mig-test.txt\"
               ;;
            'truncate')
-              pre_cmd='migput.sh mig-test.txt .'
+              pre_cmd=\"$path_prefix/migput.sh mig-test.txt .\"
               cmd_args[1]='mig-test.txt'
-              post_cmd[1]='migrm.sh mig-test.txt'
+              post_cmd[1]=\"$path_prefix/migrm.sh mig-test.txt\"
               ;;
            'wc')
-              pre_cmd='migput.sh mig-test.txt'
+              pre_cmd=\"$path_prefix/migput.sh mig-test.txt\"
               cmd_args[1]='mig-test.txt'
-              post_cmd='migrm.sh -r mig-test.txt'
+              post_cmd=\"$path_prefix/migrm.sh -r mig-test.txt\"
               ;;
            'write')
-              pre_cmd='migput.sh mig-test.txt .'
+              pre_cmd=\"$path_prefix/migput.sh mig-test.txt .\"
               cmd_args[1]='4 8 mig-test.txt mig-test.txt'
-              post_cmd='migrm.sh -r mig-test.txt'
+              post_cmd=\"$path_prefix/migrm.sh -r mig-test.txt\"
               ;;
            *)
            echo \"No test available for $op!\"
@@ -1313,7 +1327,6 @@ def test_function(lang, curl_cmd, curl_flags=''):
                 $pre >& /dev/null
             fi
             ./$cmd $test_flags $args >& /dev/null
-            #./$cmd $test_flags $args
             ret=$?
             if [ $ret -eq 0 ]; then
                 echo \"   $op test $index SUCCEEDED\"
@@ -1739,7 +1752,14 @@ def get_main(lang):
 
     s = ''
     s += basic_main_init(lang)
-    s += parse_options(lang, None, None)
+    if lang == 'sh':
+        s += parse_options(lang, 'r',
+                           '          r) server_flags="${server_flags}r";;'
+                           )
+    elif lang == 'python':
+        s += parse_options(lang, 'r',
+                           '''        elif opt == "-r":
+                server_flags += "r"''')
     s += arg_count_check(lang, 2, None)
     s += check_conf_readable(lang)
     s += configure(lang)
@@ -1855,17 +1875,21 @@ def ls_main(lang):
     s = ''
     s += basic_main_init(lang)
     if lang == 'sh':
-        s += parse_options(lang, 'al',
+        s += parse_options(lang, 'alr',
                            '''          a) server_flags="${server_flags}a"
              flags="${flags} -a";;
           l) server_flags="${server_flags}l"
-             flags="${flags} -l";;''')
+             flags="${flags} -l";;
+          r) server_flags="${server_flags}r"
+             flags="${flags} -r";;''')
     elif lang == 'python':
-        s += parse_options(lang, 'al',
+        s += parse_options(lang, 'alr',
                            '''        elif opt == "-a":
                 server_flags += "a"
         elif opt == "-l":
-                server_flags += "l"''')
+                server_flags += "l"
+        elif opt == "-r":
+                server_flags += "r"''')
     s += arg_count_check(lang, None, None)
     s += check_conf_readable(lang)
     s += configure(lang)
@@ -1971,6 +1995,7 @@ def mv_main(lang):
 
     s = ''
     s += basic_main_init(lang)
+    s += parse_options(lang, None, None)
     s += arg_count_check(lang, 2, None)
     s += check_conf_readable(lang)
     s += configure(lang)
@@ -2036,19 +2061,23 @@ def put_main(lang):
     s = ''
     s += basic_main_init(lang)
     if lang == 'sh':
-        s += 'extract_package=0\n'
         s += 'submit_mrsl=0\n'
-        s += parse_options(lang, 'xp',
-                           '          x) extract_package=1;;\n          p) submit_mrsl=1;;'
+        s += 'recursive=0\n'
+        s += 'extract_package=0\n'
+        s += parse_options(lang, 'prx',
+                           '          p) submit_mrsl=1;;\n          r) recursive=1;;\n          x) extract_package=1;;'
                            )
     elif lang == 'python':
-        s += 'extract_package = False\n'
         s += 'submit_mrsl = False\n'
-        s += parse_options(lang, 'xp',
-                           '''        elif opt == "-x":
-                extract_package = True
-        elif opt == "-p":
-                submit_mrsl = True''')
+        s += 'recursive = False\n'
+        s += 'extract_package = False\n'
+        s += parse_options(lang, 'prx',
+                           '''        elif opt == "-p":
+                submit_mrsl = True
+        elif opt == "-r":
+                recursive = True
+        elif opt == "-x":
+                extract_package = True''')
     s += arg_count_check(lang, 2, None)
     s += check_conf_readable(lang)
     s += configure(lang)
@@ -2077,19 +2106,22 @@ for src in ${src_list[@]}; do
             echo \"Nonrecursive put skipping directory: $src\"
             continue
         fi
-        # TODO: remove local dir prefix (put somedir/otherdir should only put otherdir)
         # Recursive dirs may not exist - create them first
-        dirs=`find $src -type d`
+        src_parent=`dirname $src`
+        src_target=`basename $src`
+        dirs=`cd $src_parent && find $src_target -type d`
         # force mkdir -p
         old_flags=\"$server_flags\"
         server_flags=\"p\"
+        dir_list=\"\"
         for dir in $dirs; do
-            mk_dir \"$dst/$dir\"
+            dir_list=\"$dir_list;path=$dst/$dir\"
         done
+        mk_dir \"$dir_list\"
         server_flags=\"$old_flags\"
-        sources=`find $src -type f`
+        sources=`cd $src_parent && find $src_target -type f`
         for path in $sources; do
-            put_file \"$path\" \"$dst/$path\" $submit_mrsl $extract_package
+            put_file \"$src_parent/$path\" \"$dst/$path\" $submit_mrsl $extract_package
         done
     else
         put_file \"$src\" \"$dst\" $submit_mrsl $extract_package
@@ -2127,19 +2159,22 @@ for src in src_list:
         if not recursive:
             print \"Nonrecursive put skipping directory: %s\" % src
             continue
-        # TODO: remove local dir prefix (put somedir/otherdir should only put otherdir)
-        for root, dirs, files in os.walk(src):
+        src_parent = os.path.abspath(os.path.dirname(src))
+        for root, dirs, files in os.walk(os.path.abspath(src)):
             # Recursive dirs may not exist - create them first
             # force mkdir -p
             old_flags = \"$server_flags\"
             server_flags = \"p\"
-            mk_dir(dst + '/' + root)
-            for dir in dirs:
-                mk_dir(dst + '/' + root + '/' + dir)
+            rel_root = root.replace(src_parent, '', 1).lstrip(os.sep)
+            dir_list = ';'.join(['path=%s' % os.path.join(dst, rel_root, i) for i in dirs])
+            # add current root
+            dir_list += ';path=%s' % os.path.join(dst, rel_root)
+            mk_dir(dir_list)
             server_flags = \"$old_flags\"
             for name in files:
-                path = root + '/' + name
-                put_file(path, dst + '/' + path, submit_mrsl, extract_package)
+                src_path = os.path.join(root, name)
+                dst_path = os.path.join(dst, rel_root, name)
+                (status, out) = put_file(src_path, dst_path, submit_mrsl, extract_package)
     else:
         (status, out) = put_file(src, dst, submit_mrsl, extract_package)
 sys.exit(status)
@@ -2159,6 +2194,7 @@ def read_main(lang):
 
     s = ''
     s += basic_main_init(lang)
+    s += parse_options(lang, None, None)
     s += arg_count_check(lang, 4, None)
     s += check_conf_readable(lang)
     s += configure(lang)
@@ -2232,11 +2268,17 @@ def rm_main(lang):
 
     # rm cgi supports wild cards natively so no need to use
     # expand here
-    # TODO: support -r flags
 
     s = ''
     s += basic_main_init(lang)
-    s += parse_options(lang, None, None)
+    if lang == 'sh':
+        s += parse_options(lang, 'r',
+                           '          r) server_flags="${server_flags}r"\n             flags="${flags} -r";;'
+                           )
+    elif lang == 'python':
+        s += parse_options(lang, 'r',
+                           '        elif opt == "-r":\n                server_flags += "r"'
+                           )
     s += arg_count_check(lang, 1, None)
     s += check_conf_readable(lang)
     s += configure(lang)
@@ -2750,6 +2792,7 @@ def write_main(lang):
 
     s = ''
     s += basic_main_init(lang)
+    s += parse_options(lang, None, None)
     s += arg_count_check(lang, 4, None)
     s += check_conf_readable(lang)
     s += configure(lang)
@@ -3085,7 +3128,6 @@ def generate_put(scripts_languages, dest_dir='.'):
         script += shared_usage_function(op, lang, extension)
         script += check_var_function(lang)
         script += read_conf_function(lang)
-        script += expand_function(lang, curl_cmd)
 
         # Recursive put requires mkdir
 

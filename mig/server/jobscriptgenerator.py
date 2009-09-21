@@ -403,21 +403,25 @@ def create_arc_job(
     if client_id == configuration.empty_job_name:
         return ('Error. empty job for ARC?', None)
 
-    # make symbolic links inside webserver_home:
-    #  
-    # linklist = [(l1,d1),(l2,d2),...]
-    # def symlink (dest,loc): make_symlink(dest,loc,logger)
-    # map(symlink, linklist)
-    # but we only need one: owner's dir. to receive results
 
+    # generate random session ID:
     sessionid = hexlify(open('/dev/urandom').read(32))
+    logger.debug('session ID (for creating links): %s' % sessionid)
 
     client_dir = client_id_dir(client_id)
 
-    linkdest = configuration.user_home + client_dir
-    linkloc = configuration.webserver_home + sessionid
-    logger.debug('session ID (creating link): %s' % sessionid)
-    make_symlink(linkdest, linkloc, logger)
+    # make symbolic links inside webserver_home:
+    #  
+    # we need: link to owner's dir. to receive results, 
+    #          job mRSL inside sessid_to_mrsl_link_home
+    linklist = [(configuration.user_home + client_dir, 
+                 configuration.webserver_home + sessionid)
+               ,(configuration.mrsl_files_dir + client_dir + '/' + str(job['JOB_ID']) + '.mRSL',
+                 configuration.sessid_to_mrsl_link_home + sessionid + '.mRSL')
+               ]
+
+    def symlink (dest,loc): make_symlink(dest,loc,logger)
+    map(symlink, linklist)
 
     # the translation generates an xRSL object which specifies to execute
     # a shell script with script_name. If sessionid != None, results will

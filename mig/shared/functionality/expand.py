@@ -118,7 +118,7 @@ def handle_expand(
     if os.path.isfile(real_path):
         handle_file(
             listing,
-            base_name,
+            relative_path,
             relative_path,
             real_path,
             flags,
@@ -148,11 +148,11 @@ def handle_expand(
                 if os.path.isfile(path):
                     handle_file(
                         listing,
-                        name,
+                        rel_path,
                         rel_path,
                         path,
                         flags,
-                        dest,
+                        os.path.join(dest, os.path.basename(rel_path)),
                         show_dest,
                         )
         else:
@@ -180,7 +180,7 @@ def handle_expand(
                         base_dir,
                         path,
                         flags,
-                        dest,
+                        os.path.join(dest, name),
                         depth + 1,
                         show_dest,
                         )

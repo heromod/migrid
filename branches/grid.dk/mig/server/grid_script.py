@@ -421,11 +421,16 @@ while True:
                 dict_userjob['SESSIONID'] = session_id
                 # abuse these two fields, 
                 # expected by timeout thread to be there anyway
-                dict_userjob['UNIQUE_RESOURCE_NAME'] = arc_id
+                dict_userjob['UNIQUE_RESOURCE_NAME'] = 'ARC'
                 dict_userjob['EXE'] = arc_id
-                
+
+                dict_userjob['STATUS'] = 'EXECUTING' # which is kind-of wrong...
+                dict_userjob['EXECUTING_TIMESTAMP'] = time.gmtime()
+                executing_queue.enqueue_job(dict_userjob, \
+                                            executing_queue.queue_length())
+
             # Either way, save the job mrsl. 
-            # Status is QUEUED or FAILED
+            # Status is EXECUTING or FAILED
             pickle(dict_userjob, file_userjob, logger)
 
             # go on with scheduling loop (do not use scheduler magic below)
@@ -1176,8 +1181,14 @@ while True:
         elif job_dict['UNIQUE_RESOURCE_NAME'] != res_name\
              or job_dict['EXE'] != exe_name:
             msg += \
-                ', but job is beeing executed by %s:%s, ignoring result.'\
+                ', but job is being executed by %s:%s, ignoring result.'\
                  % (job_dict['UNIQUE_RESOURCE_NAME'], job_dict['EXE'])
+        elif job_dict['UNIQUE_RESOURCE_NAME'] == 'ARC':
+            msg += '. This is an ARC job, ID is %s' % job_dict['EXE']
+            # TODO: check job status.
+            # if status == finished: 
+            #     clean up the job on ARC and server 
+            # otherwise: update job status in mrsl and re-enqueue
         else:
 
             # Clean up the server for files associated with the finished job

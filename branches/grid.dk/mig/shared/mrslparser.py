@@ -36,6 +36,10 @@ from shared.fileio import unpickle, pickle, send_message_to_grid_script
 from shared.conf import get_configuration_object
 from shared.useradm import client_id_dir
 
+try:
+    import shared.arcwrapper as arc
+except:
+    pass
 
 def parse(
     localfile_spaces,
@@ -216,6 +220,28 @@ def parse(
 
         return (True, '')
 
+    # if this is an ARC job (indicated by a flag), check proxy existence 
+    # and lifetime. grid_script will submit the job directly.
+    
+    if replaced_dict['JOBTYPE'] == 'ARC':
+        logger.debug('Received job for ARC.')
+        user_home = os.path.join(configuration.user_home, client_dir)
+        try:
+            session = arc.Ui(user_home)
+            timeleft = session.getProxy().getTimeleft()
+            req_time = int(replaced_dict.get('CPUTIME','0')) 
+            logger.debug('CPU time (%s), proxy lifetime (%s)' \
+                         % (req_time, timeleft))
+            if timeleft < req_time:
+                return (False, 'Proxy time shorter than requested CPU time')
+
+        except arc.ARCWrapperError, err:
+            return (False, err.what())
+        except arc.NoProxyError, err:
+            return (False, 'No Proxy found: %s' % err.what())
+        except Exception, err:
+            return (False, err.__str__())
+    
     # tell 'grid_script'
 
     message = 'USERJOBFILE %s/%s\n' % (client_dir, job_id)

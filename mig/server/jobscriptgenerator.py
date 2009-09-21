@@ -392,7 +392,7 @@ def create_arc_job(
     ("job_output/job['JOB_ID']" is added to the result upload URLs in the 
     translation). 
     
-    Returns message (None if no error) and sessionid (None if error)
+    Returns message (ARC job ID if no error) and sessionid (None if error)
     """
 
     sessionid = hexlify(open('/dev/urandom').read(32))
@@ -404,9 +404,11 @@ def create_arc_job(
         return ('Error. empty job for ARC?', None)
 
     # make symbolic links inside webserver_home:
-    # we only need the owner's dir. to receive results
-    # (otherwise consider this: 
-    # map (lambda (dest,loc): make_symlink(dest,loc,logger), linklist)
+    #  
+    # linklist = [(l1,d1),(l2,d2),...]
+    # def symlink (dest,loc): make_symlink(dest,loc,logger)
+    # map(symlink, linklist)
+    # but we only need one: owner's dir. to receive results
 
     client_dir = client_id_dir(client_id)
 
@@ -440,34 +442,37 @@ def create_arc_job(
 
     os.chdir(user_home)
 
-    msg = None
     try:
         session = arc.Ui(user_home)
         (success, arc_job_ids) = session.submit(xrsl)
+        if success != 0:
+            msg = "Error during ARC job submission"
+            result = None
+        else:
+            msg = arc_job_ids[0]
+            result = sessionid
 
     # when errors occurred, pass a message to the caller.
     except arc.ARCWrapperError, err:
         msg = err.what()
-        success = 1 # unsuccessful
+        result = None # unsuccessful
     except arc.NoProxyError, err:
         msg = 'No Proxy found: %s' % err.what()
-        success = 1 # unsuccessful
+        result = None # unsuccessful
     except Exception, err:
         msg = err.__str__()
-        success = 1 # unsuccessful
+        result = None # unsuccessful
 
     # always remove the generated script
     os.remove(script_name)
 
-    if success != 0: # means: submitted
+    if not result:
         logger.error('Unsuccessful ARC job submission: %s' % msg)
-        return (msg, None)
-    else:
-        return (None, sessionid)
+    return (msg, result)
 
-    # TODO: errors in here should be handled inside grid_script. 
-    # Does not happen up to now, AFAICT.
-    # in our case, one potential error is that the proxy is invalid,
+    # errors are handled inside grid_script. For ARC jobs, set status = FAILED
+    # on errors, and include the message
+    # One potential error is that the proxy is invalid,
     # which should be checked inside the parser, before informing 
     # grid_script about the new job.
 

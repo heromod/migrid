@@ -118,7 +118,7 @@ def handle_expand(
     if os.path.isfile(real_path):
         handle_file(
             listing,
-            relative_path,
+            base_name,
             relative_path,
             real_path,
             flags,
@@ -148,11 +148,11 @@ def handle_expand(
                 if os.path.isfile(path):
                     handle_file(
                         listing,
-                        rel_path,
+                        name,
                         rel_path,
                         path,
                         flags,
-                        os.path.join(dest, os.path.basename(rel_path)),
+                        dest,
                         show_dest,
                         )
         else:
@@ -180,7 +180,7 @@ def handle_expand(
                         base_dir,
                         path,
                         flags,
-                        os.path.join(dest, name),
+                        dest,
                         depth + 1,
                         show_dest,
                         )
@@ -609,6 +609,7 @@ Optional remote filename (extra useful in windows)
     """
                                % {'dest_dir': relative_dir + os.sep}})
 
+    output_objects.append({'object_type': 'text', 'text': ''})
     return (output_objects, status)
 
 

@@ -3,7 +3,7 @@
 #
 # --- BEGIN_HEADER ---
 #
-# submit - submit a job file
+# submit - [insert a few words of module description on this line]
 # Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
@@ -25,7 +25,7 @@
 # -- END_HEADER ---
 #
 
-"""Explicit job file submit"""
+"""Explicit job submit"""
 
 import os
 import glob
@@ -156,8 +156,10 @@ def main(client_id, user_arguments_dict):
                 # output_objects.append({"object_type":"text", "text":"%s" % newmsg})
 
             submitstatuslist.append(submitstatus)
+
         output_objects.append({'object_type': 'submitstatuslist',
                               'submitstatuslist': submitstatuslist})
+
     return (output_objects, status)
 
 

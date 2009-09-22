@@ -78,8 +78,4 @@ if '__main__' == __name__:
             print 'Error: %s not supported!' % opt
             sys.exit(1)
 
-    try:
-        migrate_users(conf_path, db_path, force, verbose, prune)
-    except Exception, err:
-        print err
-        sys.exit(1)        
+    migrate_users(conf_path, db_path, force, verbose, prune)

@@ -135,10 +135,6 @@ if '__main__' == __name__:
 
     if verbose:
         print 'Removing DB entry and dirs for user: %s' % user_dict
-    try:
-        delete_user(user_dict, conf_path, db_path, force, verbose)
-    except Exception, err:
-        print err
-        sys.exit(1)
+    delete_user(user_dict, conf_path, db_path, force, verbose)
     print 'Deleted %s from user database and from file system'\
           % user_dict['distinguished_name']

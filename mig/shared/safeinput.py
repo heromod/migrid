@@ -30,7 +30,6 @@ to an extent where it can be used in back ends and output
 without worrying about XSS vulnerabilities, etc.
 """
 
-import cgi
 from string import letters, digits
 
 from shared.valuecheck import lines_value_checker, \
@@ -53,15 +52,7 @@ ALLOW_UNSAFE = \
 # Allow these chars in addition to plain letters and digits
 
 name_extras = ' -'
-
-############################################################################
-# IMPORTANT: never allow '+' and '_' in DN: reserved for path translation! #
-############################################################################
-# We allow ':' in DN, however, as it is used by e.g. DanID: 
-# /C=DK/O=Ingen organisatorisk tilknytning/CN=$name/serialNumber=PID:$serial
-
-dn_extras = name_extras + '/=@.:'
-
+dn_extras = name_extras + '/=@._'
 password_extras = ' -_#.,:;!@%/()[]{}+=?<>'
 password_min_len = 4
 password_max_len = 64
@@ -75,6 +66,23 @@ VALID_NAME_CHARACTERS = valid_name_chars
 VALID_DN_CHARACTERS = valid_dn_chars
 
 # Helper functions
+
+# TODO: switch to use similar cgiinput function
+# ... only possible when cgiinput no longer imports from here!!
+
+
+def __html_escape(contents):
+    """Uses cgi.escape() to encode contents in a html safe way. In that
+    way the resulting data can be included in a html page without risk
+    of XSS vulnerabilities.
+    """
+
+    # We us html_escape as a general protection even though it is
+    # mostly html (cgi) related
+
+    import cgi
+    return cgi.escape(contents)
+
 
 def __valid_contents(
     contents,
@@ -114,16 +122,6 @@ def __filter_contents(contents, valid_chars):
 
 # Public functions
 
-def html_escape(contents):
-    """Uses cgi.escape() to encode contents in a html safe way. In that
-    way the resulting data can be included in a html page without risk
-    of XSS vulnerabilities.
-    """
-
-    # We us html_escape as a general protection even though it is
-    # mostly html (cgi) related
-
-    return cgi.escape(contents)
 
 def valid_ascii(contents, min_length=0, max_length=-1):
     """Verify that supplied contents only contain ascii characters"""
@@ -776,8 +774,6 @@ def guess_type(name):
         return valid_ascii
     elif name.lower().find('state') != -1:
         return valid_ascii
-    elif name.lower().find('org') != -1:
-        return valid_commonname
     elif name.lower().find('email') != -1:
         return valid_email_address
     elif name.lower().find('comment') != -1:
@@ -911,8 +907,8 @@ def validate_helper(
         for entry in values:
             if not key in fields:
                 err = 'unexpected field: %s' % key
-                bad_values.append((html_escape(entry),
-                                  html_escape(str(err))))
+                bad_values.append((__html_escape(entry),
+                                  __html_escape(str(err))))
                 continue
             if not type_checks.has_key(key):
 
@@ -925,8 +921,8 @@ def validate_helper(
 
                 # Probably illegal type hint
 
-                bad_values.append((html_escape(entry),
-                                  html_escape(str(err))))
+                bad_values.append((__html_escape(entry),
+                                  __html_escape(str(err))))
                 continue
             if not value_checks.has_key(key):
 
@@ -939,8 +935,8 @@ def validate_helper(
 
                 # Value check failed
 
-                bad_values.append((html_escape(entry),
-                                  html_escape(str(err))))
+                bad_values.append((__html_escape(entry),
+                                  __html_escape(str(err))))
                 continue
             ok_values.append(entry)
         if ok_values:

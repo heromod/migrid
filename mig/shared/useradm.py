@@ -175,7 +175,6 @@ def create_user(
     db_path,
     force=False,
     verbose=False,
-    ask_renew=True
     ):
     """Add user"""
 
@@ -204,17 +203,15 @@ def create_user(
             if verbose:
                 print 'Loaded existing user DB from: %s' % db_path
         except Exception, err:
+            print 'Failed to load user DB!'
             if not force:
-                raise Exception('Failed to load user DB!')
+                sys.exit(1)
 
         if user_db.has_key(client_id):
-            if ask_renew:
-                renew_answer = \
-                             raw_input('User DB entry already exists - renew? [Y/n] '
-                                       )
-                renew = not renew_answer.lower().startswith('n')
-            else:
-                renew = False
+            renew_answer = \
+                raw_input('User DB entry already exists - renew? [Y/n] '
+                          )
+            renew = not renew_answer.lower().startswith('n')
             if renew:
                 if verbose:
                     print 'Renewing existing user'
@@ -232,9 +229,10 @@ def create_user(
             print 'User %s was successfully added/updated in user DB!'\
                   % client_id
     except Exception, err:
+        print 'Error: Failed to add %s to user DB: %s' % (client_id,
+                err)
         if not force:
-            raise Exception('Error: Failed to add %s to user DB: %s' % \
-                            (client_id, err))
+            sys.exit(1)
 
     home_dir = os.path.join(configuration.user_home, client_dir)
     mrsl_dir = os.path.join(configuration.mrsl_files_dir, client_dir)
@@ -248,22 +246,24 @@ def create_user(
         try:
             os.mkdir(home_dir)
         except:
+            print 'Error: could not create home dir: %s' % home_dir
             if not force:
-                raise Exception('Error: could not create home dir: %s' % \
-                                home_dir)
+                sys.exit(1)
 
         try:
             os.mkdir(mrsl_dir)
         except:
+            print 'Error: could not create mrsl dir: %s' % mrsl_dir
             if not force:
-                raise Exception('Error: could not create mrsl dir: %s' % \
-                                mrsl_dir)
+                sys.exit(1)
+
         try:
             os.mkdir(pending_dir)
         except:
+            print 'Error: could not create resource dir: %s'\
+                 % pending_dir
             if not force:
-                raise Exception('Error: could not create resource dir: %s' % \
-                                pending_dir)
+                sys.exit(1)
     else:
 
         # Allow temporary write access
@@ -302,9 +302,10 @@ def create_user(
 
         os.chmod(htaccess_path, 0444)
     except:
+        print 'Error: could not create htaccess file: %s'\
+             % htaccess_path
         if not force:
-            raise Exception('Error: could not create htaccess file: %s' % \
-                            htaccess_path)
+            sys.exit(1)
 
     # Always write default css to avoid apache error log entries
 
@@ -313,10 +314,9 @@ def create_user(
         filehandle.write(get_default_css(css_path))
         filehandle.close()
     except:
-        
+        print 'Error: could not create custom css file: %s' % css_path
         if not force:
-            raise Exception('Error: could not create custom css file: %s' % \
-                            css_path)
+            sys.exit(1)
 
 
 def delete_user(
@@ -347,13 +347,15 @@ def delete_user(
             if verbose:
                 print 'Loaded existing user DB from: %s' % db_path
         except Exception, err:
+            print 'Failed to load user DB!'
+            print err
             if not force:
-                raise Exception('Failed to load user DB: %s' % err)
+                sys.exit(1)
 
         if not user_db.has_key(client_id):
+            print "Error: User DB entry '%s' doesn't exist!" % client_id
             if not force:
-                raise Exception("Error: User DB entry '%s' doesn't exist!" % \
-                                client_id)
+                sys.exit(1)
 
     try:
         del user_db[client_id]
@@ -362,9 +364,10 @@ def delete_user(
             print 'User %s was successfully removed from user DB!'\
                   % client_id
     except Exception, err:
+        print 'Error: Failed to remove %s from user DB: %s'\
+             % (client_id, err)
         if not force:
-            raise Exception('Error: Failed to remove %s from user DB: %s'\
-                            % (client_id, err))
+            sys.exit(1)
 
     # Remove user dirs recursively
 
@@ -376,9 +379,9 @@ def delete_user(
         try:
             delete_dir(user_path)
         except Exception, exc:
+            print 'Error: could not remove %s: %s' % (user_path, exc)
             if not force:
-                raise Exception('Error: could not remove %s: %s' % \
-                                (user_path, exc))
+                sys.exit(1)
     if verbose:
         print 'User dirs for %s was successfully removed!'\
                   % client_id
@@ -416,8 +419,10 @@ def migrate_users(
             if verbose:
                 print 'Loaded existing user DB from: %s' % db_path
         except Exception, err:
+            print 'Failed to load user DB!'
+            print err
             if not force:
-                raise Exception('Failed to load user DB: %s' % err)
+                sys.exit(1)
 
     targets = {}
     for (client_id, user) in user_db.items():
@@ -438,18 +443,18 @@ def migrate_users(
         new_id = user['distinguished_name']        
         if new_id in user_db.keys():
             if not prune_dupes:
+                print 'Error: new ID %s already exists in user DB!' % new_id
                 if not force:
-                    raise Exception('Error: new ID %s already exists in user DB!' % \
-                                    new_id)
+                    sys.exit(1)
             else:
                 if verbose:
                     print 'Pruning old duplicate user %s from user DB' % client_id
                 del user_db[client_id]
         elif old_id in latest.keys():
             if not prune_dupes:
+                print 'Error: old ID %s is not unique in user DB!' % old_id
                 if not force:
-                    raise Exception('Error: old ID %s is not unique in user DB!' % \
-                                    old_id)
+                    sys.exit(1)
             else:
                 (latest_id, latest_user) = latest[old_id]
                 # expire may be int, unset or None: try with fall back
@@ -499,9 +504,10 @@ def migrate_users(
 
                 # os.symlink(new_path, old_path)
 
+                print 'Error: could not move %s to %s: %s' % (old_path,
+                        new_path, exc)
                 if not force:
-                    raise Exception('Error: could not move %s to %s: %s' % \
-                                    (old_path, new_path, exc))
+                    sys.exit(1)
 
         mrsl_base = os.path.join(configuration.mrsl_files_dir, new_name)
         for mrsl_name in os.listdir(mrsl_base):
@@ -511,9 +517,10 @@ def migrate_users(
                     continue
                 filter_pickled_dict(mrsl_path, {old_id: new_id})
             except Exception, exc:
+                print 'Error: could not update saved mrsl user in %s: %s'\
+                     % (mrsl_path, exc)
                 if not force:
-                    raise Exception('Error: could not update saved mrsl user in %s: %s'\
-                                    % (mrsl_path, exc))
+                    sys.exit(1)
 
         re_base = configuration.re_home
         for re_name in os.listdir(re_base):
@@ -523,9 +530,10 @@ def migrate_users(
                     continue
                 filter_pickled_dict(re_path, {old_id: new_id})
             except Exception, exc:
+                print 'Error: could not update RE user in %s: %s'\
+                     % (re_path, exc)
                 if not force:
-                    raise Exception('Error: could not update RE user in %s: %s'\
-                                    % (re_path, exc))
+                    sys.exit(1)
 
         for base_dir in (configuration.resource_home,
                          configuration.vgrid_home):
@@ -537,9 +545,10 @@ def migrate_users(
                     try:
                         filter_pickled_list(kind_path, {old_id: new_id})
                     except Exception, exc:
+                        print 'Error: could not update saved %s in %s: %s'\
+                             % (kind, kind_path, exc)
                         if not force:
-                            raise Exception('Error: could not update saved %s in %s: %s'\
-                                            % (kind, kind_path, exc))
+                            sys.exit(1)
 
         # Finally update user DB now that file system was updated
 
@@ -551,9 +560,10 @@ def migrate_users(
                 print 'User %s was successfully updated in user DB!'\
                       % client_id
         except Exception, err:
+            print 'Error: Failed to update %s in user DB: %s'\
+                 % (client_id, err)
             if not force:
-                raise Exception('Error: Failed to update %s in user DB: %s'\
-                                % (client_id, err))
+                sys.exit(1)
 
 
 def default_search():

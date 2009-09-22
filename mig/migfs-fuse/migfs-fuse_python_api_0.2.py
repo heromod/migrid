@@ -31,7 +31,7 @@ which at the time of this writing uses curl as a HTTPS transport
 with client certificate support.
 """
 
-__version__ = '0.5.3'
+__version__ = '0.5.2'
 
 import ConfigParser
 import array
@@ -1175,11 +1175,7 @@ class MiGfs(Fuse):
                                  % (path, parts))
                     continue
                 (name, val) = parts
-                # times may be float string which causes ValueError for int()
-                if '.' in val:
-                    inode[mapping[name]] = int(float(val))
-                else:
-                    inode[mapping[name]] = int(val)
+                inode[mapping[name]] = int(val)
                 inode['uid'] = int(os.getuid())
                 inode['gid'] = int(os.getgid())
             log.debug('prefetch_inodes: %s; inode %s' % (path, inode))
@@ -1259,11 +1255,7 @@ class MiGfs(Fuse):
                             parts))
                 continue
             (name, val) = parts
-            # times may be float string which causes ValueError for int()
-            if '.' in val:
-                inode[mapping[name]] = int(float(val))
-            else:
-                inode[mapping[name]] = int(val)
+            inode[mapping[name]] = int(val)
         if inode:
 
             # Overwrite uid/gid and save to cache
@@ -1305,10 +1297,6 @@ try:
     if 'logfile' in options:
         logfile = os.path.abspath(os.path.expanduser(conf.get('log',
                                   'logfile')))
-        # TODO: Switch to ConcurrentRotatingFileHandler?
-        # The regular RotatingFileHandler is not thread safe and won't work
-        # consistently with threaded prefetching:
-        # http://bugs.python.org/issue4749
         file_handler = logging.handlers.RotatingFileHandler(logfile, 'a'
                 , 5242880, 3)
         file_handler.setFormatter(default_format)

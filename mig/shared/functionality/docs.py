@@ -57,7 +57,6 @@ def display_topic(output_objects, subject, all_docs):
         output_objects.append({'object_type': 'text', 'text'
                               : "No documentation found matching '%s'"
                                % subject})
-    output_objects.append({'object_type': 'html_form', 'text': '<br>'})
 
 
 def show_subject(subject, doc_function, doc_args):
@@ -87,7 +86,7 @@ def mrsl_keywords(configuration, output_objects):
         info = keywords_dict[keyword]
         output_objects.append({'object_type': 'html_form', 'text'
                               : "<a name='%s'></a>" % keyword})
-        output_objects.append({'object_type': 'sectionheader', 'text'
+        output_objects.append({'object_type': 'header', 'text'
                               : keyword})
         entries = []
         for (field, val) in info.items():
@@ -101,24 +100,22 @@ def config_keywords(configuration, output_objects):
         resconfkeywords.get_resource_keywords(configuration)
     exenode_keywords = \
         resconfkeywords.get_exenode_keywords(configuration)
-    storenode_keywords = \
-        resconfkeywords.get_storenode_keywords(configuration)
     topics = [('Resource configuration', resource_keywords),
-              ('Execution node configuration', exenode_keywords),
-              ('Storage node configuration', storenode_keywords)]
+              ('Execution node configuration', exenode_keywords)]
     for (title, keywords_dict) in topics:
         output_objects.append({'object_type': 'header', 'text': title})
         sorted_keys = keywords_dict.keys()
         sorted_keys.sort()
         for keyword in sorted_keys:
             info = keywords_dict[keyword]
-            output_objects.append({'object_type': 'sectionheader', 'text'
+            output_objects.append({'object_type': 'header', 'text'
                                   : keyword})
             entries = []
             for (field, val) in info.items():
                 entries.append(field + ': ' + str(val))
             output_objects.append({'object_type': 'list', 'list'
                                   : entries})
+        output_objects.append({'object_type': 'header', 'text': ''})
 
 
 def valid_outputformats(output_objects):
@@ -131,7 +128,7 @@ def valid_outputformats(output_objects):
     output_objects.append({'object_type': 'text', 'text'
                           : 'Example: SERVER_URL/ls.py?output_format=txt'
                           })
-    output_objects.append({'object_type': 'sectionheader', 'text'
+    output_objects.append({'object_type': 'header', 'text'
                           : 'Valid formats'})
     entries = []
     for outputformat in get_valid_outputformats():
@@ -170,7 +167,7 @@ def main(client_id, user_arguments_dict):
     html += "<input type='hidden' name='show' value=''>"
     html += "<input type='text' name='search' value=''>"
     html += "<input type='submit' value='Filter'>"
-    html += '</form></p><br>'
+    html += '</form></p>'
     output_objects.append({'object_type': 'html_form', 'text': html})
 
     # Fall back to show all topics

@@ -50,6 +50,8 @@ from shared.resadm import atomic_resource_exe_restart, put_exe_pgid
 from shared.vgrid import default_vgrid
 from shared.useradm import client_id_dir
 
+import shared.arcwrapper as arc
+
 try:
     import servercomm
 except ImportError, ime:
@@ -1184,11 +1186,35 @@ while True:
                 ', but job is being executed by %s:%s, ignoring result.'\
                  % (job_dict['UNIQUE_RESOURCE_NAME'], job_dict['EXE'])
         elif job_dict['UNIQUE_RESOURCE_NAME'] == 'ARC':
-            msg += '. This is an ARC job, ID is %s' % job_dict['EXE']
-            # TODO: check job status.
-            # if status == finished: 
-            #     clean up the job on ARC and server 
-            # otherwise: update job status in mrsl and re-enqueue
+            msg += (', which is an ARC job (ID %s).' % job_dict['EXE'])
+
+            # job status has been checked by put script already
+            # we need to clean up the job remainder (links, queue, and ARC side)
+
+            userdir = client_id_dir(job_dict['USER_CERT'])
+            sessionid = job_dict['SESSIONID']
+
+            symlinks = [configuration.webserver_home + sessionid
+                        , configuration.sessid_to_mrsl_link_home \
+                          + sessionid + '.mRSL']
+            for link in symlinks:
+                try: 
+                    os.remove(link)
+                except Exception, err:
+                    logger.error('Could not remove link %s' % link)
+
+            # remove from the executing queue
+            executing_queue.dequeue_job_by_id(job_id)
+
+            # clean up in ARC
+            try:
+                arcsession = arc.Ui(userdir)
+                arcsession.clean(job_dict['EXE'])
+            except Exception, err:
+                # session instantiation failed (clean always succeeds)
+                logger.error('Error getting ARC session: %s' % err.str())
+                logger.debug('Job was: %s' % job_dict)
+
         else:
 
             # Clean up the server for files associated with the finished job

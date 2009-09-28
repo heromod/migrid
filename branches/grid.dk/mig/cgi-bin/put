@@ -40,7 +40,7 @@ import shared.confparser as confparser
 from shared.putfuncs import verify_results, migrated_job
 from shared.resadm import start_resource_exe_if_continuous
 from shared.refunctions import create_runtimeenv
-from shared.notification import notify_user_thread,\
+from shared.notification import notify_user_thread, \
      parse_im_relay, send_resource_create_request_mail, \
      send_instant_message
 from shared.cgishared import init_cgiscript_possibly_with_cert
@@ -51,6 +51,7 @@ from shared.upload import handle_package_upload
 from shared.settings import parse_and_save_settings
 from shared.useradm import client_id_dir
 
+import shared.arcwrapper as arc
 
 block_size = 1024 * 1024
 
@@ -184,9 +185,39 @@ if not client_id:
                    % filepath)
             o.reply_and_exit(o.ERROR)
 
-        # emit a message to grid_script (which will check job status)
-        # dict['EXE'] is the ARC job ID to check.
-        (status, msg) = finished_job(sessionid,'ARC', dict['EXE'], \
+        userdir = client_id_dir(dict['USER_CERT'])
+        try:
+            session = arc.Ui(userdir)
+            jobinfo = session.jobStatus(dict['EXE'])
+        except Exception, err:
+            logger.error('Error during ARC operation: %s' % err.str())
+            logger.debug('Erroneous job was: %s' % dict)
+            o.reply_and_exit(o.ERROR)
+
+        # if status == finished: 
+        #     clean up the job on ARC and server 
+        # otherwise: just update job status in mrsl and keep in queue
+        if jobinfo['status'] == 'FINISHED':
+            logger.debug('ARC job %s finished, cleaning up' % dict['EXE'])
+            dict['FINISHED_TIMESTAMP'] = time.gmtime()
+        else:
+            logger.debug('ARC job %s uploaded a file (not finished yet, status %s).' % \
+                              (dict['EXE'], jobinfo))
+
+        # update status data in mrsl file
+        # (should be FINISHING or FINISHED)
+        dict['STATUS'] = jobinfo['status']
+        # pickle the file again, with the updated status
+
+        repickle = pickle(dict, filepath, logger)
+        if not repickle:
+            o.out('error changing status!')
+
+        # if finished, emit a message to grid_script (which will clean up). 
+        # Don't do this before writing back mRSL. 
+
+        if jobinfo['status'] == 'FINISHED':
+            (status, msg) = finished_job(sessionid, 'ARC', dict['EXE'], \
                                      dict['JOB_ID'], configuration)
         o.reply_and_exit(o.OK)
 

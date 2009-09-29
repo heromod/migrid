@@ -165,6 +165,12 @@ def main(client_id, user_arguments_dict):
                                    % (job_id, job_dict['STATUS'])})
             continue
 
+        if job_dict['UNIQUE_RESOURCE_NAME'] == 'ARC':
+            output_objects.append({'object_type': 'text', 'text'
+                                  : 'Job %s is submitted to ARC, details are not available!'
+                                   % job_id })
+            continue
+
         last_live_update_dict = {}
         last_live_update_file = configuration.mig_system_files + os.sep\
              + job_id + '.last_live_update'

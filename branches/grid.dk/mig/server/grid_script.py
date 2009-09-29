@@ -1212,7 +1212,7 @@ while True:
                 arcsession.clean(job_dict['EXE'])
             except Exception, err:
                 # session instantiation failed (clean always succeeds)
-                logger.error('Error getting ARC session: %s' % err.str())
+                logger.error('Error getting ARC session: %s' % err)
                 logger.debug('Job was: %s' % job_dict)
 
         else:
@@ -1399,6 +1399,39 @@ while True:
         # Retrieve job_dict
 
         job_dict = executing_queue.get_job_by_id(jobid)
+
+        # special treatment of ARC jobs: delete two links and 
+        # clean job in ARC system, do not retry.
+        if job_dict and unique_resource_name == 'ARC':
+
+            userdir = client_id_dir(job_dict['USER_CERT'])
+            sessionid = job_dict['SESSIONID']
+
+            symlinks = [configuration.webserver_home + sessionid
+                        , configuration.sessid_to_mrsl_link_home \
+                          + sessionid + '.mRSL']
+            for link in symlinks:
+                try: 
+                    os.remove(link)
+                except Exception, err:
+                    logger.error('Could not remove link %s: %s' % (link, err))
+
+            # remove from the executing queue
+            executing_queue.dequeue_job_by_id(job_id)
+
+            # clean up in ARC
+            try:
+                arcsession = arc.Ui(userdir)
+            except Exception, err:
+                logger.error('Error when processing ARC job timeout: %s' % err)
+                logger.debug('Job was: %s' % job_dict)
+            else:
+                # cancel catches, clean always succeeds
+                killed = arcsession.cancel(job_dict['EXE'])
+                if not killed:
+                    arcsession.clean(job_dict['EXE'])
+            continue
+        #######################################################
 
         # Execution information is removed from job_dict in
         # requeue_job - save here

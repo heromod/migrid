@@ -40,6 +40,7 @@ from shared.init import initialize_main_variables
 from shared.validstring import valid_user_path
 from shared.useradm import client_id_dir
 
+import shared.arcwrapper as arc
 
 def signature():
     """Signature of the main function"""
@@ -240,6 +241,23 @@ def main(client_id, user_arguments_dict):
                     # not a time object, just add
 
                     job_obj[name.lower()] = job_dict[name]
+
+        ###########################################
+        # ARC job status retrieval on demand:
+        # But we should _not_ update the status in the mRSL files, since 
+        # other MiG code might rely on finding only valid "MiG" states.
+        
+        if job_obj['UNIQUE_RESOURCE_NAME'] == 'ARC' \
+            and job_dict['STATUS'] == 'EXECUTING':
+            try:
+                home = os.path.join(configuration.user_home,client_dir)
+                arcsession = arc.Ui(home)
+                arcstatus = arcsession.JobStatus(job_dict['EXE'])
+                job_obj['STATUS'] = arcstatus
+            except arc.ARCWrapperError, err:
+                logger.error('Error retrieving ARC job status: %s' % err.what())
+            except Exception, err:
+                logger.error('Error retrieving ARC job status: %s' % err)
 
         execution_histories = []
         if verbose(flags):

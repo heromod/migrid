@@ -1191,7 +1191,8 @@ while True:
             # job status has been checked by put script already
             # we need to clean up the job remainder (links, queue, and ARC side)
 
-            userdir = client_id_dir(job_dict['USER_CERT'])
+            userdir = os.path.join(configuration.user_home,\
+                                   client_id_dir(job_dict['USER_CERT']))
             sessionid = job_dict['SESSIONID']
 
             symlinks = [configuration.webserver_home + sessionid
@@ -1338,6 +1339,38 @@ while True:
                             )
                 continue
 
+            # special treatment of ARC jobs: delete two links and cancel job in ARC
+            if unique_resource_name == 'ARC':
+
+                userdir = os.path.join(configuration.user_home,\
+                                       client_id_dir(job_dict['USER_CERT']))
+                sessionid = job_dict['SESSIONID']
+    
+                symlinks = [configuration.webserver_home + sessionid
+                            , configuration.sessid_to_mrsl_link_home \
+                              + sessionid + '.mRSL']
+                for link in symlinks:
+                    try: 
+                        os.remove(link)
+                    except Exception, err:
+                        logger.error('Could not remove link %s: %s' % (link, err))
+    
+                # remove from the executing queue
+                executing_queue.dequeue_job_by_id(job_id)
+    
+                # clean up in ARC
+                try:
+                    arcsession = arc.Ui(userdir)
+                except Exception, err:
+                    logger.error('Error when processing ARC job timeout: %s' % err)
+                    logger.debug('Job was: %s' % job_dict)
+                else:
+                    # cancel catches, clean always succeeds
+                    killed = arcsession.cancel(job_dict['EXE'])
+                    if not killed:
+                        arcsession.clean(job_dict['EXE'])
+                continue
+
             if not server_cleanup(
                 job_dict['SESSIONID'],
                 job_dict['IOSESSIONID'],
@@ -1404,7 +1437,8 @@ while True:
         # clean job in ARC system, do not retry.
         if job_dict and unique_resource_name == 'ARC':
 
-            userdir = client_id_dir(job_dict['USER_CERT'])
+            userdir = os.path.join(configuration.user_home,\
+                                   client_id_dir(job_dict['USER_CERT']))
             sessionid = job_dict['SESSIONID']
 
             symlinks = [configuration.webserver_home + sessionid

@@ -170,8 +170,18 @@ if not client_id:
         # we have no job script => ARC job returned a file 
         # trigger job status check by 
         # grid_script (RESOURCEFINISHEDJOB message)        
-        logger.debug('Received a file from ARC (session id %s)' % sessionid)
+        logger.debug('Received file %s from ARC (session id %s)' \
+                      % (filename, sessionid))
+        
+        # ATTENTION, RACE CONDITION: several output files will arrive 
+        # and might cause conflicting updates and several cleanup messages. 
 
+        # to avoid this situation: only do the check for files with 
+        # name "*.stdout", and loop if job status != finished.
+        # This does not eliminate the race condition, well understood...
+        if str_suffix != '.stdout':
+            o.reply_and_exit(o.OK)
+        
         # open .mRSL file containing all info about the job
 
         filepath = configuration.sessid_to_mrsl_link_home + sessionid\
@@ -181,6 +191,8 @@ if not client_id:
         # TODO: do something if dict could not be unpickled.
 
         if not dict or not dict['JOBTYPE'] == 'arc':
+            logger.error('put: error unpickling ARC job dict %s'
+                         % filepath)
             o.out('put: error unpickling ARC job dict %s'
                    % filepath)
             o.reply_and_exit(o.ERROR)
@@ -189,35 +201,39 @@ if not client_id:
         try:
             session = arc.Ui(userdir)
             jobinfo = session.jobStatus(dict['EXE'])
+            logger.debug('ARC job %s uploaded output file (status %s).' % \
+                              (dict['EXE'], jobinfo))
+            while jobinfo['status'] != 'FINISHED':
+                # we have received output, so the job should
+                # hopefully finish soon...
+                sleep(5)
+                jobinfo = session.jobStatus(dict['EXE'])
+
         except Exception, err:
-            logger.error('Error during ARC operation: %s' % err.str())
+            logger.error('Error during ARC status retrieval: %s'\
+                          % err.str())
             logger.debug('Erroneous job was: %s' % dict)
             o.reply_and_exit(o.ERROR)
 
-        # if status == finished: 
+        # now status == finished: 
         #     clean up the job on ARC and server 
-        # otherwise: just update job status in mrsl and keep in queue
-        if jobinfo['status'] == 'FINISHED':
-            logger.debug('ARC job %s finished, cleaning up' % dict['EXE'])
-            dict['FINISHED_TIMESTAMP'] = time.gmtime()
-        else:
-            logger.debug('ARC job %s uploaded a file (not finished yet, status %s).' % \
-                              (dict['EXE'], jobinfo))
+        logger.debug('ARC job %s finished, cleaning up' % dict['EXE'])
 
         # update status data in mrsl file
-        # (should be FINISHING or FINISHED)
+        # (should be FINISHED)
         dict['STATUS'] = jobinfo['status']
+        dict['FINISHED_TIMESTAMP'] = time.gmtime()
+
         # pickle the file again, with the updated status
 
         repickle = pickle(dict, filepath, logger)
         if not repickle:
             o.out('error changing status!')
 
-        # if finished, emit a message to grid_script (which will clean up). 
+        # And emit a message to grid_script (which will clean up). 
         # Don't do this before writing back mRSL. 
 
-        if jobinfo['status'] == 'FINISHED':
-            (status, msg) = finished_job(sessionid, 'ARC', dict['EXE'], \
+        (status, msg) = finished_job(sessionid, 'ARC', dict['EXE'], \
                                      dict['JOB_ID'], configuration)
         o.reply_and_exit(o.OK)
 

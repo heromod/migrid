@@ -197,7 +197,8 @@ if not client_id:
                    % filepath)
             o.reply_and_exit(o.ERROR)
 
-        userdir = client_id_dir(dict['USER_CERT'])
+        userdir = os.path.join(configuration.user_home, \
+                               client_id_dir(dict['USER_CERT']))
         try:
             session = arc.Ui(userdir)
             jobinfo = session.jobStatus(dict['EXE'])
@@ -206,13 +207,16 @@ if not client_id:
             while jobinfo['status'] != 'FINISHED':
                 # we have received output, so the job should
                 # hopefully finish soon...
-                sleep(5)
+                time.sleep(5)
                 jobinfo = session.jobStatus(dict['EXE'])
 
+        except arc.ARCWrapperError, err:
+            logger.error('Error during ARC status retrieval: %s'\
+                          % err.what())
+            o.reply_and_exit(o.ERROR)
         except Exception, err:
             logger.error('Error during ARC status retrieval: %s'\
-                          % err.str())
-            logger.debug('Erroneous job was: %s' % dict)
+                          % err.__str__())
             o.reply_and_exit(o.ERROR)
 
         # now status == finished: 

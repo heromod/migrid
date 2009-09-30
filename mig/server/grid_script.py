@@ -405,12 +405,12 @@ while True:
                 dict_userjob['STATUS'] = 'FAILED'
                 dict_userjob['FAILED_TIMESTAMP'] = time.gmtime()
                 # and create an execution history (basically empty)
-                dict_userjob['EXECUTION_HISTORY'] = [].append(\
-                    {'QUEUED_TIMESTAMP': dict_userjob['QUEUED_TIMESTAMP'],
-                     'EXECUTING_TIMESTAMP': dict_userjob['FAILED_TIMESTAMP'],
-                     'FAILED_TIMESTAMP': dict_userjob['FAILED_TIMESTAMP'],
-                     'FAILED_MESSAGE': ('ARC Submission failed: %s' % arc_id),
-                     'UNIQUE_RESOURCE_NAME': 'ARC',})
+                hist = ({'QUEUED_TIMESTAMP': dict_userjob['QUEUED_TIMESTAMP'],
+                         'EXECUTING_TIMESTAMP': dict_userjob['FAILED_TIMESTAMP'],
+                         'FAILED_TIMESTAMP': dict_userjob['FAILED_TIMESTAMP'],
+                         'FAILED_MESSAGE': ('ARC Submission failed: %s' % arc_id),
+                         'UNIQUE_RESOURCE_NAME': 'ARC',})
+                dict_userjob['EXECUTION_HISTORY'] = [hist]
 
                 # should also notify the user (if requested)
                 # not implented for this branch.

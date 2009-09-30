@@ -1451,7 +1451,7 @@ while True:
                     logger.error('Could not remove link %s: %s' % (link, err))
 
             # remove from the executing queue
-            executing_queue.dequeue_job_by_id(job_id)
+            executing_queue.dequeue_job_by_id(jobid)
 
             # clean up in ARC
             try:

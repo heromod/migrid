@@ -420,7 +420,7 @@ def create_arc_job(
                  configuration.sessid_to_mrsl_link_home + sessionid + '.mRSL')
                ]
 
-    def symlink (dest,loc): make_symlink(dest,loc,logger)
+    def symlink ((dest,loc)): make_symlink(dest,loc,logger)
     map(symlink, linklist)
 
     # the translation generates an xRSL object which specifies to execute

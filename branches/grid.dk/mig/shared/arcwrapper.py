@@ -261,7 +261,7 @@ class Ui:
             raise err
         except arclib.ARCLibError, err:
             logger.error('Cannot initialise: %s' % err.what())
-            raise err
+            raise ARCWrapperError(err.what())
         except Exception, other:
             logger.error('Unexpected error during initialisation.\n %s' % other)
             raise ARCWrapperError(other.__str__())
@@ -306,7 +306,7 @@ class Ui:
             logger.error('ARC queue initialisation error: %s' % err )
             self._clusters = []
             self._queues = []
-            raise err
+            raise ARCWrapperError(err.__str__())
 
     def __lockArclib(self):
         """ ensures exclusive access to the interface and sets the environment
@@ -435,24 +435,24 @@ class Ui:
                 self.__unlockArclib()
             raise err
         except arclib.XrslError, message:
-            logger.error('Ui: XrslError: ' + message.what())
+            logger.error('Ui,XRSL' + message.what())
             if self._arclibLock.locked(): # should not happen!
                 self.__unlockArclib()
-            raise message
+            raise ARCWrapperError('XrslError: ' + message.what())
         except arclib.JobSubmissionError, message:
-            logger.error('Ui: JobSubmissionError: ' + message.what())
+            logger.error('Ui,Submit: ' + message.what())
             self.__unlockArclib()
-            raise message
+            raise ARCWrapperError('JobSubmissionError: ' + message.what())
         except arclib.TargetError, message:
-            logger.error('Ui: TargetError: ' + str(message))
+            logger.error('Ui,Target: ' + str(message))
             if self._arclibLock.locked(): # should not be...
                 self.__unlockArclib()
-            raise message
+            raise ARCWrapperError('TargetError: ' + str(message))
         except Exception, err:
             if self._arclibLock.locked(): # ...
                 self.__unlockArclib()
             logger.error('Unexpected error: %s' % err )
-            raise err
+            raise ARCWrapperError(err.__str__())
 
     def AllJobStatus(self):
         """Query status of jobs in joblist.
@@ -682,7 +682,7 @@ class Ui:
         except Exception, err:
             logger.error('Error creating job directory: %s' % err)
             os.chdir(currDir)
-            raise err
+            raise ARCWrapperError(err.__str__())
 
         logger.debug('downloading output summary file')
         self.__lockArclib()
@@ -735,12 +735,12 @@ class Ui:
             logger.error('ARCLib error while downloading: %s' % err.what())
             self.__unlockArclib()
             os.chdir(currDir)
-            raise Exception(err.what())
+            raise ARCWrapperError(err.what())
         except Exception, err:
             logger.error('Error while downloading.\n %s' % err)
             self.__unlockArclib()
             os.chdir(currDir)
-            raise err
+            raise ARCWrapperError(err.__str__())
 
         # return
         logger.debug(string.join(['downloaded:'] + complete, ' '))
@@ -837,7 +837,7 @@ class Ui:
                 ftp.Download(arclib.URL(jobId + '/' + outname))
             except Exception, err:
                 self.__unlockArclib()
-                raise err
+                raise ARCWrapperError(err.__str__())
             self.__unlockArclib()
             logger.debug('output downloaded')
             result = file(outname).read()
@@ -875,7 +875,7 @@ class Ui:
                 ftp.Download(arclib.URL(jobId + '/' + outname))
             except Exception, err:
                 self.__unlockArclib()
-                raise err
+                raise ARCWrapperError(err.__str__())
             self.__unlockArclib()
             logger.debug('output downloaded')
             result = file(outname).read()

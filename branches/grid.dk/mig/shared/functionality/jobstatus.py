@@ -247,7 +247,8 @@ def main(client_id, user_arguments_dict):
         # But we should _not_ update the status in the mRSL files, since 
         # other MiG code might rely on finding only valid "MiG" states.
         
-        if job_obj['UNIQUE_RESOURCE_NAME'] == 'ARC' \
+        if 'UNIQUE_RESOURCE_NAME' in job_obj \
+            and job_obj['UNIQUE_RESOURCE_NAME'] == 'ARC' \
             and job_dict['STATUS'] == 'EXECUTING':
             try:
                 home = os.path.join(configuration.user_home,client_dir)

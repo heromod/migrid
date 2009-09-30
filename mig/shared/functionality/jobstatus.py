@@ -247,14 +247,14 @@ def main(client_id, user_arguments_dict):
         # But we should _not_ update the status in the mRSL files, since 
         # other MiG code might rely on finding only valid "MiG" states.
         
-        if 'UNIQUE_RESOURCE_NAME' in job_obj \
-            and job_obj['UNIQUE_RESOURCE_NAME'] == 'ARC' \
+        if 'UNIQUE_RESOURCE_NAME' in job_dict \
+            and job_dict['UNIQUE_RESOURCE_NAME'] == 'ARC' \
             and job_dict['STATUS'] == 'EXECUTING':
             try:
                 home = os.path.join(configuration.user_home,client_dir)
                 arcsession = arc.Ui(home)
-                arcstatus = arcsession.JobStatus(job_dict['EXE'])
-                job_obj['STATUS'] = arcstatus
+                arcstatus = arcsession.jobStatus(job_dict['EXE'])
+                job_obj['status'] = arcstatus['status']
             except arc.ARCWrapperError, err:
                 logger.error('Error retrieving ARC job status: %s' % err.what())
             except Exception, err:

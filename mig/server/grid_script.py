@@ -1195,9 +1195,10 @@ while True:
                                    client_id_dir(job_dict['USER_CERT']))
             sessionid = job_dict['SESSIONID']
 
-            symlinks = [configuration.webserver_home + sessionid
-                        , configuration.sessid_to_mrsl_link_home \
-                          + sessionid + '.mRSL']
+            symlinks = [os.path.join(configuration.webserver_home,
+                                     sessionid)
+                        , os.path.join(configuration.sessid_to_mrsl_link_home,
+                                       sessionid + '.mRSL')]
             for link in symlinks:
                 try: 
                     os.remove(link)
@@ -1346,9 +1347,10 @@ while True:
                                        client_id_dir(job_dict['USER_CERT']))
                 sessionid = job_dict['SESSIONID']
     
-                symlinks = [configuration.webserver_home + sessionid
-                            , configuration.sessid_to_mrsl_link_home \
-                              + sessionid + '.mRSL']
+                symlinks = [os.path.join(configuration.webserver_home,
+                                         sessionid)
+                            , os.path.join(configuration.sessid_to_mrsl_link_home,
+                                           sessionid + '.mRSL')]
                 for link in symlinks:
                     try: 
                         os.remove(link)
@@ -1441,9 +1443,10 @@ while True:
                                    client_id_dir(job_dict['USER_CERT']))
             sessionid = job_dict['SESSIONID']
 
-            symlinks = [configuration.webserver_home + sessionid
-                        , configuration.sessid_to_mrsl_link_home \
-                          + sessionid + '.mRSL']
+            symlinks = [os.path.join(configuration.webserver_home,
+                                     sessionid)
+                        , os.path.join(configuration.sessid_to_mrsl_link_home,
+                                       sessionid + '.mRSL')]
             for link in symlinks:
                 try: 
                     os.remove(link)

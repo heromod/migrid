@@ -253,6 +253,8 @@ if not client_id:
     elif str_suffix == '.status':
         o.internal('.status file received|')
 
+        # TODO: check if prefix is a job id
+
         # open .mRSL file containing all info about the job
 
         filepath = configuration.sessid_to_mrsl_link_home + sessionid\

@@ -87,9 +87,7 @@ def translate(mrsl_dict, session_id = None):
             # MiG server URL (automatic output download, will use PUT)
             destination = '/'.join([config.migserver_https_url
                                    , 'sid_redirect'
-                                   , session_id
-                                   , 'job_output'
-                                   , j_name,''])
+                                   , session_id, ''])
         else:
             destination = ''
 
@@ -100,13 +98,14 @@ def translate(mrsl_dict, session_id = None):
         for [f,target] in tmpoutfiles:
             if target == '':
                 target = f # same file name if none given
-            elif -1 == target.find('://'): # not remote target, should copy
+            if -1 == target.find('://'): # not remote target, should copy
                     # (ARC does not allow local file names as target)
                 target = ''.join([destination,target])
                     # means: automatic upload to jobdir on MiG server. 
             outfiles.append([f,target])
 
         # job output, maybe transfer automatically to MiG server
+        destination = destination + '/'.join(['job_output', j_name,''])
         stdout = '.'.join([j_name,'stdout'])
         stderr = '.'.join([j_name,'stderr'])
 

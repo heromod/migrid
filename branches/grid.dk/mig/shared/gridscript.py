@@ -35,7 +35,7 @@ from shared.fileio import send_message_to_grid_script
 from shared.job import output_dir
 from shared.notification import notify_user_thread
 from shared.useradm import client_id_dir
-
+import shared.arcwrapper as arc
 
 def clean_grid_stdin(stdin):
     """Deletes all content from the pipe (used when grid-script is
@@ -122,8 +122,8 @@ def check_mrsl_files(
 
             job_dict = io.unpickle(filename, logger)
             if not job_dict:
-                logger.error('could not open and unpickle: %s %s'
-                              % (filename, err))
+                logger.error('could not open and unpickle: %s'
+                              % filename)
                 continue
 
             if job_dict['STATUS'] == 'PARSE':
@@ -444,3 +444,85 @@ def requeue_job(
                 )
 
 
+def clean_arc_job(
+    job_dict, 
+    status,
+    msg,
+    configuration,
+    logger,
+    kill = True 
+    ):
+
+    if not status in ['FINISHED', 'CANCELED', 'FAILED']:
+        logger.error('inconsistent cleanup request: %s for job %s' % \
+                     (status, job_dict))
+
+# done by the caller...
+#    executing_queue.dequeue_job_by_id(job_dict['JOB_ID'])
+
+    timestamp = time.gmtime()
+    client_dir = client_id_dir(job_dict['USER_CERT'])
+
+    # clean up in ARC
+    try:
+        userdir = os.path.join(configuration.user_home, client_dir)
+        arcsession = arc.Ui(userdir)
+    except Exception, err:
+        logger.error('Error cleaning up ARC job: %s' % err)
+        logger.debug('Job was: %s' % job_dict)
+    else:
+        # cancel catches, clean always succeeds
+        if kill:
+            killed = arcsession.cancel(job_dict['EXE'])
+            if not killed:
+                arcsession.clean(job_dict['EXE'])
+        else:
+            arcsession.clean(job_dict['EXE'])
+
+# Clean up associated server files of the job
+
+    if 'SESSIONID' in job_dict:
+        sessionid = job_dict['SESSIONID']
+        symlinks = [os.path.join(configuration.webserver_home,
+                                 sessionid)
+                    , os.path.join(configuration.sessid_to_mrsl_link_home,
+                                   sessionid + '.mRSL')]
+        for link in symlinks:
+            try: 
+                os.remove(link)
+            except Exception, err:
+                logger.error('Could not remove link %s: %s' % (link, err))
+
+
+    # finished jobs have already been handled by the put script
+    if status == 'FINISHED':
+        logger.debug('Cleaned finished job %s (done)' % job_dict['JOB_ID'])
+        return
+
+    else:
+        job_dict['STATUS'] = status
+        job_dict[ status + '_TIMESTAMP' ] = timestamp
+
+        # Generate execution history
+
+        if not job_dict.has_key('EXECUTION_HISTORY'):
+            job_dict['EXECUTION_HISTORY'] = []
+
+        history_dict = {
+            'QUEUED_TIMESTAMP': job_dict['QUEUED_TIMESTAMP'],
+            'EXECUTING_TIMESTAMP': job_dict['EXECUTING_TIMESTAMP'],
+            status + '_TIMESTAMP': timestamp,
+            status + '_MESSAGE': msg,
+            'UNIQUE_RESOURCE_NAME': job_dict['UNIQUE_RESOURCE_NAME'],
+        }
+
+        job_dict['EXECUTION_HISTORY'].append(history_dict)
+
+        # save into mrsl
+
+        mrsl_file = os.path.join(configuration.mrsl_files_dir,
+                                 client_dir, 
+                                 job_dict['JOB_ID'] + '.mRSL')
+        io.pickle(job_dict, mrsl_file, logger)
+
+    return

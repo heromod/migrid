@@ -45,12 +45,10 @@ from shared.conf import get_resource_exe
 from shared.gridscript import clean_grid_stdin, \
     remove_jobrequest_pending_files, check_mrsl_files, requeue_job, \
     server_cleanup, load_queue, save_queue, load_schedule_cache, \
-    save_schedule_cache
+    save_schedule_cache, clean_arc_job
 from shared.resadm import atomic_resource_exe_restart, put_exe_pgid
 from shared.vgrid import default_vgrid
 from shared.useradm import client_id_dir
-
-import shared.arcwrapper as arc
 
 try:
     import servercomm
@@ -1188,34 +1186,14 @@ while True:
         elif job_dict['UNIQUE_RESOURCE_NAME'] == 'ARC':
             msg += (', which is an ARC job (ID %s).' % job_dict['EXE'])
 
-            # job status has been checked by put script already
-            # we need to clean up the job remainder (links, queue, and ARC side)
-
-            userdir = os.path.join(configuration.user_home,\
-                                   client_id_dir(job_dict['USER_CERT']))
-            sessionid = job_dict['SESSIONID']
-
-            symlinks = [os.path.join(configuration.webserver_home,
-                                     sessionid)
-                        , os.path.join(configuration.sessid_to_mrsl_link_home,
-                                       sessionid + '.mRSL')]
-            for link in symlinks:
-                try: 
-                    os.remove(link)
-                except Exception, err:
-                    logger.error('Could not remove link %s' % link)
-
             # remove from the executing queue
             executing_queue.dequeue_job_by_id(job_id)
 
-            # clean up in ARC
-            try:
-                arcsession = arc.Ui(userdir)
-                arcsession.clean(job_dict['EXE'])
-            except Exception, err:
-                # session instantiation failed (clean always succeeds)
-                logger.error('Error getting ARC session: %s' % err)
-                logger.debug('Job was: %s' % job_dict)
+            # job status has been checked by put script already
+            # we need to clean up the job remainder (links, queue, and ARC side)
+            clean_arc_job(job_dict, 'FINISHED', None, 
+                          configuration, logger, False)
+            msg += 'ARC job completed'
 
         else:
 
@@ -1343,34 +1321,17 @@ while True:
             # special treatment of ARC jobs: delete two links and cancel job in ARC
             if unique_resource_name == 'ARC':
 
-                userdir = os.path.join(configuration.user_home,\
-                                       client_id_dir(job_dict['USER_CERT']))
-                sessionid = job_dict['SESSIONID']
-    
-                symlinks = [os.path.join(configuration.webserver_home,
-                                         sessionid)
-                            , os.path.join(configuration.sessid_to_mrsl_link_home,
-                                           sessionid + '.mRSL')]
-                for link in symlinks:
-                    try: 
-                        os.remove(link)
-                    except Exception, err:
-                        logger.error('Could not remove link %s: %s' % (link, err))
-    
+
                 # remove from the executing queue
                 executing_queue.dequeue_job_by_id(job_id)
-    
-                # clean up in ARC
-                try:
-                    arcsession = arc.Ui(userdir)
-                except Exception, err:
-                    logger.error('Error when processing ARC job timeout: %s' % err)
-                    logger.debug('Job was: %s' % job_dict)
-                else:
-                    # cancel catches, clean always succeeds
-                    killed = arcsession.cancel(job_dict['EXE'])
-                    if not killed:
-                        arcsession.clean(job_dict['EXE'])
+
+                # job status has been set by the cancel request already, but 
+                # we need to kill the ARC job, or clean it (if already finished),
+                # and clean up the job remainder links
+                clean_arc_job(job_dict, 'CANCELED', None, 
+                              configuration, logger, True)
+
+                logger.debug('ARC job completed')
                 continue
 
             if not server_cleanup(
@@ -1439,36 +1400,18 @@ while True:
         # clean job in ARC system, do not retry.
         if job_dict and unique_resource_name == 'ARC':
 
-            userdir = os.path.join(configuration.user_home,\
-                                   client_id_dir(job_dict['USER_CERT']))
-            sessionid = job_dict['SESSIONID']
-
-            symlinks = [os.path.join(configuration.webserver_home,
-                                     sessionid)
-                        , os.path.join(configuration.sessid_to_mrsl_link_home,
-                                       sessionid + '.mRSL')]
-            for link in symlinks:
-                try: 
-                    os.remove(link)
-                except Exception, err:
-                    logger.error('Could not remove link %s: %s' % (link, err))
-
             # remove from the executing queue
             executing_queue.dequeue_job_by_id(jobid)
 
-            # clean up in ARC
-            try:
-                arcsession = arc.Ui(userdir)
-            except Exception, err:
-                logger.error('Error when processing ARC job timeout: %s' % err)
-                logger.debug('Job was: %s' % job_dict)
-            else:
-                # cancel catches, clean always succeeds
-                killed = arcsession.cancel(job_dict['EXE'])
-                if not killed:
-                    arcsession.clean(job_dict['EXE'])
+            # job status has been set by the cancel request already, but 
+            # we need to kill the ARC job, or clean it (if already finished),
+            # and clean up the job remainder links
+            clean_arc_job(job_dict, 'FAILED', 'Job timed out', 
+                          configuration, logger, True)
+
+            logger.debug('ARC job timed out, removed')
             continue
-        #######################################################
+
 
         # Execution information is removed from job_dict in
         # requeue_job - save here

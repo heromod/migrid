@@ -1016,9 +1016,8 @@ def json_format(ret_val, ret_msg, out_obj):
 
             return json.write(out_obj)
     except Exception, exc:
-        print 'json not available on server! Defaulting to .txt output. (%s)'\
+        return 'json not available on server! Defaulting to .txt output. (%s)'\
              % exc
-        return None
 
 
 def get_valid_outputformats():

@@ -940,25 +940,15 @@ Exit code: %s Description: %s<br>
 def soap_format(ret_val, ret_msg, out_obj):
     """Generate output in soap format"""
 
-    try:
-        import SOAPpy
-        return SOAPpy.buildSOAP(out_obj)
-    except Exception, exc:
-        print 'SOAPpy not available on server! Defaulting to .txt output. (%s)'\
-             % exc
-        return None
+    import SOAPpy
+    return SOAPpy.buildSOAP(out_obj)
 
 
 def pickle_helper(ret_val, ret_msg, out_obj, protocol=None):
     """Generate output in requested pickle protocol format"""
 
-    try:
-        import pickle
-        return pickle.dumps(out_obj, protocol)
-    except Exception, exc:
-        print 'pickle not available on server! Defaulting to .txt output. (%s)'\
-             % exc
-        return None
+    import pickle
+    return pickle.dumps(out_obj, protocol)
 
 def pickle_format(ret_val, ret_msg, out_obj):
     """Generate output in default pickle protocol format"""
@@ -979,46 +969,31 @@ def pickle2_format(ret_val, ret_msg, out_obj):
 def yaml_format(ret_val, ret_msg, out_obj):
     """Generate output in yaml format"""
 
-    try:
-        import yaml
-        return yaml.dump(out_obj)
-    except Exception, exc:
-        print 'yaml not available on server! Defaulting to .txt output. (%s)'\
-             % exc
-        return None
+    import yaml
+    return yaml.dump(out_obj)
 
 
 def xmlrpc_format(ret_val, ret_msg, out_obj):
     """Generate output in xmlrpc format"""
 
-    try:
-        import xmlrpclib
-        return xmlrpclib.dumps((out_obj, ), allow_none=True)
-    except Exception, exc:
-        print 'xmlrpclib not available on server! Defaulting to .txt output. (%s)'\
-             % exc
-        return None
+    import xmlrpclib
+    return xmlrpclib.dumps((out_obj, ), allow_none=True)
 
 
 def json_format(ret_val, ret_msg, out_obj):
     """Generate output in json format"""
 
+    import json
     try:
-        import json
-        try:
 
-            # python >=2.6 includes native json module with loads/dumps methods
+        # python >=2.6 includes native json module with loads/dumps methods
 
-            return json.dumps(out_obj)
-        except AttributeError:
+        return json.dumps(out_obj)
+    except AttributeError:
 
-            # python <2.6 + python-json module with read/write methods
+        # python <2.6 + python-json module with read/write methods
 
-            return json.write(out_obj)
-    except Exception, exc:
-        return 'json not available on server! Defaulting to .txt output. (%s)'\
-             % exc
-
+        return json.write(out_obj)
 
 def get_valid_outputformats():
     """Return list of valid outputformats"""
@@ -1087,7 +1062,12 @@ def format_output(
     if not outputformat in outputformats:
         return txt_format(ret_val, ret_msg, out_obj)
 
-    return eval('%s_format(ret_val, ret_msg, out_obj)' % outputformat)
+    try:
+        return eval('%s_format(ret_val, ret_msg, out_obj)' % outputformat)
+    except Exception, err:
+        msg = outputformat + \
+              ' failed on server! Defaulting to .txt output. (%s)' % err
+        return (txt_format(ret_val, msg, out_obj))
 
 def format_timedelta(timedelta):
     """Formats timedelta as '[Years,] [days,] HH:MM:SS'"""

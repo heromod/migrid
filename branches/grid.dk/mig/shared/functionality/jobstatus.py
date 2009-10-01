@@ -257,8 +257,13 @@ def main(client_id, user_arguments_dict):
                 job_obj['status'] = arcstatus['status']
             except arc.ARCWrapperError, err:
                 logger.error('Error retrieving ARC job status: %s' % err.what())
+                job_obj['status'] += '(Error: ' + err.what() + ')' 
+            except arc.NoProxyError, err:
+                logger.error('While retrieving ARC job status: %s' % err.what())
+                job_obj['status'] += '(Error: ' + err.what() + ')' 
             except Exception, err:
                 logger.error('Error retrieving ARC job status: %s' % err)
+                job_obj['status'] += '(Error during retrieval)' 
 
         execution_histories = []
         if verbose(flags):

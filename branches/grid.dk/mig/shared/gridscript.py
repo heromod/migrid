@@ -443,6 +443,32 @@ def requeue_job(
                 configuration,
                 )
 
+def arc_job_status(
+    job_dict,
+    configuration,
+    logger
+    ):
+    """Retrieve status information for a job submitted to ARC.
+       Status is returned as a string. In case of failure, returns 
+       'UNKNOWN' and logs the error."""
+    
+    logger.debug('Checking ARC job status for %s' % job_dict['JOB_ID'])
+
+    userdir = os.path.join(configuration.user_home, \
+                           client_id_dir(job_dict['USER_CERT']))
+    try:
+        jobinfo = {'status':'UNKNOWN(TO FINISH)'}
+        session = arc.Ui(userdir)
+        jobinfo = session.jobStatus(job_dict['EXE'])
+    except arc.ARCWrapperError, err:
+        logger.error('Error during ARC status retrieval: %s'\
+                     % err.what())
+        pass
+    except Exception, err:
+        logger.error('Error during ARC status retrieval: %s'\
+                     % err.__str__())
+        pass
+    return jobinfo['status']
 
 def clean_arc_job(
     job_dict, 
@@ -453,9 +479,12 @@ def clean_arc_job(
     kill = True 
     ):
 
+    logger.debug('Cleanup for ARC job %s, status %s' % (job_dict['JOB_ID'],status))
+
     if not status in ['FINISHED', 'CANCELED', 'FAILED']:
         logger.error('inconsistent cleanup request: %s for job %s' % \
                      (status, job_dict))
+        return
 
 # done by the caller...
 #    executing_queue.dequeue_job_by_id(job_dict['JOB_ID'])

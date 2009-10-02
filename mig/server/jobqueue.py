@@ -27,6 +27,7 @@
 
 """MiG server job queue"""
 
+import threading
 
 def print_job(job_dict, detail=['JOB_ID']):
 
@@ -64,6 +65,10 @@ class JobQueue:
         self.logger = logger
         self.logger.info('initialised queue')
 
+        # avoid race conditions in complex dequeue operations
+        self.mutex = threading.Lock()
+
+
     def show_queue(self, detail=['JOB_ID']):
         """Print queue contents"""
 
@@ -82,6 +87,7 @@ class JobQueue:
     def enqueue_job(self, job, index):
         """Insert job at index in queue list"""
 
+        self.mutex.acquire()
         if self.queue_length() >= index:
 
             # check if a job with that job_id is in the queue to avoid multiple occurences
@@ -91,7 +97,8 @@ class JobQueue:
                     if queue_job['JOB_ID'] == job['JOB_ID']:
                         self.logger.error('enqueue_job called with a job already in the queue! Skipping enqueue_job for job_id %s!'
                                  % job['JOB_ID'])
-                        return False
+                        success = False
+                        break
             except Exception, exc:
                 self.logger.error('enqueue_job exception when checking if specified job already is in the queue: %s'
                                    % exc)
@@ -102,12 +109,15 @@ class JobQueue:
 
             # self.logger.info("NEW JOB! after enqueue len is %d", self.queue_length())
 
-            return True
+            success = True
         else:
             self.logger.error("NEW JOB! failed to enqueue job - index %d \
             out of range! (qlen %d)"
                               , index, self.queue_length())
-        return False
+        success = False
+        self.mutex.release()
+
+        return success
 
     def get_job(self, index):
         """Find and return job found at index in queue list"""
@@ -125,6 +135,7 @@ class JobQueue:
         """Find and return job with jobid"""
 
         job = None
+        self.mutex.acquire()
         if self.queue_length() > 0:
             for j in self.queue:
                 if j['JOB_ID'] == jobid:
@@ -136,11 +147,13 @@ class JobQueue:
         if not job and log_errors:
             self.logger.error('get_job_by_id: Failed to get job - jobid: %s '
                                % jobid)
+        self.mutex.release()
         return job
 
     def dequeue_job(self, index):
         """Dequeue and return job found at index in queue list"""
 
+        self.mutex.acquire()
         job = None
         if self.queue_length() > index:
             job = self.queue[index]
@@ -149,6 +162,7 @@ class JobQueue:
             self.logger.error("dequeue_job: Failed to dequeue job - index %d \
             out of range! (qlen %d)"
                               , index, self.queue_length())
+        self.mutex.release()
         return job
 
     def dequeue_job_by_id(self, jobid, log_errors=True):
@@ -156,8 +170,11 @@ class JobQueue:
 
         job = None
         index = 0
+        self.mutex.acquire()
         if self.queue_length() > 0:
             for j in self.queue:
+                # FIXME: this relies on the for proceeding from 
+                #        index 0 to the end! Not necessarily the case.
                 if j['JOB_ID'] == jobid:
                     job = self.queue[index]
                     self.dequeue_job(index)
@@ -169,6 +186,7 @@ class JobQueue:
         if not job and log_errors:
             self.logger.error('dequeue_job_by_id: Failed to dequeue job - jobid: %s '
                                % jobid)
+        self.mutex.release()
         return job
 
 

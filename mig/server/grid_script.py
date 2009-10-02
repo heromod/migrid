@@ -30,6 +30,7 @@
 import sys
 import time
 import datetime
+import calendar
 import threading
 import os
 import signal
@@ -45,7 +46,7 @@ from shared.conf import get_resource_exe
 from shared.gridscript import clean_grid_stdin, \
     remove_jobrequest_pending_files, check_mrsl_files, requeue_job, \
     server_cleanup, load_queue, save_queue, load_schedule_cache, \
-    save_schedule_cache, clean_arc_job
+    save_schedule_cache, arc_job_status, clean_arc_job
 from shared.resadm import atomic_resource_exe_restart, put_exe_pgid
 from shared.vgrid import default_vgrid
 from shared.useradm import client_id_dir
@@ -124,18 +125,11 @@ def time_out_jobs(stop_event):
                     total_cputime = delay + extra_cputime + cputime
                     timestamp = job['EXECUTING_TIMESTAMP']
 
-                    # is there a  nicer way to convert time.gmtime() to
-                    # a datetime?
-                    # Time is in UTC timezone
+                    # the canonical way to convert time.gmtime() to
+                    # a datetime... All times in UTC timezone
 
-                    start_executing_datetime = datetime.datetime(
-                        timestamp.tm_year,
-                        timestamp.tm_mon,
-                        timestamp.tm_mday,
-                        timestamp.tm_hour,
-                        timestamp.tm_min,
-                        timestamp.tm_sec,
-                        )
+                    start_executing_datetime = \
+                      datetime.datetime.utcfromtimestamp(calendar.timegm(timestamp))
 
                     last_valid_finish_time = start_executing_datetime\
                          + datetime.timedelta(seconds=total_cputime)
@@ -153,6 +147,28 @@ def time_out_jobs(stop_event):
                                 ], job['JOB_ID'])
                         send_message_to_grid_script(grid_script_msg,
                                 logger, configuration)
+
+                    elif job['UNIQUE_RESOURCE_NAME'] == 'arc':
+                        jobstatus = arc_job_status(job, configuration, logger)
+
+                        # take action if the job is failed or killed. 
+                        # No action for a finished job, since other 
+                        # machinery will be at work to update it
+
+                        if jobstatus  in ['FAILED','KILLED']:
+                            logger.debug('discovered %s job %s, clean it on the server' % \
+                                         (jobstatus, job['JOB_ID']))
+                            exec_job = executing_queue.dequeue_job_by_id(job['JOB_ID'])
+                            if exec_job:
+                                # job was still there, clean up here
+                                # (otherwise, someone else picked it up in the meantime)
+                                clean_arc_job(exec_job, jobstatus, '(failed inside ARC)',
+                                              configuration, logger, False)
+                        else:
+                            logger.debug('Status %s for ARC job %s, no action required' %  \
+                                         (jobstatus, job['JOB_ID']))
+
+
     except Exception, err:
         logger.error('time_out_jobs: unexpected exception: %s' % err)
     logger.info('time_out_jobs: time out thread terminating')
@@ -423,6 +439,10 @@ while True:
                 # expected by timeout thread to be there anyway
                 dict_userjob['UNIQUE_RESOURCE_NAME'] = 'ARC'
                 dict_userjob['EXE'] = arc_id
+
+                # this one is used by the timeout thread as well
+                # We put in a wild guess, 1 minute. Perhaps not enough
+                dict_userjob['EXECUTION_DELAY'] = 60 
 
                 dict_userjob['STATUS'] = 'EXECUTING' # which is kind-of wrong...
                 dict_userjob['EXECUTING_TIMESTAMP'] = time.gmtime()

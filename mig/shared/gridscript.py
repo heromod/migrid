@@ -76,7 +76,7 @@ def load_queue(path, logger):
 
         # add a new lock
 
-        queue.mutex = threading.Lock()
+        queue.mutex = threading.RLock()
         
         return queue
 

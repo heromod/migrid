@@ -155,14 +155,14 @@ def time_out_jobs(stop_event):
                         # No action for a finished job, since other 
                         # machinery will be at work to update it
 
-                        if jobstatus['status']  in ['FAILED','KILLED']:
+                        if jobstatus  in ['FAILED','KILLED']:
                             logger.debug('discovered %s job %s, clean it on the server' % \
                                          (jobstatus, job['JOB_ID']))
                             exec_job = executing_queue.dequeue_job_by_id(job['JOB_ID'])
                             if exec_job:
                                 # job was still there, clean up here
                                 # (otherwise, someone else picked it up in the meantime)
-                                clean_arc_job(exec_job, jobstatus['status'], '(failed inside ARC)',
+                                clean_arc_job(exec_job, jobstatus, '(failed inside ARC)',
                                               configuration, logger, False)
                         else:
                             logger.debug('Status %s for ARC job %s, no action required' %  \

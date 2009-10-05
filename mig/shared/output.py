@@ -32,6 +32,7 @@ import shared.returnvalues as returnvalues
 from shared.html import get_cgi_html_header, get_cgi_html_footer
 from shared.objecttypes import validate
 from shared.prettyprinttable import pprint_table
+from shared.safeinput import html_escape
 
 row_name = ('even_row', 'odd_row')
 
@@ -172,9 +173,12 @@ def txt_format(ret_val, ret_msg, out_obj):
                     if obj.has_key('executing_timestamp'):
                         lines.append('Executing: %s'
                                  % obj['executing_timestamp'])
-                    if obj.has_key('unique_resource_name'):
+                    if obj.has_key('resource'):
                         lines.append('Resource: %s'
-                                 % obj['unique_resource_name'])
+                                 % obj['resource'])
+                    if obj.has_key('vgrid'):
+                        lines.append('VGrid: %s'
+                                 % obj['vgrid'])
                     if obj.has_key('finished_timestamp'):
                         lines.append('Finished: %s'
                                  % obj['finished_timestamp'])
@@ -199,6 +203,9 @@ def txt_format(ret_val, ret_msg, out_obj):
                         if single_history.has_key('resource'):
                             lines.append('Resource %s: %s' % (count,
                                     single_history['resource']))
+                        if single_history.has_key('vgrid'):
+                            lines.append('VGrid %s: %s' % (count,
+                                    single_history['vgrid']))
                         if single_history.has_key('failed'):
                             lines.append('Failed %s: %s' % (count,
                                     single_history['failed']))
@@ -318,13 +325,13 @@ def html_format(ret_val, ret_msg, out_obj):
         if i['object_type'] == 'start':
             pass
         elif i['object_type'] == 'error_text':
-            lines.append('<p class=errortext>%s</p>' % i['text'])
+            lines.append('<p class=errortext>%s</p>' % html_escape(i['text']))
         elif i['object_type'] == 'warning':
-            lines.append('<p class=warningtext>%s</p>' % i['text'])
+            lines.append('<p class=warningtext>%s</p>' % html_escape(i['text']))
         elif i['object_type'] == 'header':
-            lines.append('<h1>%s</h1>' % i['text'])
+            lines.append('<h1>%s</h1>' % html_escape(i['text']))
         elif i['object_type'] == 'sectionheader':
-            lines.append('<h3>%s</h3>' % i['text'])
+            lines.append('<h3>%s</h3>' % html_escape(i['text']))
         elif i['object_type'] == 'title':
             javascript = ''
             if i.has_key('javascript'):
@@ -351,7 +358,7 @@ def html_format(ret_val, ret_msg, out_obj):
             if i.has_key('logotitle'):
                 logotitle = i['logotitle']
             lines.append(get_cgi_html_header(
-                i['text'],
+                html_escape(i['text']),
                 '',
                 True,
                 javascript,
@@ -364,9 +371,9 @@ def html_format(ret_val, ret_msg, out_obj):
                 logotitle=logotitle,
                 ))
         elif i['object_type'] == 'text':
-            lines.append('<p>%s</p>' % i['text'])
+            lines.append('<p>%s</p>' % html_escape(i['text']))
         elif i['object_type'] == 'verbatim':
-            lines.append('%s' % i['text'])
+            lines.append('%s' % html_escape(i['text']))
         elif i['object_type'] == 'link':
             lines.append(html_link(i))
         elif i['object_type'] == 'job_list':
@@ -408,9 +415,12 @@ def html_format(ret_val, ret_msg, out_obj):
                     if obj.has_key('executing_timestamp'):
                         lines.append('<tr><td>Executing</td><td>%s</td></tr>'
                                  % obj['executing_timestamp'])
-                    if obj.has_key('unique_resource_name'):
+                    if obj.has_key('resource'):
                         lines.append('<tr><td>Resource</td><td>%s</td></tr>'
-                                 % obj['unique_resource_name'])
+                                 % obj['resource'])
+                    if obj.has_key('vgrid'):
+                        lines.append('<tr><td>VGrid</td><td>%s</td></tr>'
+                                 % obj['vgrid'])
                     if obj.has_key('finished_timestamp'):
                         lines.append('<tr><td>Finished</td><td>%s</td></tr>'
                                  % obj['finished_timestamp'])
@@ -438,6 +448,10 @@ def html_format(ret_val, ret_msg, out_obj):
                             lines.append('<tr><td>Resource %s</td><td>%s</td></tr>'
                                      % (count,
                                     single_history['resource']))
+                        if single_history.has_key('vgrid'):
+                            lines.append('<tr><td>VGrid %s</td><td>%s</td></tr>'
+                                     % (count,
+                                    single_history['vgrid']))
                         if single_history.has_key('failed'):
                             lines.append('<tr><td>Failed %s</td><td>%s</td></tr>'
                                      % (count, single_history['failed'
@@ -463,6 +477,7 @@ def html_format(ret_val, ret_msg, out_obj):
                         lines.append('<br>%s'
                                  % html_link(obj['outputfileslink']))
                     lines.append('</td></tr><tr><td><br></td></tr>')
+
 
                 lines.append('</table>')
         elif i['object_type'] == 'resubmitobjs':
@@ -707,7 +722,7 @@ def html_format(ret_val, ret_msg, out_obj):
                              )
                 for link in links:
                     lines.append('<tr><td>%s</td><td>%s</td></tr>'
-                                  % (link['text'], html_link(link)))
+                                  % (html_escape(link['text']), html_link(link)))
                 lines.append('</table>')
         elif i['object_type'] == 'multilinkline':
             links = i['links']

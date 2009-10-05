@@ -107,8 +107,8 @@ def check_mrsl_files(
     # We only check files modified since last start if possible
 
     last_start = 0
-    last_start_file = configuration.mig_system_files\
-         + 'grid_script_laststart'
+    last_start_file = os.path.join(configuration.mig_system_files,
+                                   'grid_script_laststart')
     if os.path.exists(last_start_file):
         last_start = os.path.getmtime(last_start_file)
 
@@ -120,20 +120,21 @@ def check_mrsl_files(
 
         if root.find(os.sep + '.') != -1:
             continue
+        logger.info('check mRSL files: inspecting %d files in %s' % \
+                    (len(files), root))
         for name in files:
             filename = os.path.join(root, name)
             if os.path.getmtime(filename) < last_start:
                 if only_new:
-                    logger.info('skipping treated mrsl file: %s'
-                                 % filename)
+                    #logger.debug('skipping treated mrsl file: %s'
+                    #             % filename)
                     continue
                 logger.info('parsing possibly outdated mrsl file: %s'
                              % filename)
 
             job_dict = io.unpickle(filename, logger)
             if not job_dict:
-                logger.error('could not open and unpickle: %s'
-                              % filename)
+                logger.error('could not open and unpickle: %s' % filename)
                 continue
 
             if job_dict['STATUS'] == 'PARSE':
@@ -216,9 +217,9 @@ def server_cleanup(
     # remove symlinks created in job script generator
 
     try:
-        symlink1 = configuration.webserver_home + sessionid
+        symlink1 = os.path.join(configuration.webserver_home, sessionid)
 
-        # logger.info("trying to remove: " + symlink1)
+        # logger.info("trying to remove: %s" % symlink1)
 
         os.remove(symlink1)
     except Exception, err:
@@ -227,9 +228,9 @@ def server_cleanup(
         success = False
 
     try:
-        symlink2 = configuration.webserver_home + iosessionid
+        symlink2 = os.path.join(configuration.webserver_home, iosessionid)
 
-        # logger.info("trying to remove: " + symlink2)
+        # logger.info("trying to remove: %s" % symlink2)
 
         os.remove(symlink2)
     except Exception, err:
@@ -238,10 +239,10 @@ def server_cleanup(
         success = False
 
     try:
-        symlink3 = configuration.sessid_to_mrsl_link_home + sessionid\
-             + '.mRSL'
+        symlink3 = os.path.join(configuration.sessid_to_mrsl_link_home,
+                                sessionid + '.mRSL')
 
-        # logger.info("trying to remove: " + symlink3)
+        # logger.info("trying to remove: %s" % symlink3)
 
         os.remove(symlink3)
     except Exception, err:
@@ -252,7 +253,7 @@ def server_cleanup(
     # Remove X.job and X.sendoutputfiles and source created during job script generation
 
     try:
-        joblink = configuration.webserver_home + sessionid + '.job'
+        joblink = os.path.join(configuration.webserver_home, sessionid + '.job')
         jobfile = os.path.realpath(joblink)
         os.remove(joblink)
         os.remove(jobfile)
@@ -260,8 +261,8 @@ def server_cleanup(
         logger.error('error removing %s %s' % (jobfile, err))
         success = False
     try:
-        sendoutputfileslink = configuration.webserver_home + sessionid\
-             + '.sendoutputfiles'
+        sendoutputfileslink = os.path.join(configuration.webserver_home,
+                                           sessionid + '.sendoutputfiles')
         sendoutputfilesfile = os.path.realpath(sendoutputfileslink)
         os.remove(sendoutputfileslink)
         os.remove(sendoutputfilesfile)
@@ -271,8 +272,8 @@ def server_cleanup(
         success = False
 
     try:
-        sendupdatefileslink = configuration.webserver_home + sessionid\
-             + '.sendupdatefiles'
+        sendupdatefileslink = os.path.join(configuration.webserver_home,
+                                           sessionid + '.sendupdatefiles')
         sendupdatefilesfile = os.path.realpath(sendupdatefileslink)
         os.remove(sendupdatefileslink)
         os.remove(sendupdatefilesfile)
@@ -281,8 +282,8 @@ def server_cleanup(
                      err))
         success = False
     try:
-        last_live_update_file = configuration.mig_system_files + os.sep\
-             + job_id + '.last_live_update'
+        last_live_update_file = os.path.join(configuration.mig_system_files,
+                                             job_id + '.last_live_update')
         if os.path.isfile(last_live_update_file):
             os.remove(last_live_update_file)
     except Exception, err:
@@ -316,8 +317,8 @@ def server_cleanup(
 
     # Only sandboxes create this link, so we don't fail if it does not exists.
 
-    sandboxgetinputfileslink = configuration.webserver_home\
-         + localjobname + '.getinputfiles'
+    sandboxgetinputfileslink = os.path.join(configuration.webserver_home,
+                                            localjobname + '.getinputfiles')
     if os.path.islink(sandboxgetinputfileslink):
         try:
             os.remove(sandboxgetinputfileslink)
@@ -327,7 +328,7 @@ def server_cleanup(
 
     # Only oneclick sandboxes create this link, so we don't fail if it does not exists.
 
-    oneclickexelink = configuration.webserver_home + sessionid + '.jvm'
+    oneclickexelink = os.path.join(configuration.webserver_home, sessionid + '.jvm')
     if os.path.islink(oneclickexelink):
         try:
             os.remove(oneclickexelink)
@@ -375,12 +376,11 @@ def requeue_job(
         # Remove job result files, if they have arrived as the result is not valid
         # This can happen with sandboxes as they can't be stopped serverside
 
-        io.delete_file(configuration.user_home + client_dir + '/'
-                        + job_dict['JOB_ID'] + '.status', logger)
-        io.delete_file(configuration.user_home + client_dir + '/'
-                        + job_dict['JOB_ID'] + '.stdout', logger)
-        io.delete_file(configuration.user_home + client_dir + '/'
-                        + job_dict['JOB_ID'] + '.stderr', logger)
+        status_prefix = os.path.join(configuration.user_home, client_dir,
+                                     job_dict['JOB_ID'])
+        io.delete_file(status_prefix + '.status', logger)
+        io.delete_file(status_prefix + '.stdout', logger)
+        io.delete_file(status_prefix + '.stderr', logger)
 
         # Generate execution history
 
@@ -393,6 +393,8 @@ def requeue_job(
             'FAILED_TIMESTAMP': failed_timestamp,
             'FAILED_MESSAGE': failed_msg,
             'UNIQUE_RESOURCE_NAME': job_dict['UNIQUE_RESOURCE_NAME'],
+            'RESOURCE_VGRID': job_dict.get('RESOURCE_VGRID', ''),
+            'PUBLICNAME': job_dict.get('PUBLICNAME', 'HIDDEN'),
             }
 
         job_dict['EXECUTION_HISTORY'].append(history_dict)
@@ -419,6 +421,10 @@ def requeue_job(
                 del job_dict['SESSIONID']
             if job_dict.has_key('IOSESSIONID'):
                 del job_dict['IOSESSIONID']
+            if job_dict.has_key('PUBLICNAME'):
+                del job_dict['PUBLICNAME']
+            if job_dict.has_key('RESOURCE_VGRID'):
+                del job_dict['RESOURCE_VGRID']
 
             io.pickle(job_dict, mrsl_file, logger)
 

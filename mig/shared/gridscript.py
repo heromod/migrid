@@ -29,6 +29,7 @@
 
 import os
 import time
+import threading
 
 import shared.fileio as io
 from shared.fileio import send_message_to_grid_script
@@ -54,6 +55,10 @@ def save_queue(queue, path, logger):
     # Don't try to save logger
 
     queue.logger = None
+    
+    # do not save the lock either
+
+    queue.mutex = None
     return io.pickle(queue, path, logger)
 
 
@@ -68,6 +73,11 @@ def load_queue(path, logger):
         return None
     else:
         queue.logger = logger
+
+        # add a new lock
+
+        queue.mutex = threading.Lock()
+        
         return queue
 
 

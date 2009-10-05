@@ -490,8 +490,15 @@ def clean_arc_job(
     msg,
     configuration,
     logger,
-    kill = True 
+    kill = True,
+    timestamp = None
     ):
+    """Cleaning remainder of an executed ARC job:
+        - delete from ARC (and possibly kill the job, parameter)
+        - delete two symbolic links (user dir and mrsl file)
+        - write status and timestamp into mrsl 
+    """
+
 
     logger.debug('Cleanup for ARC job %s, status %s' % (job_dict['JOB_ID'],status))
 
@@ -503,7 +510,8 @@ def clean_arc_job(
 # done by the caller...
 #    executing_queue.dequeue_job_by_id(job_dict['JOB_ID'])
 
-    timestamp = time.gmtime()
+    if not timestamp:
+        timestamp = time.gmtime()
     client_dir = client_id_dir(job_dict['USER_CERT'])
 
     # clean up in ARC
@@ -537,15 +545,10 @@ def clean_arc_job(
                 logger.error('Could not remove link %s: %s' % (link, err))
 
 
-    # finished jobs have already been handled by the put script
-    if status == 'FINISHED':
-        logger.debug('Cleaned finished job %s (done)' % job_dict['JOB_ID'])
-        return
+    job_dict['STATUS'] = status
+    job_dict[ status + '_TIMESTAMP' ] = timestamp
 
-    else:
-        job_dict['STATUS'] = status
-        job_dict[ status + '_TIMESTAMP' ] = timestamp
-
+    if not status == 'FINISHED':
         # Generate execution history
 
         if not job_dict.has_key('EXECUTION_HISTORY'):
@@ -561,11 +564,11 @@ def clean_arc_job(
 
         job_dict['EXECUTION_HISTORY'].append(history_dict)
 
-        # save into mrsl
+    # save into mrsl
 
-        mrsl_file = os.path.join(configuration.mrsl_files_dir,
+    mrsl_file = os.path.join(configuration.mrsl_files_dir,
                                  client_dir, 
                                  job_dict['JOB_ID'] + '.mRSL')
-        io.pickle(job_dict, mrsl_file, logger)
+    io.pickle(job_dict, mrsl_file, logger)
 
     return

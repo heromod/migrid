@@ -464,6 +464,10 @@ def arc_job_status(
         logger.error('Error during ARC status retrieval: %s'\
                      % err.what())
         pass
+    except arc.NoProxyError, err:
+        logger.error('Error during ARC status retrieval: %s'\
+                     % err.what())
+        pass
     except Exception, err:
         logger.error('Error during ARC status retrieval: %s'\
                      % err.__str__())

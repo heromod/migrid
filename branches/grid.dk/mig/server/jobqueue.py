@@ -66,7 +66,7 @@ class JobQueue:
         self.logger.info('initialised queue')
 
         # avoid race conditions in complex dequeue operations
-        self.mutex = threading.Lock()
+        self.mutex = threading.RLock()
 
 
     def show_queue(self, detail=['JOB_ID']):

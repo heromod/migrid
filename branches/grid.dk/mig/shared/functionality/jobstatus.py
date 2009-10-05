@@ -217,19 +217,18 @@ def main(client_id, user_arguments_dict):
         job_obj = {'object_type': 'job', 'job_id': job_id}
         job_obj['status'] = job_dict['STATUS']
 
-        fields = [
+        time_fields = [
             'VERIFIED',
             'VERIFIED_TIMESTAMP',
             'RECEIVED_TIMESTAMP',
             'QUEUED_TIMESTAMP',
             'SCHEDULE_TIMESTAMP',
             'EXECUTING_TIMESTAMP',
-            'UNIQUE_RESOURCE_NAME',
             'FINISHED_TIMESTAMP',
             'FAILED_TIMESTAMP',
             'CANCELED_TIMESTAMP',
             ]
-        for name in fields:
+        for name in time_fields:
             if job_dict.has_key(name):
 
                 # time objects cannot be marshalled, asctime if timestamp
@@ -273,6 +272,13 @@ def main(client_id, user_arguments_dict):
                     job_obj['execute'] = '%s ...' % command_line[:252]
                 else:
                     job_obj['execute'] = command_line
+            if job_dict.has_key('PUBLICNAME'):
+                if job_dict['PUBLICNAME']:
+                    job_obj['resource'] = job_dict['PUBLICNAME']
+                else:
+                    job_obj['resource'] = 'HIDDEN'
+            if job_dict.has_key('RESOURCE_VGRID'):
+                job_obj['vgrid'] = job_dict['RESOURCE_VGRID']
 
             if job_dict.has_key('EXECUTION_HISTORY'):
                 counter = 0
@@ -288,9 +294,14 @@ def main(client_id, user_arguments_dict):
                         execution_history['executing'] = \
                             time.asctime(history_dict['EXECUTING_TIMESTAMP'
                                 ])
-                    if history_dict.has_key('UNIQUE_RESOURCE_NAME'):
-                        execution_history['resource'] = \
-                            history_dict['UNIQUE_RESOURCE_NAME']
+                    if history_dict.has_key('PUBLICNAME'):
+                        if history_dict['PUBLICNAME']:
+                            execution_history['resource'] = history_dict['PUBLICNAME']
+                        else:
+                            execution_history['resource'] = 'HIDDEN'
+                    if history_dict.has_key('RESOURCE_VGRID'):
+                        execution_history['vgrid'] = \
+                            history_dict['RESOURCE_VGRID']
                     if history_dict.has_key('FAILED_TIMESTAMP'):
                         execution_history['failed'] = \
                             time.asctime(history_dict['FAILED_TIMESTAMP'
@@ -346,9 +357,7 @@ def main(client_id, user_arguments_dict):
                 'destination': 'liveoutput.py?job_id=%s' % job_id,
                 'text': 'Request live update'}
         job_list['jobs'].append(job_obj)
-
     output_objects.append(job_list)
-    output_objects.append({'object_type': 'text', 'text': ''})
 
     return (output_objects, status)
 

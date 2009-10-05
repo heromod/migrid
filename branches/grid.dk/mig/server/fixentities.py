@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# migrateusers - a simple helper to migrate old CN to new DN user IDs
+# fixentities - fix all resources and vgrids to use migrated user IDs
 # Copyright (C) 2009  Jonas Bardino
 #
 # This file is part of MiG.
@@ -20,19 +20,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-"""Upgrade all files and dirs to use the new certificate DN based user ID
-instead of the old CN based ones"""
+"""Fix resource and vgrid owners and members files to contain only migrated
+user IDs from user DB if at all possible"""
 
 import sys
 import getopt
 
-from shared.useradm import init_user_adm, migrate_users
+from shared.useradm import init_user_adm, fix_entities
 
-def usage(name='migrateusers.py'):
+def usage(name='fixentities.py'):
     """Usage help"""
 
-    print """Update MiG user database and user dirs from old format with CN
-as user idetifier to new format with DN as user identifier.
+    print """Update resource and VGrid onwers/members files to match user DB
+    entries with DN as user identifier.
 
 Usage:
 %(name)s [OPTIONS]
@@ -41,7 +41,6 @@ Where OPTIONS may be one or more of:
    -d DB_FILE          Use DB_FILE as user data base file
    -f                  Force operations to continue past errors
    -h                  Show this help
-   -p                  Prune duplicate users (keeps the one with latest expire)
    -v                  Verbose output
 """\
          % {'name': name}
@@ -51,8 +50,7 @@ if '__main__' == __name__:
     conf_path = None
     force = False
     verbose = False
-    prune = False
-    opt_args = 'c:d:fhpv'
+    opt_args = 'c:d:fhv'
     try:
         (opts, args) = getopt.getopt(args, opt_args)
     except getopt.GetoptError, err:
@@ -70,8 +68,6 @@ if '__main__' == __name__:
         elif opt == '-h':
             usage()
             sys.exit(0)
-        elif opt == '-p':
-            prune = True
         elif opt == '-v':
             verbose = True
         else:
@@ -79,7 +75,7 @@ if '__main__' == __name__:
             sys.exit(1)
 
     try:
-        migrate_users(conf_path, db_path, force, verbose, prune)
+        fix_entities(conf_path, db_path, force, verbose)
     except Exception, err:
         print err
         sys.exit(1)        

@@ -14,7 +14,7 @@ MiG includes a set of user scripts that you can run from the command line or wra
 You can obtain the user scripts including the miglib python library from Downloads on your personal MiG page.
 
 = XMLRPC =
-Direct access to MiG from just about any programming language is available through an XMLRPC interface. We provide a python [http://code.google.com/p/migrid/source/browse/trunk/mig/user/xmlrpcsslclient.py XMLRPC client module] with a few examples in our repository. We do not have a lot of documentation on this topic yet, so the examples will have to do for now. Additional API details can be found in the actual server code in `mig/shared/functionality/` but they may still change slightly over time.
+Direct access to MiG from just about any programming language is available through an XMLRPC interface. This is implemented via xmlrpclib for python (see [http://code.google.com/p/migrid/source/browse/trunk/mig/user/xmlrpcsslclient.py xmlrpcsslclient.py]) with a few examples in our repository. A documentation of the methods is under development [XmlRpcMethods here]. Additional API details can be found in the actual server code in `mig/shared/functionality/` but they may still change slightly over time.
 
 = JSON =
 We have a few students working on some very flexible and dynamic web solutions based on JSON. So we provide JSON as a output format, but this is still much in development, so please [ContactUs contact us] if this is something you would like to know more about.

@@ -202,24 +202,6 @@ def parse(
 
     replaced_dict = parser.replace_special(global_dict)
 
-    # save file
-
-    if outfile == 'AUTOMATIC':
-        filename = \
-            os.path.abspath(os.path.join(configuration.mrsl_files_dir,
-                            client_dir, job_id + '.mRSL'))
-    else:
-        filename = outfile
-
-    if not pickle(replaced_dict, filename, logger):
-        return (False, 'Fatal error: Could not write %s' % filename)
-
-    if not outfile == 'AUTOMATIC':
-
-        # an outfile was specified, so this is just for testing - dont tell grid_script
-
-        return (True, '')
-
     # if this is an ARC job (indicated by a flag), check proxy existence 
     # and lifetime. grid_script will submit the job directly.
     
@@ -242,6 +224,24 @@ def parse(
         except Exception, err:
             return (False, err.__str__())
     
+    # save file
+
+    if outfile == 'AUTOMATIC':
+        filename = \
+            os.path.abspath(os.path.join(configuration.mrsl_files_dir,
+                            client_dir, job_id + '.mRSL'))
+    else:
+        filename = outfile
+
+    if not pickle(replaced_dict, filename, logger):
+        return (False, 'Fatal error: Could not write %s' % filename)
+
+    if not outfile == 'AUTOMATIC':
+
+        # an outfile was specified, so this is just for testing - dont tell grid_script
+
+        return (True, '')
+
     # tell 'grid_script'
 
     message = 'USERJOBFILE %s/%s\n' % (client_dir, job_id)

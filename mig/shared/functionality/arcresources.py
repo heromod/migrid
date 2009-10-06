@@ -31,7 +31,7 @@ import os
 import time
 
 import shared.returnvalues as returnvalues
-from shared.init import initialize_main_variables
+from shared.init import initialize_main_variables, find_entry
 from shared.functional import validate_input_and_cert
 import shared.arcwrapper as arc
 from shared.useradm import client_id_dir
@@ -91,7 +91,7 @@ def main(client_id, user_arguments_dict):
     """Main function used by front end"""
 
     (configuration, logger, output_objects, op_name) = \
-        initialize_main_variables(op_header=False, op_title=False)
+        initialize_main_variables(op_header=False)
     defaults = signature()[1]
     (validate_status, accepted) = validate_input_and_cert(
         user_arguments_dict,
@@ -107,8 +107,8 @@ def main(client_id, user_arguments_dict):
     user_dir = os.path.join(configuration.user_home, 
                             client_id_dir(client_id))
 
-    output_objects.append({'object_type': 'title', 'text'
-                          : 'ARC Resource Display'})
+    title_entry = find_entry(output_objects, 'title')
+    title_entry['text'] = 'ARC Queues'
     output_objects.append({'object_type': 'header', 'text'
                           : 'ARC Resources available'})
     try:
@@ -131,14 +131,14 @@ def main(client_id, user_arguments_dict):
                               : 'Job queues discovered'})
 
     for q in queues:
-        output_objects.append({'object_type': 'text', 'text' 
+        output_objects.append({'object_type': 'html_form', 'text' 
                                :'<p><a href="#%s">%s</a>' % \
                                (q_anchor(q),q_displayname(q))})
 
     output_objects.append({'object_type': 'sectionheader', 'text'
                               : 'Queue details'})
     for q in queues:
-        output_objects.append({'object_type': 'text', 'text' 
+        output_objects.append({'object_type': 'html_form', 'text' 
                                : display_arc_queue(q) })
 
     return ( output_objects, returnvalues.OK )

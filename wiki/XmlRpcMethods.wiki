@@ -1,0 +1,75 @@
+#summary Documentation of methods that can be invoked via XML RPC
+
+= Introduction =
+
+This page will have more details soon -- such as parameters and return values.
+
+= List of methods =
+
+=== addresowner ===
+=== addvgridmember ===
+=== addvgridowner ===
+=== addvgridres ===
+=== adminre ===
+=== adminvgrid ===
+=== canceljob ===
+=== cat ===
+=== cleanexe ===
+=== cleanfe ===
+=== cp ===
+=== createre ===
+=== createvgrid ===
+=== docs ===
+=== editfile ===
+=== editor ===
+=== getjobobj ===
+=== head ===
+=== jobobjsubmit ===
+=== jobstatus ===
+=== liveoutput ===
+=== ls ===
+=== lsresowners ===
+=== lsvgridmembers ===
+=== lsvgridowners ===
+=== lsvgridres ===
+=== mkdir ===
+=== mv ===
+=== my_id ===
+=== object_type_info ===
+=== pubvgridprojects ===
+=== redb ===
+=== restartexe ===
+=== restartfe ===
+=== resubmit ===
+=== rm ===
+=== rmdir ===
+=== rmresowner ===
+=== rmvgridmember ===
+=== rmvgridowner ===
+=== rmvgridres ===
+=== scripts ===
+=== settings ===
+=== showre ===
+=== showvgridmonitor ===
+=== signature ===
+=== spell ===
+=== startexe ===
+=== startfe ===
+=== stat ===
+=== statusexe ===
+=== statusfe ===
+=== stopexe ===
+=== stopfe ===
+=== submit ===
+=== system.listMethods ===
+=== system.methodHelp ===
+=== system.methodSignature ===
+=== tail ===
+=== textarea ===
+=== touch ===
+=== truncate ===
+=== updateresconfig ===
+=== vgridmemberrequest ===
+=== vgridmemberrequestaction ===
+=== wc ===
+=== zip ===

@@ -28,6 +28,12 @@ You will be prompted for a passphrase and a location for the generated key file(
 
 The public key is the file which is by default saved to ~/.ssh/id_rsa.pub during the key generation.
 
+We need a public key in OpenSSH format, so if you use another SSH client (e.g. Putty) with another key format, you can use ssh-keygen from the OpenSSH suite to convert it:
+{{{
+ssh-keygen -i ssh2key.pub -o opensshkey.pub
+}}}
+
+
 == Existing key from MiG user certificate ==
 Alternatively you can use your MiG user key as your SSH key. If you unpacked your certificate and key to ~/.mig/ you can generate the corresponding public key with:
 

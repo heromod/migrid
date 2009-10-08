@@ -30,7 +30,7 @@ The public key is the file which is by default saved to ~/.ssh/id_rsa.pub during
 
 We need a public key in OpenSSH format, so if you use another SSH client (e.g. Putty) with another key format, you can use ssh-keygen from the OpenSSH suite to convert it:
 {{{
-ssh-keygen -i ssh2key.pub -o opensshkey.pub
+ssh-keygen -i -f ssh2key.pub > opensshkey.pub
 }}}
 
 

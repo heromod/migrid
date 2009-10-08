@@ -308,9 +308,9 @@ def main(client_id, user_arguments_dict):
                          % exc})
                 return (output_objects, returnvalues.SYSTEM_ERROR)
             output_objects.append({'object_type': 'html_form', 'text'
-                                  : show_info(configuration, userdb,
-                                              grid_stat, username, password,
-                                              expert)})
+                                    : show_download(configuration, userdb,
+                                                   username, password,
+                                                   expert)})
     else:
 
         # Otherwise, check that username and password are correct

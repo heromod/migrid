@@ -454,17 +454,12 @@ def create_arc_job(
     try:
         logger.debug('submitting job to ARC')
         session = arc.Ui(user_home)
-        (success, arc_job_ids) = session.submit(xrsl)
-        if success != 0:
-            msg = "Error during ARC job submission"
-            result = None
+        arc_job_ids = session.submit(xrsl)
 
-            # and remove the created links immediately
-            map(os.remove, [link for (_,link) in linklist] )
-            
-        else:
-            msg = arc_job_ids[0]
-            result = sessionid
+        # if no exception occurred, we are done:
+
+        msg = arc_job_ids[0]
+        result = sessionid
 
     # when errors occurred, pass a message to the caller.
     except arc.ARCWrapperError, err:
@@ -479,8 +474,9 @@ def create_arc_job(
 
     # always remove the generated script
     os.remove(script_name)
-
+    # and remove the created links immediately if failed
     if not result:
+        map(os.remove, [link for (_,link) in linklist] )
         logger.error('Unsuccessful ARC job submission: %s' % msg)
     else:
         logger.debug('submitted to ARC as job %s' % msg)

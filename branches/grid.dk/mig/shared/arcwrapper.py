@@ -351,10 +351,11 @@ class Ui:
         @type  xrslFilename: string
         @param xrslFilename: Filename containing a job description in XRSL.
         @rtype list:
-        @return: list containing [resultVal, jobIds] resultVal is the return
-        code of the ARC command, jobIds is a list of jobID strings."""
+        @return: list containing ARC jobIds (strings).
+        Throws an ARCWrapperError if unsuccessful."""
 
         logger.debug( 'Submitting a job from file %s...' % xrslFilename )
+        currDir = os.getcwd()
         try:
 
                 # Convert XRSL file into a string
@@ -364,7 +365,6 @@ class Ui:
                 f.close()
                 xrslAll = arclib.Xrsl(xrslString)
 
-                currDir = os.getcwd()
                 [jobDir, filename] = os.path.split(xrslFilename)
                 os.chdir(jobDir)
 
@@ -374,7 +374,7 @@ class Ui:
         except arclib.XrslError, err:
             logger.error('Ui: XrslError: ' + err.what())
             os.chdir(currDir)
-            return (-1, [])
+            raise ARCWrapperError('XrslError: ' + err.what())
 
     def submit(self, xrslAll, jobName=''):
         """Submit xrsl object as job to available ARC resources.
@@ -384,10 +384,10 @@ class Ui:
         @type  xrslAll: arclib.Xrsl
         @param xrslAll: job description in XRSL (arclib object).
         @rtype list:
-        @return: (resultVal, list of jobIds) resultVal is a return
-        code (0 for success), jobIds is a list of jobID strings.
-        
-        Exceptions are forwarded to the caller."""
+        @return: list of jobIds(strings).
+
+        Any error is raised as an exception to the caller, as 
+        ARCWrapperError or NoProxyError."""
 
         try:
                 # Check for multiple xrsl
@@ -422,7 +422,7 @@ class Ui:
 
                         arclib.AddJobID(jobId, jobName)
                     self.__unlockArclib()
-                    return (0, jobIds)
+                    return jobIds
                 else:
                     # len(targets) == 0, thus:
                     raise ARCWrapperError("No matching resource for submission.")

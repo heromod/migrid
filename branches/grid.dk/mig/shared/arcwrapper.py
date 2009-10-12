@@ -424,7 +424,8 @@ class Ui:
                     self.__unlockArclib()
                     return (0, jobIds)
                 else:
-                    return (-1, jobIds)
+                    # len(targets) == 0, thus:
+                    raise ARCWrapperError("No matching resource for submission.")
 
         except NoProxyError, err:
             logger.error('Proxy error during job submission: ' + err.what())

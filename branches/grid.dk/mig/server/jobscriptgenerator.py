@@ -458,6 +458,10 @@ def create_arc_job(
         if success != 0:
             msg = "Error during ARC job submission"
             result = None
+
+            # and remove the created links immediately
+            map(os.remove, [link for (_,link) in linklist] )
+            
         else:
             msg = arc_job_ids[0]
             result = sessionid

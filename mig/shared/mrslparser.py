@@ -120,7 +120,9 @@ def parse(
 
     # convert specified runtime environments to upper-case and verify they actually exist
 
-    if global_dict.has_key('RUNTIMEENVIRONMENT'):
+    # do not check REs if the job is for ARC (submission will fail later) 
+    if global_dict.get('JOBTYPE','unset') != 'arc' \
+        and global_dict.has_key('RUNTIMEENVIRONMENT'):
         re_entries_uppercase = []
         for specified_re in global_dict['RUNTIMEENVIRONMENT']:
             specified_re = specified_re.upper()
@@ -205,7 +207,7 @@ def parse(
     # if this is an ARC job (indicated by a flag), check proxy existence 
     # and lifetime. grid_script will submit the job directly.
     
-    if replaced_dict['JOBTYPE'] == 'arc':
+    if replaced_dict.get('JOBTYPE','unset') == 'arc':
         logger.debug('Received job for ARC.')
         user_home = os.path.join(configuration.user_home, client_dir)
         try:

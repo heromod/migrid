@@ -451,7 +451,7 @@ class Configuration:
         if config.has_option('SITE', 'logo_text'):
             self.site_logo_text = config.get('SITE', 'logo_text')
         else:
-            self.site_logo_text = "Minimum intrusion Grid"
+            self.site_logo_text = "GRID::DK"
         if config.has_option('SITE', 'logo_image'):
             self.site_logo_image = config.get('SITE', 'logo_image')
         else:

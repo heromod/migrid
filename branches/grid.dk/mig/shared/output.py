@@ -998,7 +998,7 @@ def xmlrpc_format(ret_val, ret_msg, out_obj):
 def json_format(ret_val, ret_msg, out_obj):
     """Generate output in json format"""
 
-    import json
+    import simplejson as json
     try:
 
         # python >=2.6 includes native json module with loads/dumps methods

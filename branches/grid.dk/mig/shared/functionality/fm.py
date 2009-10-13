@@ -122,56 +122,6 @@ def js_tmpl():
     """
     return js
 
-# Handler for ajax-call
-#def list(base, location):
-#    
-#    prefix_count = len(base)
-#    
-#    if location[:prefix_count] != base:
-#        location = base+location
-#    r=['<ul class="jqueryFileTree" style="display: none;">\n']
-# 
-#    try:
-#        r=['<ul class="jqueryFileTree" style="display: none;">\n']
-#        
-#        for f in os.listdir(location):
-#            ff=os.path.join(location,f)
-#            if os.path.isdir(ff):
-#                r.append('<li class="directory collapsed"><a href="#" rel="%s/">%s</a></li>\n' % (f,f))
-#            else:
-#                e=os.path.splitext(f)[1][1:] # get .ext and remove dot
-#                r.append('<li class="file ext_%s"><a href="#" rel="%s">%s</a></li>\n' % (e,ff,f))
-#        r.append('</ul>')
-#    except Exception,e:
-#        r.append('Could not load directory: %s' % str(e))
-#    r.append('</ul>')
-#    return ''.join(r)
-
-# below is useless
-#def list_html(base, location):
-#    
-#    prefix_count    = len(base)
-#    relative_root   = location
-#    
-#    if location[:prefix_count] != base:
-#        location = base+location
-#    r=['<ul class="jqueryFileTree" style="display: none;">\n']
-# 
-#    try:
-#        r=['<ul class="jqueryFileTree" style="display: none;">\n']
-#        
-#        for f in os.listdir(location):
-#            ff=os.path.join(location,f)
-#            if os.path.isdir(ff):
-#                r.append('<li class="directory collapsed"><a href="#" rel="%s/">%s</a></li>\n' % (ff, f))
-#
-#        r.append('</ul>')
-#    except Exception,e:
-#        r.append('Could not load directory: %s' % str(e))
-#        
-#    r.append('</ul>')
-#    return ''.join(r)
-
 # Handler for ajax-call, this is a quick-and-very-dirty-simplejson hack    
 def list(base, location):
     
@@ -259,7 +209,7 @@ def main(client_id, user_arguments_dict):
         
         output_objects.append({'object_type': 'header', 'text': 'Filemanager' })
         
-        output_objects.append({'object_type': 'text', 'text': html_tmpl()})
+        output_objects.append({'object_type': 'html_form', 'text': html_tmpl()})
             
         return (output_objects, status)
     else:

@@ -205,6 +205,6 @@ def main(client_id, user_arguments_dict):
     
     output_objects.append({'object_type': 'header', 'text': 'Jobmanager' })
     
-    output_objects.append({'object_type': 'text', 'text': html_tmpl()})
+    output_objects.append({'object_type': 'html_form', 'text': html_tmpl()})
     
     return (output_objects, status)

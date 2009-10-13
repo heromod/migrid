@@ -1,8 +1,8 @@
-/* MiG default style sheet */
+/* GRIDDK style */
 
 body {
   background: #ccc;
-  background: transparent url('/images/pattern.png');
+  background: transparent url('/images/griddk/pattern.png');
   color: #000;
   font-family: verdana, helvetica, serif, times;
   margin: 0;
@@ -30,7 +30,7 @@ h1 {
   margin-top: 0;
   
   color: #eee;
-  background: #eee url('/images/background.png');
+  background: #eee url('/images/griddk/background.png');
   font-size: 16px;  
 
   padding: 4px;
@@ -149,7 +149,7 @@ table.monitorruntimeenvreq {
 
 /* Navigational menu... */
 .navmenu {
-  background: #aaa url('/images/background_greypattern.png');
+  background: #aaa url('/images/griddk/background_greypattern.png');
   width: 150px;
   float: left;
 
@@ -249,7 +249,7 @@ table.monitorruntimeenvreq {
   margin-top: 5px;
   
   color: #eee;
-  background: #eee url('/images/background.png');
+  background: #eee url('/images/griddk/background.png');
 }
 
 /* MiG logo */
@@ -258,7 +258,7 @@ table.monitorruntimeenvreq {
 }
 #toplogo {
   border: 0;
-  background: #eee url('/images/background.png');
+  background: #eee url('/images/griddk/background.png');
   background-position: left;
   padding: 0px 10px;
   font-size: 20px;
@@ -289,6 +289,14 @@ table.monitorruntimeenvreq {
   border-spacing: 0;
 }
 
+.odd {
+  background-color: white;
+}
+
+.even {
+  background-color: #ccc;
+}
+
 #exitcode {
   font-family: Small Fonts, VT100, Arial, Helvetica;
   font-size: 8px;
@@ -299,7 +307,7 @@ table.monitorruntimeenvreq {
 }
 #bottomlogo {
   border: 0;
-  background: #eee url('/images/background.png');
+  background: #eee url('/images/griddk/background.png');
   padding: 8px 10px;
   font-size: 10px;
   font-weight: normal;
@@ -418,4 +426,9 @@ table.monitorruntimeenvreq {
 
 .mandatory {
   color: blue;
+}
+
+/* Job manager */
+.jm {
+  margin-top: -15px; 
 }

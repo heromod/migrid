@@ -5,6 +5,7 @@ if (jQuery) (function($){
     var defaults = {
         root: '/',      
         connector: 'somewhere.py',
+        param: 'path',
         folderEvent: 'click',  
         expandSpeed: 500,
         collapseSpeed: 500,
@@ -29,9 +30,25 @@ if (jQuery) (function($){
         $(folder_pane).addClass('wait');
         $(".jqueryFileTree.start").remove();
 
-        $.getJSON(options.connector, { dir: t }, function(listing, textStatus) {
+        $.getJSON(options.connector, { path: t }, function(jsonRes, textStatus) {
           
-          var i=0;
+          var listing = new Array();
+          var i,j;
+          
+          for(i=0;i<jsonRes.length; i++) {
+            
+            if (jsonRes[i].object_type=='dir_listings') {
+              
+              for(j=0; j<jsonRes[i].dir_listings.length; j++) {
+                alert('got something');
+                listing = listing.concat(jsonRes[i].dir_listings[j].entries);
+              }
+              
+            }
+          }
+          
+          alert(listing.length);
+        
           var folders = '<ul class="jqueryFileTree">';          
           
           /*
@@ -50,11 +67,13 @@ if (jQuery) (function($){
           
           for (i=0;i<listing.length;i++) {
             
-            is_dir = listing[i]['is_dir'];
+            is_dir = listing[i]['type'] == 'directory';
             base_css_style = 'file';
             if (is_dir) {
               base_css_style = 'directory';
-              folders += '<li class="'+base_css_style+' collapsed"><a href="#" rel="'+listing[i]['parent']+'/">'+listing[i]['name']+'</a></li>\n';
+              folders +=  '<li class="'+base_css_style+' collapsed">'+
+                          ' <a href="#" rel="'+t+'/'+listing[i]['name']+'/">'+listing[i]['name']+'</a>'+
+                          '</li>\n';
             }
             /*
             files +=  '<tr>'+
@@ -65,8 +84,12 @@ if (jQuery) (function($){
                       ' <td>'+pp_date(listing[i]['create_time'])+'</td>'+
                       '</tr>';*/
             files +=  '<li class="'+base_css_style+' ext_'+listing[i]['ext']+'">'+
-                      ' <span class="size">'+pp_bytes(listing[i]['size'])+'</span>'+
-                      ' <span class="cdate">'+pp_date(listing[i]['create_time'])+'</span>'+
+// TODO: expand the backend to send filesize with
+//                      ' <span class="size">'+pp_bytes(listing[i]['size'])+'</span>'+
+                      ' <span class="size">'+pp_bytes(1)+'</span>'+
+// TODO: expand the backd to send this infor with
+//                      ' <span class="cdate">'+pp_date(listing[i]['create_time'])+'</span>'+
+                      ' <span class="cdate">create time</span>'+
                       ' <span class="bulk"><input type="checkbox" /></span>'+
                       ' <span class="name">'+listing[i]['name']+'</span>'+
                       

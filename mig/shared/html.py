@@ -32,7 +32,6 @@ import sys
 def html_print(formatted_text, html=True):
     print html_add(formatted_text, html)
 
-
 def html_add(formatted_text, html=True):
     """Convenience function to only append html formatting to a text
     string in html mode"""
@@ -78,7 +77,7 @@ def get_cgi_html_header(
     usercss="/cert_redirect/.default.css",
     favicon="/images/favicon.ico",
     logoimage="/images/site-logo.png",
-    logotitle="Minimum intrusion Grid",
+    logotitle="GRID::DK",
     ):
     """Return the html tags to mark the beginning of a page."""
 
@@ -91,12 +90,10 @@ def get_cgi_html_header(
         menu_items = (
             {'class': 'dashboard', 'url': 'dashboard.py', 'title'
              : 'Dashboard'},
-            {'class': 'submitjob', 'url': 'submitjob.py', 'title'
-             : 'Submit Job'},
-            {'class': 'files', 'url': 'ls.py', 'title': 'Files'},
-            {'class': 'jobs', 'url': 'managejobs.py', 'title': 'Jobs'},
-            {'class': 'vgrids', 'url': 'vgridadmin.py', 'title'
-             : 'VGrids'},
+            {'class': 'submitjob', 'url': 'submitjob.py', 'title' : 'Submit Job'},
+            {'class': 'files', 'url': 'fm.py', 'title': 'Files'},
+            {'class': 'jobs', 'url': 'jm.py', 'title': 'Jobs'},
+            {'class': 'vgrids', 'url': 'vgridadmin.py', 'title' : 'Virtual Org.'},
             {'class': 'resources', 'url': 'resadmin.py', 'title'
              : 'Resources'},
             {'class': 'downloads', 'url': 'downloads.py', 'title'
@@ -116,7 +113,18 @@ def get_cgi_html_header(
 <head>
 <link rel="stylesheet" type="text/css" href="%s" media="screen"/>
 <link rel="stylesheet" type="text/css" href="%s" media="screen"/>
+
+<link rel="stylesheet" type="text/css" href="/images/css/jquery.filemanager.css" media="screen"/>
+<link rel="stylesheet" type="text/css" href="/images/css/jquery.contextmenu.css" media="screen"/>
 <link rel="icon" type="image/vnd.microsoft.icon" href="%s">
+
+<script type="text/javascript" src="/images/js/jquery.js"></script>
+<script type="text/javascript" src="/images/js/jquery.prettyprint.js"></script>
+<script type="text/javascript" src="/images/js/jquery.filemanager.js"></script>
+<script type="text/javascript" src="/images/js/jquery.jobmanager.js"></script>
+<script type="text/javascript" src="/images/js/jquery.tablesorter.js"></script>
+<script type="text/javascript" src="/images/js/jquery.tablesorter.pager.js"></script>
+<script type="text/javascript" src="/images/js/jquery.contextmenu.js"></script>
 <title>
 %s
 </title>
@@ -126,7 +134,7 @@ def get_cgi_html_header(
 <div id="topspace">
 </div>
 <div id="toplogo">
-<img src="%s" id="logoimage" alt="site logo"/>
+<!--<img src="%s" id="logoimage" alt="site logo"/>-->
 <span id="logotitle">
 %s
 </span>
@@ -139,7 +147,6 @@ def get_cgi_html_header(
     '''\
          % (defaultcss, usercss, favicon, title, scripts,
             bodyfunctions, logoimage, logotitle, menu_lines, header)
-
 
 def get_cgi_html_footer(footer='', html=True, creditsimage="/images/copyright.png",
                         credits='2009, <a href="http://www.migrid.org">The MiG Project</a>'):
@@ -164,7 +171,9 @@ def get_cgi_html_footer(footer='', html=True, creditsimage="/images/copyright.pn
 </body>
 </html>
 ''' % (creditsimage, credits)
-    return out
+    # todo: fix this
+    #return out
+    return ''
 
 
 # Wrappers used during transition phase - replace with
@@ -192,5 +201,3 @@ def html_encode(raw_string):
     result = raw_string.replace("'", '&#039;')
     result = result.replace('"', '&#034;')
     return result
-
-

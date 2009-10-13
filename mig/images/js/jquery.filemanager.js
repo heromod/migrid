@@ -40,15 +40,12 @@ if (jQuery) (function($){
             if (jsonRes[i].object_type=='dir_listings') {
               
               for(j=0; j<jsonRes[i].dir_listings.length; j++) {
-                alert('got something');
                 listing = listing.concat(jsonRes[i].dir_listings[j].entries);
               }
               
             }
           }
-          
-          alert(listing.length);
-        
+                  
           var folders = '<ul class="jqueryFileTree">';          
           
           /*

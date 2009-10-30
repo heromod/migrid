@@ -132,43 +132,43 @@ def js_tmpl():
                     
                     // Grab jobs from json response and place them in jobList.
                     for(i=0; i<jsonRes.length; i++) {
-            if (jsonRes[i].object_type == 'job_list') {    
-              jobList = jobList.concat(jsonRes[i].jobs);
-            }
-        }
+                        if (jsonRes[i].object_type == 'job_list') {    
+                          jobList = jobList.concat(jsonRes[i].jobs);
+                        }
+                    }   
   
-        $.each(jobList, function(i, item) {
-
-            $('table tbody').append('<tr>'+
-               '<td>'+item.job_id+'</td>'+
-               '<td>'+item.status+'</td>'+
-               '<td><a href="'+item.mrsllink.destination+'">mRSL</a></td>'+
-               '<td><a href="'+item.statuslink.destination+'">status</a></td>'+
-               '<td><a href="'+item.jobschedulelink.destination+'">schedule</a></td>'+
-               '<td>'+item.received_timestamp+'</td>'+
-               '<td><a href="'+item.cancellink.destination+'">cancel</a></td>'+
-               '<td><a href="'+item.liveoutputlink.destination+'">liveout</a></td>'+
-               '<td><a href="'+item.resubmitlink.destination+'">resubmitlink</a></td>'+
-               '</tr>'
-               
-               );
+                    // Wrap each json result into html
+                    $.each(jobList, function(i, item) {
             
-            // Inform tablesorter of new data
-            var sorting = [[0,0]]; 
-            $("table").trigger("update");       
-            $("table").trigger("sorton",[sorting]); 
-
-        });      
+                        $('table tbody').append('<tr>'+
+                           '<td>'+item.job_id+'</td>'+
+                           '<td>'+item.status+'</td>'+
+                           '<td><a href="'+item.mrsllink.destination+'">mRSL</a></td>'+
+                           '<td><a href="'+item.statuslink.destination+'">status</a></td>'+
+                           '<td><a href="'+item.jobschedulelink.destination+'">schedule</a></td>'+
+                           '<td>'+item.received_timestamp+'</td>'+
+                           '<td><a href="'+item.cancellink.destination+'">cancel</a></td>'+
+                           '<td><a href="'+item.liveoutputlink.destination+'">liveout</a></td>'+
+                           '<td><a href="'+item.resubmitlink.destination+'">resubmitlink</a></td>'+
+                           '</tr>'
+                           
+                           );
+                                    
+                    });
+                    
+                    // Inform tablesorter of new data
+                    var sorting = [[0,0]]; 
+                    $("table").trigger("update");       
+                    $("table").trigger("sorton",[sorting]); 
         
-      });
+                });
 
-  }); 
+            }); 
 
-  $("table").trigger("update");       
-  var sorting = [[0,0]]; 
-  $("table").trigger("sorton",[sorting]);
-        }); 
+            $("#append").click();
 
+        });
+        
     </script>
     """
     return js

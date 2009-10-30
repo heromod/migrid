@@ -13,7 +13,6 @@ if (jQuery) (function($){
     var options = $.extend(defaults, user_options);
 
     
-
     return this.each(function() {
       obj = $(this);
             

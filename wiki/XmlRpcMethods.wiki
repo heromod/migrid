@@ -4,6 +4,10 @@
 
 Important note: xmlrpcsslclient is NOT thread safe.
 
+Currently, most methods will return a huge list of dictionaries full of redundant data, because the server-side implementation is yet to be written specifically for RPC calls.
+
+Recommended: use pprint.pprint for pretty printing of output to get an idea of what's going on.
+
 This page will have more details soon -- such as parameters and return values.
 
 = List of methods =
@@ -29,7 +33,15 @@ This page will have more details soon -- such as parameters and return values.
 === jobobjsubmit ===
 === jobstatus ===
 === liveoutput ===
-=== ls ===
+=== ls(path_list) ===
+path_list :: [Str]
+returns a list of dictionaries. To get the actual directory listing, filter the list:
+
+{{{
+(output, _) = xmlserver_instance.ls({"path": ["some_path"]})
+filter(lambda x: x.__contains__('dir_listings'), output)
+}}}
+
 === lsresowners ===
 === lsvgridmembers ===
 === lsvgridowners ===
@@ -57,7 +69,11 @@ This page will have more details soon -- such as parameters and return values.
 === spell ===
 === startexe ===
 === startfe ===
-=== stat ===
+
+=== stat(path_list) ===
+path_list :: [Str]
+returns a list of dictionaries.
+
 === statusexe ===
 === statusfe ===
 === stopexe ===

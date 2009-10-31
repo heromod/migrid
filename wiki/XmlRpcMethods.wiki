@@ -2,6 +2,8 @@
 
 = Introduction =
 
+Important note: xmlrpcsslclient is NOT thread safe.
+
 This page will have more details soon -- such as parameters and return values.
 
 = List of methods =

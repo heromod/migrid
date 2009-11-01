@@ -47,7 +47,10 @@ filter(lambda x: x.__contains__('dir_listings'), output)
 === lsvgridowners ===
 === lsvgridres ===
 === mkdir ===
-=== mv ===
+=== mv(src_list, dst) ===
+`src_list :: [Str]'
+`dst :: Str'
+
 === my_id ===
 === object_type_info ===
 === pubvgridprojects ===

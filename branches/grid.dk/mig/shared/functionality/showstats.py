@@ -291,12 +291,8 @@ def main(client_id, user_arguments_dict):
 
     # build data rows
     if not grouping:
-        datarows = [['(All)'] + [ lookupdict[date] for d in dates ]]
-        output_objects.append({'object_type':'error_text', 'text'
-                               :'FIXME! wrong selection!'}) 
-        output_objects.append({'object_type':'html_form', 'text'
-                               :'lookup: %s <br>dates: %s <br>rows: %s'
-                                 % (lookupdict,dates,datarows)}) 
+        datarows = [['(All)'] + [ lookupdict[(d,)] for d in dates ]]
+
     else:
         # fill in missing data...
         nullval = {'count':0, 'wall_duration':0,'charge':0}
@@ -310,7 +306,7 @@ def main(client_id, user_arguments_dict):
                 else:
                     row.append(nullval)
             datarows.append(row)
-        
+
     #   build tables for all data we have. could make field names
     # configurable as well, but this is anyway highly proprietary code
 

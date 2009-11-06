@@ -52,7 +52,7 @@ ALLOW_UNSAFE = \
 
 # Allow these chars in addition to plain letters and digits
 
-name_extras = ' -'
+name_extras = ' -@'
 
 ############################################################################
 # IMPORTANT: never allow '+' and '_' in DN: reserved for path translation! #
@@ -824,10 +824,23 @@ def guess_type(name):
         return valid_numeric
     elif name.lower().find('net_bw') != -1:
         return valid_numeric
+    # showstats.py:
+    # time_start/time_end: YYYY-MM
+    elif name.lower().find('time_') != -1:
+        # has to be a function with type (something convertible to string,int,int) -> Bool 
+        return lambda x:__valid_contents(x, "-" + digits)
+# group_in_time: month,week,day,all
+    elif name.lower().find('group_in_time') != -1:
+        return lambda x:__valid_contents(x, "monthweekdayall")
+# display: machine, user
+    elif name.lower().find('display') != -1:
+        return lambda x:__valid_contents(x, "machineuser")
+# summary: checkbox, can be "on"
+    elif name.lower().find('summary') != -1:
+        return lambda x:__valid_contents(x, "on")
     else:
 
     # TODO: extend to include all used variables here
-
         return valid_alphanumeric
 
 

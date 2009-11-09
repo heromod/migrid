@@ -832,12 +832,9 @@ def guess_type(name):
 # group_in_time: month,week,day,all
     elif name.lower().find('group_in_time') != -1:
         return lambda x:__valid_contents(x, "monthweekdayall")
-# display: machine, user
+# display: machine, user, summary
     elif name.lower().find('display') != -1:
-        return lambda x:__valid_contents(x, "machineuser")
-# summary: checkbox, can be "on"
-    elif name.lower().find('summary') != -1:
-        return lambda x:__valid_contents(x, "on")
+        return lambda x:__valid_contents(x, "machineusersummary")
     else:
 
     # TODO: extend to include all used variables here

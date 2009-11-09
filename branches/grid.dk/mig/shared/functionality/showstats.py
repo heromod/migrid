@@ -44,7 +44,7 @@ from shared.functional import validate_input
 
 
 # allowed parameters, first value is default
-displays = ['machine','user']
+displays = ['machine','user', 'summary']
 time_groups = ['month', 'week', 'day', 'all']
 
 def signature():
@@ -52,7 +52,6 @@ def signature():
 
     defaults = { 'group_in_time':time_groups[0:1]
                  ,'display'     :displays[0:1]
-                 ,'summary'     :[''] # means: no grouping by display item
                  ,'time_start'  :['2009-09'] # allowed are year-month strings
                  ,'time_end'    :[]          # ditto. 
                }
@@ -102,10 +101,7 @@ def main(client_id, user_arguments_dict):
     # read view options
     group_in_time = accepted['group_in_time'][-1] # all, month, day, year
     time_start    = accepted['time_start'][-1]
-    display       = accepted['display'][-1] # machine, user
-    grouping      = True
-    if accepted['summary'][-1] == 'on':
-        grouping = False
+    display       = accepted['display'][-1] # machine, user, summary
 
     # check arguments against configured lists of valid inputs:
     reject = False
@@ -135,7 +131,7 @@ def main(client_id, user_arguments_dict):
             output_objects.append({'object_type': 'error_text', 'text'
                    : 'invalid end time specified: %s' % time_end })
             time_end = ''
-        reject = True
+            reject = True
     else:
         time_end = ''
 
@@ -143,11 +139,12 @@ def main(client_id, user_arguments_dict):
     updateform = '           <form action="%s" >' %  \
                  os.path.basename(sys.argv[0])
     updateform +='''
-                <table>
+                <table class="runtimeenventry">
                   <tr>
                     <th>Grouping by time
-                    <th>Start <th>End
-                    <th>Category<th>Summary?
+                    <th>Start
+                    <th>End
+                    <th>Category
                   <tr>
                     <td><select name="group_in_time">
 '''
@@ -174,17 +171,13 @@ def main(client_id, user_arguments_dict):
         if display == d:
             updateform += 'selected '
         updateform += 'value="' + d + '">' + d.title() + '</option>\n'
-    summary_checked = ''
-    if not grouping:
-        summary_checked = 'CHECKED'
     updateform +='''
                         </select>
-                    <td><input type="checkbox" name="summary" %s>
-                  <tr><td colspan="4"><td><input type="submit" value="Update View">
+                    <td><input type="submit" value="Update View">
                 </table>
             </form>
             <hr>
-''' % summary_checked
+'''
 
     output_objects.append({'object_type': 'html_form', 'text': updateform})
     if reject:
@@ -216,25 +209,18 @@ def main(client_id, user_arguments_dict):
         group_in_time = 'month'
         group_level = 1
 
-    if not grouping:
-        # global statistics per-time only, use a different view
-        view = group_in_time + '-' + 'user-machine'
-        group_level = group_level - 1
-        start_key = '['+ start + ',null,null]'
-        end_key = '['+ end + ',{},{}]'
-    else:
-        # normal: use predefined views and defaults
-        view = display + '-' + group_in_time
+    # we use couchdb views with name convention <display>-<group-in-time>
+    view = display + '-' + group_in_time
 
-        if display == 'user':
-            # only own user ID allowed
-            start_key = '[' + client_id + ','+ start + ']'
-            end_key = '[' + client_id + ','+ end + ']'
-        else:
-            # all machines allowed (?)
-            start_key = '[null,'+ start + ']'
-            end_key = '[{},'+ end + ']'
-            
+    if display == 'user':
+        # only own user ID allowed
+        start_key = '[' + client_id + ','+ start + ']'
+        end_key = '[' + client_id + ','+ end + ']'
+    else:
+        # machines or summary, not restricted
+        start_key = '[null,'+ start + ']'
+        end_key = '[{},'+ end + ']'
+        
     # couchdb URL, default http://localhost:5984/
     database = 'http://localhost:5984/' # TODO use configuration.usagedb
     
@@ -260,15 +246,15 @@ def main(client_id, user_arguments_dict):
 {"key":["amigos24.diku.dk.1","2007-09"],"value":{"count":8,"wall_duration":693,"charge":693}},
 {"key":["lucia.imada.sdu.dk.0","2007-05"],"value":{"count":11,"wall_duration":267,"charge":267}},
 {"key":["lucia.imada.sdu.dk.0","2007-08"],"value":{"count":15,"wall_duration":6617,"charge":6617}},
-{"key":["lucia.imada.sdu.dk.0","2007-09"],"value":{"count":861,"wall_duration":1908082,"charge":1908082}},
-{"key":["lucia.imada.sdu.dk.0","2007-10"],"value":{"count":329,"wall_duration":569629,"charge":569629}},
+{"key":["lucia.imada.sdu.dk.0","2007-09"],"value":{"count":61,"wall_duration":10808,"charge":10808}},
+{"key":["lucia.imada.sdu.dk.0","2007-10"],"value":{"count":129,"wall_duration":69629,"charge":69629}},
 {"key":["lucia.imada.sdu.dk.0","2007-11"],"value":{"count":20,"wall_duration":0,"charge":0}},
 {"key":["lucia.imada.sdu.dk.0","2008-01"],"value":{"count":3,"wall_duration":0,"charge":0}},
 {"key":["niflheim.fysik.dtu.dk.0","2007-05"],"value":{"count":28,"wall_duration":6894,"charge":22376}},
 {"key":["niflheim.fysik.dtu.dk.0","2007-06"],"value":{"count":6,"wall_duration":3339,"charge":5945}}
 ]}
 """
-    else:  # view = month-user-machine, group-level=1, 06 to 10 2007
+    elif view == 'summary-month': # , group-level=1, 06 to 10 2007
         jsonreply = \
 """{"rows":[
 {"key":["2007-06"],"value":{"count":2224,"wall_duration":72463,"charge":75069}},
@@ -277,10 +263,21 @@ def main(client_id, user_arguments_dict):
 {"key":["2007-10"],"value":{"count":653,"wall_duration":687981,"charge":687981}}
 ]}
 """
+    else:
+        jsonreply = '{"rows":[]}'
 
     #  2. convert from json to dictionary, extract values we need
     # ...we do not really need json here...
     data = eval(jsonreply)['rows'] # :: list of dict with "key","value"
+
+    if not data:
+        output_objects.append({'object_type': 'sectionheader', 'text' :
+                               'No data available'})
+        output_objects.append({'object_type': 'text', 'text' :
+                               '''
+The query you have requested did not return any data.
+                               '''})
+        return (output_objects, returnvalues.OK)
 
     lookupdict = dict( [ (tuple(d['key']),d['value']) for d in data ] )
 
@@ -290,7 +287,8 @@ def main(client_id, user_arguments_dict):
     dates.sort()
 
     # build data rows
-    if not grouping:
+    # TODO eliminate this special case, by defining the view accordingly
+    if display == 'summary':
         datarows = [['(All)'] + [ lookupdict[(d,)] for d in dates ]]
 
     else:
@@ -314,6 +312,11 @@ def main(client_id, user_arguments_dict):
                    'wall_duration': 'Accumulated Wall Clock Time',
                    'charge': 'Accumulated Charge'}
     for key in table_names:
+        output_objects.append({'object_type': 'text', 'text' :
+                               ''}) # spacer.. :-S
+        output_objects.append({'object_type': 'sectionheader', 'text' :
+                               table_names[key]})
+
         html = '<table class="stats"><caption>%s</caption>' % table_names[key]
         
         # fill header (date part of keys) and data (other ky part = col.1)
@@ -329,7 +332,7 @@ def main(client_id, user_arguments_dict):
             html += '<td>'.join([ str(x[key]) for x in r[1:] ])
             
         html += '</tbody>'
-        html += '</table>'
+        html += '</table></p>'
         output_objects.append({'object_type': 'html_form', 'text'
                               : html})
 

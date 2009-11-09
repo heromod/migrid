@@ -83,6 +83,12 @@ def long_list(flags, letter='l'):
 # end long_list
 
 
+def file_info(flags, letter='f'):
+    return contains_letter(flags, letter)
+
+# end file_info
+
+
 def parents(flags, letter='p'):
     """Verify if flags contain the parents flag"""
 

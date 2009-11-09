@@ -34,7 +34,7 @@ import time
 import glob
 import stat
 
-from shared.parseflags import all, long_list, recursive
+from shared.parseflags import all, long_list, recursive, file_info
 from shared.validstring import valid_user_path
 from shared.init import initialize_main_variables, find_entry
 from shared.functional import validate_input_and_cert
@@ -111,6 +111,27 @@ function selectedFilesAction() {
 </script>
 """
 
+def fileinfo_stat(path):
+        
+    file_information = {'size'     : 0,
+                        'created'  : 0,
+                        'modified' : 0,
+                        'accessed' : 0,
+                        'ext'      : ''}
+    
+    if os.path.exists(path):
+        ext = 'dir'
+        if not os.path.isdir(path):
+            ext = os.path.splitext(path)[1].replace('.','')
+        file_information = {'size'      : os.path.getsize(path),
+                            'created'   : os.path.getctime(path),
+                            'modified'  : os.path.getmtime(path),
+                            'accessed'  : os.path.getatime(path),
+                            'ext'       : ext
+        }
+        
+    return file_information
+    
 
 def long_format(path):
     """ output extra info like filesize about the file located at path """
@@ -183,6 +204,9 @@ def handle_file(
 
     if long_list(flags):
         file_obj['long_format'] = long_format(actual_file)
+        
+    if file_info(flags):    
+        file_obj['file_info'] = fileinfo_stat(actual_file)        
 
     listing.append(file_obj)
 
@@ -206,6 +230,9 @@ def handle_dir(
 
     if long_list(flags):
         dir_obj['actual_dir'] = long_format(actual_dir)
+        
+    if file_info(flags):
+        dir_obj['file_info'] = fileinfo_stat(actual_dir)
 
     listing.append(dir_obj)
 

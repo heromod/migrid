@@ -46,14 +46,19 @@ from shared.useradm import client_id_dir
 
 def html_tmpl():
     
-    test =  """    
+    return  """    
     <div id="fm_filemanager">
         <div class="fm_addressbar">
             <ul><li class="fm_path"><input type="text" value="/" readonly="readonly" /></li></ul>
         </div>
-        <div class="fm_folders">		
+        <div class="fm_folders">
+            <ul class="jqueryFileTree">                
+                <li class="directory expanded">
+                    <a href="#">...</a>
+                </li>
+            </ul>
         </div>
-      
+        <!--
         <div class="fm_toolbar">
           <ul>
             <li>Bulk:&nbsp;</li>
@@ -69,43 +74,109 @@ def html_tmpl():
             <li class="bulk cat"><a href="#">submit</a></li>              
           </ul>
         </div>
-        <div class="fm_files">&nbsp;</div>
+        -->
+        <div class="fm_files">
+        
+            <table id="fm_filelisting" cellspacing="0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th style="width: 80px;">Size</th>
+                <th style="width: 50px;">Type</th>
+                <th style="width: 120px;">Date Modified</th>
+              </tr>        
+            </thead>
+            <tbody>
+            </tbody>
+            </table>
+        
+        </div>        
         <div class="fm_statusbar">&nbsp;</div>    
     </div>
     
     <ul id="folder_context" class="contextMenu">
         <li class="mkdir separator">
-            <a href="#mkdir">Make dir</a>
+            <a href="#mkdir">Create Folder</a>
         </li>
         <li class="upload">
             <a href="#upload">Upload file</a>
         </li>
+        <li class="copy separator">
+            <a href="#copy">Copy</a>
+        </li>
+        <li class="paste">
+            <a href="#paste">Paste</a>
+        </li>
+        <li class="delete separator">
+            <a href="#rmdir">Delete Folder</a>
+        </li>
     </ul>
     
     <ul id="file_context" class="contextMenu">        
-        <li class="Show">
-            <a href="#show">Show</a>
+        <li class="show">
+            <a href="#show">Show / Download</a>
         </li>
         <li class="edit">
             <a href="#edit">Edit</a>
+        </li>        
+        <li class="cat separator">
+            <a href="#cat">cat</a>
+        </li>
+        <li class="head">
+            <a href="#head">head</a>
+        </li>
+        <li class="tail">
+            <a href="#tail">tail</a>
+        </li>
+        <li class="resubmit">
+            <a href="#resubmit">resubmit</a>
+        </li>
+        <li class="copy separator">
+            <a href="#copy">Copy</a>
+        </li>
+        <li class="paste">
+            <a href="#paste">Paste</a>
         </li>
         <li class="delete separator">
-            <a href="#delete">Delete</a>
+            <a href="#rm">Delete</a>
         </li>
     </ul>
-    
-    """
-    
-    return test
 
-def js_tmpl():
+    <div id="cmd_dialog" title="Command output"></div>
+
+    <div id="upload_dialog" title="Basic dialog">
+      <p>Please upload a file</p>
+    </div>
+        
+    <div id="mkdir_dialog" title="Create Folder">
+      <p id="validateTips">Bla bla bla.</p>
+    
+      <form>
+      <fieldset>
+        <label for="name">Folder Name</label>
+        <input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" />
+        
+      </fieldset>
+      </form>
+    </div>
+
+    """
+
+def js_tmpl(entry_path='/'):
     
     js = """
     <script>
-
+        $("#mkdir_dialog").dialog({ closeOnEscape: true, modal: true });
+        //$.ui.dialog.defaults.bgiframe = true;
+        /*
+        $(function() {
+            $("#mkdir_dialog").dialog({ closeOnEscape: true, modal: true });
+        });*/
+        
         $(document).ready( function() {
-            $('#fm_filemanager').filemanager({  root: '/',
-                                        connector: 'ls.py?flags=l;output_format=json',
+            $('#fm_filemanager').filemanager({
+                                        root: '/',
+                                        connector: 'ls.py?flags=f;output_format=json',
                                         params: 'path',
                                         expandSpeed: 0,
                                         collapseSpeed: 0,
@@ -115,63 +186,15 @@ def js_tmpl():
                                     );
 
                                 });
-                                    
-            
-    
+  
     </script>
     """
     return js
-
-# Handler for ajax-call, this is a quick-and-very-dirty-simplejson hack    
-def list(base, location):
     
-    prefix_count    = len(base)
-    relative_root   = location
-    
-    if location[:prefix_count] != base:
-        location = base+location
-    folders =[]
-    files   =[]
-
-    try:
-        
-        for f in os.listdir(location):            
-            ff=os.path.join(location,f)
-            
-            if os.path.isdir(ff):
-            
-                folders.append({'name':f,
-                        'size' : os.path.getsize(ff),
-                        'ext' : os.path.splitext(ff)[1].replace('.',''),
-                        'is_dir' : os.path.isdir(ff),
-                        'parent': relative_root+f,
-                        'create_time' : os.path.getctime(ff)})
-            else:
-                
-                files.append({'name':f,
-                        'size' : os.path.getsize(ff),
-                        'ext' : os.path.splitext(ff)[1].replace('.',''),
-                        'is_dir' : os.path.isdir(ff),
-                        'parent': ff,
-                        'create_time' : os.path.getctime(ff)})
-        
-    except Exception,e:
-        folders.append({'name': 'Could not load directory: %s' % str(e),
-                        'size':0,
-                        'ext' : '',
-                        'is_dir': True,
-                        'parent': '/',
-                        'create_time': 0});
-        
-    folders.sort()
-    files.sort()
-    return json.dumps(folders + files)
-    
-
 def signature():
     """Signature of the main function"""
 
-    defaults = {'dir' : ['']}
+    defaults = {'path' : ['']}
     return ['', defaults]
 
 def main(client_id, user_arguments_dict):
@@ -189,28 +212,19 @@ def main(client_id, user_arguments_dict):
         configuration,
         allow_rejects=False,
         )
+    
     if not validate_status:
         return (accepted, returnvalues.CLIENT_ERROR)
     
-    # Please note that base_dir must end in slash to avoid access to other
-    # user dirs when own name is a prefix of another user name
-
-    base_dir = os.path.abspath(os.path.join(configuration.user_home,
-                               client_dir)) + os.sep
     status = returnvalues.OK
     
-    # Grab the POSTed parameter
-    ajax_location = ''.join(accepted['dir'])
-            
-    if ajax_location == '':
-        title_entry = find_entry(output_objects, 'title')
-        title_entry['text'] = 'Filemanager'
-        title_entry['javascript'] = js_tmpl()
+    entry_path = ''.join(accepted['path'])
+    title_entry = find_entry(output_objects, 'title')
+    title_entry['text'] = 'Filemanager'
+    title_entry['javascript'] = js_tmpl(entry_path)        
+    
+    output_objects.append({'object_type': 'header', 'text': 'Filemanager' })
+    
+    output_objects.append({'object_type': 'html_form', 'text': html_tmpl()})
         
-        output_objects.append({'object_type': 'header', 'text': 'Filemanager' })
-        
-        output_objects.append({'object_type': 'html_form', 'text': html_tmpl()})
-            
-        return (output_objects, status)
-    else:
-        return ([{'object_type': 'html_form', 'text': list(base_dir, ajax_location)}], status)
+    return (output_objects, status)

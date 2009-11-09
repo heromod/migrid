@@ -47,6 +47,14 @@ from shared.functional import validate_input
 displays = ['machine','user', 'summary']
 time_groups = ['month', 'week', 'day', 'all']
 
+# visualizations for the different queries:
+bar_default = "barMargin:'0',barGroupMargin:'4',height:'300'"
+pie_default = "type:'pie',height:'200',width:'400'"
+viz_options = { 'machine': [bar_default]
+                ,'user': [bar_default, pie_default]
+                ,'summary': [bar_default]
+               }
+
 def signature():
     """Signature of the main function"""
 
@@ -75,28 +83,6 @@ def main(client_id, user_arguments_dict):
 
     title_entry = find_entry(output_objects, 'title')
     title_entry['text'] = 'Usage Statistics'
-
-    # include javascript for visualisation...
-    title_entry['javascript'] = \
-"""        <link rel="stylesheet" type="text/css" 
-             href="/images/css/stats.visualize.css" />
-         <script type="text/javascript" 
-                 src="/images/js/jquery.js"></script>
-         <script type="text/javascript" 
-                 src="/images/js/visualize.jQuery.js"></script>
-         <script type="text/javascript">
-             jQuery(function(){
-                 //make some charts
-                 $('.stats').visualize({type: 'line'});
-                 $('.stats').visualize({type: 'pie'});
-                 $('.stats').visualize();
-                 });
-         </script>
-<!-- 
- http://www.filamentgroup.com/lab/jquery_visualize_plugin_accessible_charts_graphs_from_tables_html5_canvas/ 
- http://github.com/marclove/jquery-visualize
--->
-"""
 
     # read view options
     group_in_time = accepted['group_in_time'][-1] # all, month, day, year
@@ -134,6 +120,30 @@ def main(client_id, user_arguments_dict):
             reject = True
     else:
         time_end = ''
+
+    # include javascript for visualisation...
+    # we do this here, after determining/defaulting "display"
+    include_viz = """
+<!-- 
+ http://www.filamentgroup.com/lab/jquery_visualize_plugin_accessible_charts_graphs_from_tables_html5_canvas/ 
+ http://github.com/marclove/jquery-visualize
+-->
+         <link rel="stylesheet" type="text/css" 
+             href="/images/css/stats.visualize.css" />
+         <script type="text/javascript" 
+                 src="/images/js/jquery.js"></script>
+         <script type="text/javascript" 
+                 src="/images/js/visualize.jQuery.js"></script>
+         <script type="text/javascript">
+             jQuery(function(){
+"""
+    for v in viz_options[display]:
+        include_viz += "$('.stats').visualize({" + v + "});"
+    include_viz +="""
+                 });
+         </script>
+"""
+    title_entry['javascript'] = include_viz
 
     # always include a form to re-display with different values:
     updateform = '           <form action="%s" >' %  \
@@ -212,63 +222,64 @@ def main(client_id, user_arguments_dict):
     # we use couchdb views with name convention <display>-<group-in-time>
     view = display + '-' + group_in_time
 
-    if display == 'user':
+    if display == 'summary':
         # only own user ID allowed
-        start_key = '[' + client_id + ','+ start + ']'
-        end_key = '[' + client_id + ','+ end + ']'
+        start_key = '[(Summary),'+ start + ']'
+        end_key = '[(Summary),'+ end + ']'
     else:
-        # machines or summary, not restricted
+        # users or machines, not restricted in end time
         start_key = '[null,'+ start + ']'
         end_key = '[{},'+ end + ']'
         
-    # couchdb URL, default http://localhost:5984/
-    database = 'http://localhost:5984/' # TODO use configuration.usagedb
-    
-    # to proceed: 
     #  1. get json data from couchdb using the view
     #     group=true, group_level as calculated,
     #     start and end key as constructed
 
-    # we generate some dummy data here instead...
-    if view == 'user-month': # user Rasmus_Andersen, from 06 2007
-        jsonreply = \
-"""{"rows":[
-{"key":["Rasmus_Andersen","2007-06"],"value":{"count":2,"wall_duration":7,"charge":7}},
-{"key":["Rasmus_Andersen","2007-08"],"value":{"count":110,"wall_duration":360208,"charge":360208}},
-{"key":["Else_Someone","2007-09"],"value":{"count":493,"wall_duration":941665,"charge":941665}},
-{"key":["Else_Someone","2007-10"],"value":{"count":303,"wall_duration":33751,"charge":33751}},
-{"key":["Rasmus_Andersen","unknown"],"value":{"count":9,"wall_duration":0,"charge":0}}
-]}
-"""
-    elif view == 'machine-month': # small sample!, from 5 2007
-        jsonreply = \
-"""{"rows":[
-{"key":["amigos24.diku.dk.1","2007-09"],"value":{"count":8,"wall_duration":693,"charge":693}},
-{"key":["lucia.imada.sdu.dk.0","2007-05"],"value":{"count":11,"wall_duration":267,"charge":267}},
-{"key":["lucia.imada.sdu.dk.0","2007-08"],"value":{"count":15,"wall_duration":6617,"charge":6617}},
-{"key":["lucia.imada.sdu.dk.0","2007-09"],"value":{"count":61,"wall_duration":10808,"charge":10808}},
-{"key":["lucia.imada.sdu.dk.0","2007-10"],"value":{"count":129,"wall_duration":69629,"charge":69629}},
-{"key":["lucia.imada.sdu.dk.0","2007-11"],"value":{"count":20,"wall_duration":0,"charge":0}},
-{"key":["lucia.imada.sdu.dk.0","2008-01"],"value":{"count":3,"wall_duration":0,"charge":0}},
-{"key":["niflheim.fysik.dtu.dk.0","2007-05"],"value":{"count":28,"wall_duration":6894,"charge":22376}},
-{"key":["niflheim.fysik.dtu.dk.0","2007-06"],"value":{"count":6,"wall_duration":3339,"charge":5945}}
-]}
-"""
-    elif view == 'summary-month': # , group-level=1, 06 to 10 2007
-        jsonreply = \
-"""{"rows":[
-{"key":["2007-06"],"value":{"count":2224,"wall_duration":72463,"charge":75069}},
-{"key":["2007-08"],"value":{"count":125,"wall_duration":366825,"charge":366825}},
-{"key":["2007-09"],"value":{"count":2279,"wall_duration":4409175,"charge":4409175}},
-{"key":["2007-10"],"value":{"count":653,"wall_duration":687981,"charge":687981}}
-]}
-"""
-    else:
+    # couchdb URL, default http://localhost:5984/
+    # TODO use configuration.usagedb
+    database ='http://localhost:5984/usagerecords' 
+
+    [check,db_url,db_name] = database.rsplit('/',2)
+    if check and check != 'http:/':
+        logger.debug('bad URL %s' % database)
+        db_url = 'none'
+        db_name = 'none'
+    
+    # views are organised in files per "timegrouping",
+    # and contain views with names <category>-<timegrouping>
+    query = '/'.join(['',db_name,'_design' ,group_in_time,'_view',view])
+    query += '?'
+    query += '&'.join(['group=true'
+                       ,'group_level=%s' % group_level
+                       ,'start_key=%s' % start_key
+                       , 'end_key=%s' % end_key])
+
+    # TODO query.http_encode()...
+
+    try:
+        logger.debug("asking database at %s: %s" % (db_url,query))
+        conn = httplib.HTTPConnection(db_url)
+        conn.request('GET',query)
+        res = conn.getresponse()
+        logger.debug('response: %s %s' % (res.status, res.reason))
+        if res.status != 200:
+            logger.error('%s to couchdb at %s replied: %s %s' \
+                         % (query, db_url, res.status, res.reason))
+            raise Exception(res.reason)
+        jsonreply = res.read()
+        conn.close()
+    except Exception, err:
+        logger.error('Could not get data from database: %s' % err)
+        output_objects.append({'object_type': 'error_text', 'text'
+                   : 'Error accessing the database.' })
         jsonreply = '{"rows":[]}'
+
+    logger.debug('Reply data\n %s' % jsonreply)
 
     #  2. convert from json to dictionary, extract values we need
     # ...we do not really need json here...
-    data = eval(jsonreply)['rows'] # :: list of dict with "key","value"
+    reply = jsonreply.replace('\r','')
+    data = eval(reply)['rows'] # :: list of dict with "key","value"
 
     if not data:
         output_objects.append({'object_type': 'sectionheader', 'text' :
@@ -282,17 +293,14 @@ The query you have requested did not return any data.
     lookupdict = dict( [ (tuple(d['key']),d['value']) for d in data ] )
 
     #   split off dates (eliminate dup.s and sort them)
-    
-    dates = list(set([ date[-1] for date in lookupdict ])) # :p
-    dates.sort()
-
-    # build data rows
-    # TODO eliminate this special case, by defining the view accordingly
-    if display == 'summary':
-        datarows = [['(All)'] + [ lookupdict[(d,)] for d in dates ]]
-
+    if group_level == 1: # view not grouped in time
+        dates = ['']
+        datarows = [ [k[0],lookupdict[k]] for k in lookupdict]
     else:
-        # fill in missing data...
+        dates = list(set([ date[-1] for date in lookupdict ])) # :p
+        dates.sort()
+
+        # build data rows, fill in missing data...
         nullval = {'count':0, 'wall_duration':0,'charge':0}
         keys = set([ date[0] for date in lookupdict ])
         datarows = []
@@ -304,7 +312,7 @@ The query you have requested did not return any data.
                 else:
                     row.append(nullval)
             datarows.append(row)
-
+        
     #   build tables for all data we have. could make field names
     # configurable as well, but this is anyway highly proprietary code
 

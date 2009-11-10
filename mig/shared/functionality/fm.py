@@ -88,7 +88,7 @@ def html_tmpl():
             </thead>
             <tbody>
             </tbody>
-            </table>
+            </table>            
         
         </div>        
         <div class="fm_statusbar">&nbsp;</div>    

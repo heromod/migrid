@@ -58,7 +58,8 @@ def signature():
         'country': [''],
         'state': [''],
         'comment': ['(Created through autocreate)'],
-        'proxy_upload': ['']
+        'proxy_upload': [''],
+        'proxy_uploadfilename': [''],
         }
     return ['text', defaults]
 

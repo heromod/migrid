@@ -41,6 +41,7 @@ import simplejson as json
 import shared.returnvalues as returnvalues
 from shared.init import initialize_main_variables, find_entry
 from shared.functional import validate_input
+from shared.safeinput import html_escape
 
 
 # allowed parameters, first value is default
@@ -223,14 +224,18 @@ def main(client_id, user_arguments_dict):
     view = display + '-' + group_in_time
 
     if display == 'summary':
-        # only own user ID allowed
         start_key = '[(Summary),'+ start + ']'
         end_key = '[(Summary),'+ end + ']'
     else:
-        # users or machines, not restricted in end time
+        # users or machines
+        # allow only own user ID???
         start_key = '[null,'+ start + ']'
         end_key = '[{},'+ end + ']'
+    # TODO time restriction does not work if user/machine not restricted!
+    # need to define the views with date first to allow date restriction,
+    # but then we cannot have user restriction.
         
+
     #  1. get json data from couchdb using the view
     #     group=true, group_level as calculated,
     #     start and end key as constructed
@@ -251,10 +256,8 @@ def main(client_id, user_arguments_dict):
     query += '?'
     query += '&'.join(['group=true'
                        ,'group_level=%s' % group_level
-                       ,'start_key=%s' % start_key
-                       , 'end_key=%s' % end_key])
-
-    # TODO query.http_encode()...
+                       ,'start_key=%s' % html_escape(start_key)
+                       ,'end_key=%s'   % html_escape(end_key)])
 
     try:
         logger.debug("asking database at %s: %s" % (db_url,query))

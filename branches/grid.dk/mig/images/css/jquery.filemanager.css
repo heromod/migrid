@@ -34,7 +34,7 @@
 	padding: 2px;
 }
 #fm_filelisting tbody tr:hover {
-	background-color: orange;
+	background-color: #ffdd7f;
 }
 #fm_filelisting td, th { padding: 4px; background-position: 2px 50%; }
 #fm_filelisting .header { 
@@ -207,7 +207,8 @@ UL.jqueryFileTree A {
 }
 
 UL.jqueryFileTree A:hover {
-	background: #BDF;
+	/*background: #BDF;*/
+	background: #ffdd7f;
 }
 
 .jqueryFileTree .size,.cdate {

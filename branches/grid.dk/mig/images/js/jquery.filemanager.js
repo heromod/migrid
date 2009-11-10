@@ -2,14 +2,21 @@ if (jQuery) (function($){
   
   $.fn.filemanager = function(user_options) {
 	
-		var jeojepjep = '';
+		var jepjepjep = new Array({'is_dir':false, 'path':''});
+		
+		// Note: max-height is broken on autoHeight this is noted as a bug:
+		//       http://dev.jqueryui.com/ticket/4820
+		//       The stated workaround is used in cmdHelper.
+		var dialogOptions = { width: '620px', autoOpen: false, closeOnEscape: true, modal: true}
+		var okDialog			= { buttons: {Ok: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true}
+		var closeDialog		= { buttons: {Close: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true}		
 
 		function cmdHelper(el, dialog, url) {
-				
-			$($(dialog).dialog({ closeOnEscape: true, modal: true }));
+									
 			$.getJSON(url,
 								{ path: $(el).attr('id'), output_format: 'json' },
 								function(jsonRes, textStatus) {
+									
 									var file_output = '';
 									for(i=0;i<jsonRes.length; i++) {
 										
@@ -21,10 +28,18 @@ if (jQuery) (function($){
 											
 										}
 									}
-									$(dialog).html('<pre>'+file_output+'</pre>');
+									
+									$($(dialog).dialog(closeDialog));
+									$(dialog).html('<div style="max-height: 480px;"><pre>'+file_output+'</pre></div>');
+									$($(dialog).dialog('open'));
+									
 								}
 			)
-			
+			// Refix the position
+			//var position = $(dialog).dialog('option', 'position');
+			//alert($(dialog));
+			//setter
+			//$('.selector').dialog('option', 'position', 'top');
 		}
 
 		// Callback helpers for context menu
@@ -36,18 +51,34 @@ if (jQuery) (function($){
 			head:		function (action, el, pos) { cmdHelper(el, '#cmd_dialog', '/cgi-bin/head.py'); },
 			tail:		function (action, el, pos) { cmdHelper(el, '#cmd_dialog', '/cgi-bin/tail.py'); },
 			copy: 	function (action, el, pos) {
-				jepjepjep = $(el).attr('id')
+				jepjepjep['is_dir'] = $(el).hasClass('directory');
+				jepjepjep['path']		= $(el).attr('id');
 			},
 			paste: 	function (action, el, pos) {
 				// todo perform the copy
+				var flag = '';
+				var jepp = '';
+				
+				if (jepjepjep['is_dir']) {
+					flag = 'r';
+					jepp = '/';
+				}
 				$.getJSON('/cgi-bin/cp.py',
-									{ src: jepjepjep, dst: $(el).attr('id'), output_format: 'json' },
+									{ src: jepjepjep['path'], dst: $(el).attr('id')+jepp, output_format: 'json', flags: flag },
 									function(jsonRes, textStatus) {
+										
+										$($('#cmd_dialog').dialog(okDialog));
+										$($('#cmd_dialog').dialog('open'));
+										
 										if (jsonRes.length > 3) {
-											// ok
+
+											for(var i=2; jsonRes.length; i++) {
+												$($('#cmd_dialog').html('<p>Error:</p>'+jsonRes[i].text));
+											}
+											
 										} else {
-											// error
-											$($('#cmd_dialog').dialog({ closeOnEscape: true, modal: true }));
+											// TODO: "refresh"
+											$($('#cmd_dialog').html('<p>Copied: '+jepjepjep['path']+'</p><p>To: '+$(el).attr('id')+'</p>'));
 										}
 									}
 				)	
@@ -58,44 +89,57 @@ if (jQuery) (function($){
 				$.getJSON('/cgi-bin/rm.py',
 									{ path: $(el).attr('id'), output_format: 'json' },
 									function(jsonRes, textStatus) {
+										
+										$($('#cmd_dialog').dialog(okDialog));
+										$($('#cmd_dialog').dialog('open'));
+										
 										if (jsonRes.length > 3) {
-											// ok
+											
+											for(var i=2; jsonRes.length; i++) {
+												$($('#cmd_dialog').html('<p>Error:</p>'+jsonRes[i].text));
+											}
+																						
 										} else {
-											// error
-											$($('#cmd_dialog').dialog({ closeOnEscape: true, modal: true }));
+											
+											// TODO: "refresh"
+											$($('#cmd_dialog').html('<p>nice!</p>'));
+											
 										}
 									}
 				);
 			
 			},
 			rmdir:	function (action, el, pos) {
-				$($('#cmd_dialog').dialog({ closeOnEscape: true, modal: true }));
+				$($('#cmd_dialog').dialog(okDialog));
 				$.getJSON('/cgi-bin/rmdir.py',
 									{ path: $(el).attr('id'), output_format: 'json' },
 									function(jsonRes, textStatus) {
+										
+										$($('#cmd_dialog').dialog('open'));
+										
 										if (jsonRes.length > 3) {
-											// ok
+											for(var i=2; jsonRes.length; i++) {
+												$($('#cmd_dialog').html('<p>Error:</p>'+jsonRes[i].text));												
+											}
+																						
 										} else {
-											// error
+											// ok
+											// TODO: "refresh"
+											$($('#cmd_dialog').html('<p>nice!</p>'));
 										}
 									}
 				);
 			},
 			upload: function (action, el, pos) {
-								$($("#upload_dialog").dialog({ closeOnEscape: true, modal: true }));								
+								$($("#upload_dialog").dialog(dialogOptions));
+								$($('#upload_dialog').dialog('open'));
 							},
-			mkdir:  function (action, el, pos) { $($("#mkdir_dialog").dialog({ closeOnEscape: true, modal: true })); }
+			mkdir:  function (action, el, pos) {
+								$($("#mkdir_dialog").dialog(dialogOptions));
+								$($("#mkdir_dialog").dialog('open'));
+							}
 		}
 
-		/*show: 	'/cert_redirect/',
-		edit: 	'/cgi-bin/editor.py?path=',
-		cat:		'/cgi-bin/cat.py?path=',
-		head:		'/cgi-bin/head.py?path=',
-		tail:		'/cgi-bin/tail.py?path=',
-		copy: 	'',
-		rm:			'/cgi-bin/rm.py?path=',
-		rmdir:	'/cgi-bin/rmdir.py?path='
-		*/
     var defaults = {
         root: '/',      
         connector: 'somewhere.py',
@@ -218,6 +262,17 @@ if (jQuery) (function($){
           }
           
           /* Associate context-menus */
+					
+					var spacerHeight = $(".fm_files").height() - $("#fm_filelisting").height();
+					if (spacerHeight > 0) {
+						$('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;"><div style="display: none;">'+t+'</div></div>');
+						$("div.filespacer").contextMenu({ menu: 'folder_context'},
+                                            function(action, el, pos) {																							
+																							(options['actions'][action])(action, el, pos);                                            
+                                            });
+						
+					}
+					
           $(".directory").contextMenu({ menu: 'folder_context'},
                                             function(action, el, pos) {
 																							(options['actions'][action])(action, el, pos);                                            

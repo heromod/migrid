@@ -173,9 +173,7 @@ def get_cgi_html_footer(footer='', html=True, creditsimage="/images/copyright.pn
 </body>
 </html>
 ''' % (creditsimage, credits)
-    # todo: fix this
-    #return out
-    return ''
+    return out
 
 
 # Wrappers used during transition phase - replace with

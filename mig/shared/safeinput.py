@@ -52,7 +52,7 @@ ALLOW_UNSAFE = \
 
 # Allow these chars in addition to plain letters and digits
 
-name_extras = ' -@'
+name_extras = ' -@.'
 
 ############################################################################
 # IMPORTANT: never allow '+' and '_' in DN: reserved for path translation! #

@@ -148,8 +148,8 @@ def html_tmpl():
       <p>Please upload a file</p>
     </div>
         
-    <div id="mkdir_dialog" title="Create Folder">
-      <p id="validateTips">Bla bla bla.</p>
+    <div id="mkdir_dialog" title="Create New Folder">
+      <p id="validateTips">Enter the new name:</p>
     
       <form>
       <fieldset>

@@ -35,11 +35,7 @@ if (jQuery) (function($){
 									
 								}
 			)
-			// Refix the position
-			//var position = $(dialog).dialog('option', 'position');
-			//alert($(dialog));
-			//setter
-			//$('.selector').dialog('option', 'position', 'top');
+
 		}
 
 		// Callback helpers for context menu
@@ -135,7 +131,30 @@ if (jQuery) (function($){
 								$($('#upload_dialog').dialog('open'));
 							},
 			mkdir:  function (action, el, pos) {
-								$($("#mkdir_dialog").dialog(dialogOptions));
+				
+								$($("#mkdir_dialog").dialog({ buttons: {
+																								Ok: function() {					
+																											$.getJSON('/cgi-bin/mkdir.py',
+																																	{ path: $(el).attr('id')+'/'+$('#name').val(), output_format: 'json' },
+																																	function(jsonRes, textStatus) {																																																		
+																																		if (jsonRes.length > 3) {																																			
+																																			for(var i=2; jsonRes.length; i++) {
+																																				$($('#mkdir_dialog').append('<p>Error:</p>'+jsonRes[i].text));
+																																			}																																														
+																																		} else {																																			
+																																			// TODO: "refresh"
+																																			$('#mkdir_dialog').dialog('close');
+																																		}
+																																	}
+																												);																										
+																										},
+																								Cancel: function() {$(this).dialog('close');}
+																							},
+																							autoOpen: false,
+																							closeOnEscape: true,
+																							modal: true}
+								
+																						));
 								$($("#mkdir_dialog").dialog('open'));
 							}
 		}

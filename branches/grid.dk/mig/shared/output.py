@@ -941,7 +941,9 @@ Exit code: %s Description: %s<br>
 """\
          % (ret_val, ret_msg)
 
-    lines.append(get_cgi_html_footer(footer))
+    lines.append(get_cgi_html_footer(footer, True, 
+                                     '/images/icons/copyright.png', 
+                                     '2009: grid.dk, migrid.org'))
     return '\n'.join(lines)
 
 

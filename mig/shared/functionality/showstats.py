@@ -35,6 +35,7 @@ import os
 import httplib
 import re
 import sys
+import time
 
 import simplejson as json
 
@@ -45,16 +46,9 @@ from shared.safeinput import html_escape
 
 
 # allowed parameters, first value is default
-displays = ['machine','user', 'summary']
-time_groups = ['month', 'week', 'day', 'all']
+displays = ['machine','user','summary']
+time_groups = ['month', 'week', 'day']
 
-# visualizations for the different queries:
-bar_default = "barMargin:'0',barGroupMargin:'4',height:'300'"
-pie_default = "type:'pie',height:'200',width:'400'"
-viz_options = { 'machine': [bar_default]
-                ,'user': [bar_default, pie_default]
-                ,'summary': [bar_default]
-               }
 
 def signature():
     """Signature of the main function"""
@@ -86,7 +80,7 @@ def main(client_id, user_arguments_dict):
     title_entry['text'] = 'Usage Statistics'
 
     # read view options
-    group_in_time = accepted['group_in_time'][-1] # all, month, day, year
+    group_in_time = accepted['group_in_time'][-1] # day, week, month
     time_start    = accepted['time_start'][-1]
     display       = accepted['display'][-1] # machine, user, summary
 
@@ -122,30 +116,6 @@ def main(client_id, user_arguments_dict):
     else:
         time_end = ''
 
-    # include javascript for visualisation...
-    # we do this here, after determining/defaulting "display"
-    include_viz = """
-<!-- 
- http://www.filamentgroup.com/lab/jquery_visualize_plugin_accessible_charts_graphs_from_tables_html5_canvas/ 
- http://github.com/marclove/jquery-visualize
--->
-         <link rel="stylesheet" type="text/css" 
-             href="/images/css/stats.visualize.css" />
-         <script type="text/javascript" 
-                 src="/images/js/jquery.js"></script>
-         <script type="text/javascript" 
-                 src="/images/js/visualize.jQuery.js"></script>
-         <script type="text/javascript">
-             jQuery(function(){
-"""
-    for v in viz_options[display]:
-        include_viz += "$('.stats').visualize({" + v + "});"
-    include_viz +="""
-                 });
-         </script>
-"""
-    title_entry['javascript'] = include_viz
-
     # always include a form to re-display with different values:
     updateform = '           <form action="%s" >' %  \
                  os.path.basename(sys.argv[0])
@@ -153,8 +123,8 @@ def main(client_id, user_arguments_dict):
                 <table class="runtimeenventry">
                   <tr>
                     <th>Grouping by time
-                    <th>Start
-                    <th>End
+                    <th>Start (YYYY-MM)
+                    <th>End (YYYY-MM)
                     <th>Category
                   <tr>
                     <td><select name="group_in_time">
@@ -198,43 +168,48 @@ def main(client_id, user_arguments_dict):
 
     # else: all parameters OK, go:
 
-    # construct start and end key.
-
-    # machine and user cannot be filtered from the user, only 
-    # time can be specified, and as YYYY-MM only.
-    start = time_start
-    if not time_end:
-        end = '{}'
-    else:
-        end = time_end + '-32' # append last day, so inclusive end
-
     # determine the view and group level to use:
+
+    # we use couchdb views with name convention <group-in-time>-<display>
+    view = group_in_time + '-' + display
 
     # default group-level (max. 2 view components relevant)
     group_level = 2
 
-    # handle group_in_time "all" specially:
-    #   set view to a coarse unit and group_level = 1
-    #   (group_level will be further decreased below if only time)
-    if group_in_time == 'all':
-        group_in_time = 'month'
-        group_level = 1
+    # could handle summary display specially, by setting group_level = 1
+    # and using either <time>-machine or <time>-user view
+#    if display == 'summary':
+#        display = 'user'
+#        group_level = 1
 
-    # we use couchdb views with name convention <display>-<group-in-time>
-    view = display + '-' + group_in_time
+    # construct start and end key.
 
-    if display == 'summary':
-        start_key = '[(Summary),'+ start + ']'
-        end_key = '[(Summary),'+ end + ']'
+    # machine and user cannot be filtered from the user, only 
+    # time can be specified, and as YYYY-MM only.
+    # for view per week, we have to convert it to a week number
+    # python starts by week 0, whereas javascript starts by week 1
+    if group_in_time == 'week':
+        t = time.strptime(time_start + '-07',"%Y-%m-%d")
+        time_start = time.strftime("%Y-%U",t)
+
+    start_key = '["'+ time_start + '",null]'
+    # 2nd component: user or machine
+    # TODO allow only own user ID and only machines owned???
+    # drawback: cannot restrict user/machine when requesting more than one time period 
+    # To restrict user/machine, views which have this as the first key part 
+    # have to be used. In which case only one user can be selected 
+    # to keep the time period selection valid.
+
+    if not time_end:
+        end_key = '[{},{}]'
+        end = '{}'
     else:
-        # users or machines
-        # allow only own user ID???
-        start_key = '[null,'+ start + ']'
-        end_key = '[{},'+ end + ']'
-    # TODO time restriction does not work if user/machine not restricted!
-    # need to define the views with date first to allow date restriction,
-    # but then we cannot have user restriction.
-        
+        if group_in_time == 'week':
+            t = time.strptime(time_end + '-07',"%Y-%m-%d")
+            end_key = '["'+ time.strftime("%Y-%U-",t) + '",{}]'
+        else:
+            end_key = '["'+ time_end + '-32' + '",{}]'
+            # append last day, so inclusive end
 
     #  1. get json data from couchdb using the view
     #     group=true, group_level as calculated,
@@ -256,8 +231,8 @@ def main(client_id, user_arguments_dict):
     query += '?'
     query += '&'.join(['group=true'
                        ,'group_level=%s' % group_level
-                       ,'start_key=%s' % html_escape(start_key)
-                       ,'end_key=%s'   % html_escape(end_key)])
+                       ,'startkey=%s' % html_escape(start_key)
+                       ,'endkey=%s'   % html_escape(end_key)])
 
     try:
         logger.debug("asking database at %s: %s" % (db_url,query))
@@ -295,27 +270,36 @@ The query you have requested did not return any data.
 
     lookupdict = dict( [ (tuple(d['key']),d['value']) for d in data ] )
 
-    #   split off dates (eliminate dup.s and sort them)
-    if group_level == 1: # view not grouped in time
+    if group_level == 1: 
+        # if view not grouped in time (currently unused)
+        # => only one column, but rows with other keys
         dates = ['']
         datarows = [ [k[0],lookupdict[k]] for k in lookupdict]
     else:
-        dates = list(set([ date[-1] for date in lookupdict ])) # :p
+        #   split off dates (eliminate dup.s and sort them)
+        # date comes first in keys for all views we are using 
+        dates = list(set([ date[0] for date in lookupdict ])) # :p
         dates.sort()
 
         # build data rows, fill in missing data...
         nullval = {'count':0, 'wall_duration':0,'charge':0}
-        keys = set([ date[0] for date in lookupdict ])
+        keys = set([ date[-1] for date in lookupdict ])
         datarows = []
         for k in keys:
             row = [k]
             for d in dates:
-                if (k,d) in lookupdict:
-                    row.append(lookupdict[(k,d)])
+                if (d,k) in lookupdict:
+                    row.append(lookupdict[(d,k)])
                 else:
                     row.append(nullval)
             datarows.append(row)
+
+    # could split rows with excessive length into several rows
+    # (repeat header row with new headers, or make it two tables)
         
+    # TODO extend the visualisation options here, estimate width by 
+    # length of date list 
+
     #   build tables for all data we have. could make field names
     # configurable as well, but this is anyway highly proprietary code
 
@@ -346,6 +330,55 @@ The query you have requested did not return any data.
         html += '</table></p>'
         output_objects.append({'object_type': 'html_form', 'text'
                               : html})
+
+    # include javascript for visualisation...
+    # we do this here, when we know how much data to show.
+
+    # visualisations for the different queries:
+    bar_default = "barMargin:'0',barGroupMargin:'4',height:'300'"
+    pie_default = "type:'pie',height:'200',width:'400'"
+
+    bars = len(dates) * len(datarows)
+    # default width is table width. Avoid extremes...
+    if bars < 30 or len(datarows) < 3:    # limit to a maximum width
+        w = bars * 30 
+    elif bars > 150: # enforce a minimum width
+        w = bars * 10
+    else:
+        w = None
+    if w: bar_default += ',width:"%s"' % w
+
+    # predefine 30 colours ( lazy way )
+    seq = [0,9,12,2,11,4,6,13,15,1,8,10,14,3,5,7]
+    colours = [ ('#%1X0%1X0%1X0' % (x,y,z))
+                 for (x,y,z) in zip(seq[2:15]+seq,seq[1:15]+seq[1:15],seq+seq[2:15]) ] 
+
+    cols = ",colors:%s" % str(colours)
+    viz_options = { 'machine': [bar_default + cols]
+                       ,'user': [bar_default + cols, pie_default + cols]
+                       ,'summary': [bar_default + cols]
+                       }
+    include_viz = """
+<!-- 
+ http://www.filamentgroup.com/lab/jquery_visualize_plugin_accessible_charts_graphs_from_tables_html5_canvas/ 
+ http://github.com/marclove/jquery-visualize
+-->
+         <link rel="stylesheet" type="text/css" 
+             href="/images/css/stats.visualize.css" />
+         <script type="text/javascript" 
+                 src="/images/js/jquery.js"></script>
+         <script type="text/javascript" 
+                 src="/images/js/visualize.jQuery.js"></script>
+         <script type="text/javascript">
+             jQuery(function(){
+"""
+    for v in viz_options[display]:
+        include_viz += "$('.stats').visualize({" + v + "});"
+    include_viz +="""
+                 });
+         </script>
+"""
+    title_entry['javascript'] = include_viz
 
     # and done
     return (output_objects, returnvalues.OK)

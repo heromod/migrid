@@ -253,14 +253,14 @@ UL.jqueryFileList A:hover {
 }
 .jqueryFileList .cdate,.size {float:right; margin-top: -20px;}
 /* Core Styles */
-#fm_filelisting .directory { background: url(/images/icons/directory.png) left top no-repeat; background-position: 2px 50%; }
+#fm_filelisting .directory { background-image: url(/images/icons/directory.png); background-repeat: no-repeat; background-position: 2px 50%; }
 #fm_filelisting .expanded { background: url(/images/icons/folder_open.png) left top no-repeat; background-position: 2px 50%; }
-#fm_filelisting .file { background: url(/images/icons/file.png) left top no-repeat; background-position: 2px 50%; }
+#fm_filelisting .file { background-image: url(/images/icons/file.png); background-repeat: no-repeat; background-position: 2px 50%; }
 #fm_filelisting .wait { background: url(/images/icons/spinner.gif) left top no-repeat; background-position: 2px 50%; }
 
 /* File Extensions*/
-.directory { background: url(/images/icons/directory.png) left top no-repeat; }
-.file { background: url(/images/icons/file.png) left top no-repeat; }
+/*.directory { background: url(/images/icons/directory.png) left top no-repeat; }
+.file { background: url(/images/icons/file.png) left top no-repeat; }*/
 
 .ext_3gp { background: url(/images/icons/film.png) left top no-repeat; }
 .ext_afp { background: url(/images/icons/code.png) left top no-repeat; }
@@ -320,3 +320,10 @@ UL.jqueryFileList A:hover {
 .ext_xls { background: url(/images/icons/xls.png) left top no-repeat; }
 .ext_xml { background: url(/images/icons/code.png) left top no-repeat; }
 .ext_zip { background: url(/images/icons/zip.png) left top no-repeat; }
+
+.ui-draggable-dragging {	
+	/*display: inline;
+	background-color: red;
+	cursor: move;*/
+	background-color: red;
+}

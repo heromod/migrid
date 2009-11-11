@@ -58,23 +58,6 @@ def html_tmpl():
                 </li>
             </ul>
         </div>
-        <!--
-        <div class="fm_toolbar">
-          <ul>
-            <li>Bulk:&nbsp;</li>
-            <li class="bulk cat"><a href="#">cat</a></li>
-            <li class="bulk cat"><a href="#">head</a></li>
-            <li class="bulk cat"><a href="#">tail</a></li>
-            <li class="bulk cat"><a href="#">wc</a></li>
-            <li class="bulk cat"><a href="#">stat</a></li>
-            <li class="bulk cat"><a href="#">touch</a></li>
-            <li class="bulk cat"><a href="#">truncate</a></li>
-            <li class="bulk cat"><a href="#">rm</a></li>
-            <li class="bulk cat"><a href="#">rmdir</a></li>
-            <li class="bulk cat"><a href="#">submit</a></li>              
-          </ul>
-        </div>
-        -->
         <div class="fm_files">
         
             <table id="fm_filelisting" cellspacing="0">
@@ -118,18 +101,6 @@ def html_tmpl():
         </li>
         <li class="edit">
             <a href="#edit">Edit</a>
-        </li>        
-        <li class="cat separator">
-            <a href="#cat">cat</a>
-        </li>
-        <li class="head">
-            <a href="#head">head</a>
-        </li>
-        <li class="tail">
-            <a href="#tail">tail</a>
-        </li>
-        <li class="resubmit">
-            <a href="#resubmit">resubmit</a>
         </li>
         <li class="copy separator">
             <a href="#copy">Copy</a>
@@ -140,15 +111,35 @@ def html_tmpl():
         <li class="delete separator">
             <a href="#rm">Delete</a>
         </li>
+        <li class="cat separator">
+            <a href="#cat">cat</a>
+        </li>
+        <li class="head">
+            <a href="#head">head</a>
+        </li>
+        <li class="tail">
+            <a href="#tail">tail</a>
+        </li>
+        <li class="submit">
+            <a href="#submit">submit</a>
+        </li>        
     </ul>
 
-    <div id="cmd_dialog" title="Command output"></div>
+    <div id="cmd_dialog" title="Command output" style="display: none;"></div>
 
-    <div id="upload_dialog" title="Basic dialog">
-      <p>Please upload a file</p>
+    <div id="upload_dialog" title="Upload File" style="display: none;">
+      <p>Please upload a file</p>      
+      <form id="myForm">
+      <fieldset>
+        <label for="file">Password</label>
+        <input type="file" name="file" id="file" value="" class="text ui-widget-content ui-corner-all" />
+        <input type="submit" />
+      </fieldset>
+      </form>
+
     </div>
         
-    <div id="mkdir_dialog" title="Create New Folder">
+    <div id="mkdir_dialog" title="Create New Folder" style="display: none;">
       <p id="validateTips">Enter the new name:</p>
     
       <form>
@@ -166,13 +157,9 @@ def js_tmpl(entry_path='/'):
     
     js = """
     <script>
+        $.ui.dialog.defaults.bgiframe = true;
         $("#mkdir_dialog").dialog({ closeOnEscape: true, modal: true });
-        //$.ui.dialog.defaults.bgiframe = true;
-        /*
-        $(function() {
-            $("#mkdir_dialog").dialog({ closeOnEscape: true, modal: true });
-        });*/
-        
+                
         $(document).ready( function() {
             $('#fm_filemanager').filemanager({
                                         root: '/',
@@ -186,6 +173,10 @@ def js_tmpl(entry_path='/'):
                                     );
 
                                 });
+                                
+        $('#myForm').ajaxForm(function() { 
+                alert("Thank you for your comment!"); 
+            }); 
   
     </script>
     """

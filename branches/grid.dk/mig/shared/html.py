@@ -121,6 +121,7 @@ def get_cgi_html_header(
 
 <script type="text/javascript" src="/images/js/jquery-1.3.2.min.js"></script>
 <script type="text/javascript" src="/images/js/jquery-ui-1.7.2.custom.min.js"></script>
+<script type="text/javascript" src="/images/js/jquery.form.js"></script>
 <script type="text/javascript" src="/images/js/jquery.prettyprint.js"></script>
 <script type="text/javascript" src="/images/js/jquery.filemanager.js"></script>
 <script type="text/javascript" src="/images/js/jquery.jobmanager.js"></script>

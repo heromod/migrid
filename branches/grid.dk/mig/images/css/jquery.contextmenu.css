@@ -64,6 +64,7 @@
 .contextMenu LI.head A { background-image: url(/images/icons/application_osx_terminal.png); }
 .contextMenu LI.tail A { background-image: url(/images/icons/application_osx_terminal.png); }
 .contextMenu LI.resubmit A { background-image: url(/images/icons/arrow_redo.png); }
+.contextMenu LI.submit A { background-image: url(/images/icons/arrow_redo.png); }
 .contextMenu LI.copy A { background-image: url(/images/icons/page_white_copy.png); }
 .contextMenu LI.paste A { background-image: url(/images/icons/page_white_paste.png); }
 .contextMenu LI.delete A { background-image: url(/images/icons/page_white_delete.png); }

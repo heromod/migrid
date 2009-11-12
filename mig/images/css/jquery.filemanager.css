@@ -11,6 +11,7 @@
   -moz-border-radius-bottomleft: 4px;
   -moz-border-radius-bottomright: 4px;
   -webkit-border-radius: 4px;
+	cursor: default;
   
 }
 #fm_filemanager table {
@@ -56,9 +57,7 @@
     background-image: url('/images/icons/desc.gif'); 
     background-color: #3399FF; 
 }
-#fm_filelisting {
-	cursor:  default; 
-}
+
 .fm_addressbar {	
   padding-bottom: 2px;	
   border: 0;
@@ -199,22 +198,10 @@ UL.jqueryFileTree LI {
 	white-space: nowrap;
 }
 
-UL.jqueryFileTree A {
-	color: #333;
-	text-decoration: none;
-	display: block;
-	padding: 0px 2px;
+UL.jqueryFileTree div:hover {	
+	background-color: #ffdd7f;
 }
 
-UL.jqueryFileTree A:hover {
-	/*background: #BDF;*/
-	background: #ffdd7f;
-}
-
-.jqueryFileTree .size,.cdate {
-	color: red;	
-	display: inline;
-}
 /* Core Styles */
 .jqueryFileTree LI.directory { background: url(/images/icons/directory.png) left top no-repeat; }
 .jqueryFileTree LI.expanded { background: url(/images/icons/folder_open.png) left top no-repeat; }
@@ -321,9 +308,6 @@ UL.jqueryFileList A:hover {
 .ext_xml { background: url(/images/icons/code.png) left top no-repeat; }
 .ext_zip { background: url(/images/icons/zip.png) left top no-repeat; }
 
-.ui-draggable-dragging {	
-	/*display: inline;
-	background-color: red;
-	cursor: move;*/
+.ui-draggable-dragging {
 	background-color: red;
 }

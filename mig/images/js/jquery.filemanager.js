@@ -1,5 +1,9 @@
 if (jQuery) (function($){
   
+	$.fn.tagName = function() {
+    return this.get(0).tagName;
+	}
+	
   $.fn.filemanager = function(user_options) {
 	
 		var pathAttribute = 'title';
@@ -18,6 +22,40 @@ if (jQuery) (function($){
 			} else {
 				document.location = '/cert_redirect/' + $(el).attr(pathAttribute);
 			}
+		}
+
+		// TODO: - refresh view
+		//       - set recursive flag on directory
+		function copy(src, dst) {
+									
+			var flag = '';
+						
+			// Handle directory copy, set flag and alter destination path.
+			if (clipboard['is_dir']) {
+				
+				flag = 'r';				
+				// Extract last directory from source
+				dst += src.split('/')[src.split('/').length-2];
+			}
+			
+			$.getJSON('/cgi-bin/cp.py',
+								{ src: src, dst: dst, output_format: 'json', flags: flag },
+								function(jsonRes, textStatus) {
+									
+									$($('#cmd_dialog').dialog(okDialog));
+									$($('#cmd_dialog').dialog('open'));
+									
+									if (jsonRes.length > 3) {
+										for(var i=2; jsonRes.length; i++) {
+											$($('#cmd_dialog').html('<p>Error:</p>'+jsonRes[i].text));
+										}										
+									} else {
+										// TODO: "refresh"
+										$($('#cmd_dialog').html('<p>Copied: '+src+'</p><p>To: '+dst+'</p>'));
+									}
+								}
+			)
+			
 		}
 
 		function cmdHelper(el, dialog, url) {
@@ -61,41 +99,7 @@ if (jQuery) (function($){
 				clipboard['path']		= $(el).attr(pathAttribute);
 			},
 			paste: 	function (action, el, pos) {
-				
-				var flag = '';
-				var pathFix = '';
-				
-				var src, dst = '';
-				
-				if (clipboard['is_dir']) {
-					flag = 'r';
-					pathFix = '/';
-				}
-				
-				dst = $(el).attr(pathAttribute)+clipboard['path'];
-				src = clipboard['path'];
-				
-				alert('From= '+src.substring(1)+' To= '+dst.substring(1));
-				$.getJSON('/cgi-bin/cp.py',
-									{ src: src.substring(1), dst: dst.substring(1), output_format: 'json', flags: flag },
-									function(jsonRes, textStatus) {
-										
-										$($('#cmd_dialog').dialog(okDialog));
-										$($('#cmd_dialog').dialog('open'));
-										
-										if (jsonRes.length > 3) {
-
-											for(var i=2; jsonRes.length; i++) {
-												$($('#cmd_dialog').html('<p>Error:</p>'+jsonRes[i].text));
-											}
-											
-										} else {
-											// TODO: "refresh"
-											$($('#cmd_dialog').html('<p>Copied: '+clipboard['path']+'</p><p>To: '+$(el).attr(pathAttribute)+'</p>'));
-										}
-									}
-				)	
-				
+				copy(clipboard['path'], $(el).attr(pathAttribute));
 			},
 			rm:			function (action, el, pos) {
 							
@@ -122,10 +126,15 @@ if (jQuery) (function($){
 				);
 			
 			},
+			// Note: this uses rm.py backend and not rmdir.py since recursive deletion
+			//       usually the behaviour one expects when deleting a folder in a
+			//       filemanager gui.
 			rmdir:	function (action, el, pos) {
+
 				$($('#cmd_dialog').dialog(okDialog));
-				$.getJSON('/cgi-bin/rmdir.py',
-									{ path: $(el).attr(pathAttribute), output_format: 'json' },
+
+				$.getJSON('/cgi-bin/rm.py',
+									{ path: $(el).attr(pathAttribute), flags: 'r', output_format: 'json' },
 									function(jsonRes, textStatus) {
 										
 										$($('#cmd_dialog').dialog('open'));
@@ -148,8 +157,9 @@ if (jQuery) (function($){
 								$($('#upload_dialog').dialog('open'));
 							},
 			mkdir:  function (action, el, pos) {
-				
-								$($("#mkdir_dialog").dialog({ buttons: {
+								
+								$("#mkdir_dialog").dialog('destroy');
+								$("#mkdir_dialog").dialog({ buttons: {
 																								Ok: function() {					
 																											$.getJSON('/cgi-bin/mkdir.py',
 																																{ path: $(el).attr(pathAttribute)+'/'+$('#name').val(), output_format: 'json' },
@@ -171,8 +181,8 @@ if (jQuery) (function($){
 																							closeOnEscape: true,
 																							modal: true}
 								
-																						));
-								$($("#mkdir_dialog").dialog('open'));
+																						);
+								$("#mkdir_dialog").dialog('open');
 							}
 		}
 
@@ -219,10 +229,10 @@ if (jQuery) (function($){
                   
           var folders = '';
 
-					// Root node
+					// Root node					
 					if (t=='/') {
 						folders +=	'<ul class="jqueryFileTree">'+
-												'<li class="directory collapsed" title="//"> <a title="//" href="#">/</a>';
+												'<li class="directory collapsed" title=""><div>/</div>';
 					}
 					
 					// Regular nodes from herone after
@@ -247,20 +257,23 @@ if (jQuery) (function($){
 						file_count++;
             total_file_size += listing[i]['file_info']['size'];
 												
-						path = t+'/'+listing[i]['name'];
+						path = t+listing[i]['name'];
 						
             if (is_dir) {
               base_css_style = 'directory';
-              folders +=  '<li class="'+base_css_style+' collapsed" title="'+t+'/'+listing[i]['name']+'/">'+
-                          ' <a href="#" title="'+t+'/'+listing[i]['name']+'/">'+listing[i]['name']+'</a>'+
-                          '</li>\n';
-							dir_prefix = '__';
+
+							//folders +=  '<li class="'+base_css_style+' collapsed" title="'+t+'/'+listing[i]['name']+'/"><div>'
 							path += '/';
+							folders +=  '<li class="'+base_css_style+' collapsed" title="'+path+'	"><div>'
+                          + listing[i]['name']
+													+'</div></li>\n';
+							dir_prefix = '__';
+							
             }
 						
 						$('table tbody').html = '';						
 						$('table tbody').append($('<tr></tr>')
-													.attr('title', t+listing[i]['name'])
+													.attr('title', path)
 													.addClass(base_css_style)
 													.addClass('ext_'+listing[i]['ext'])
 													.dblclick( function() { doubleClickEvent(this); } )
@@ -302,20 +315,26 @@ if (jQuery) (function($){
 					/* UI stuff: contextmenu, drag'n'drop. */
 					
 					// Create an element for the whitespace below the list of files in the file pane
-					var spacerHeight = $(".fm_files").height() - $("#fm_filelisting").height();
-					if (spacerHeight > 0) {
-						$('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;"><div style="display: none;">'+t+'</div></div>');
+					var spacerHeight = $("#fm_filelisting").height() - $(".fm_files").height();
+					if (spacerHeight < 0) {
+						spacerHeight = $(".fm_files").height() - $("#fm_filelisting").height()-20;
+						$('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;" title="'+t+'"></div>');
 						$("div.filespacer").contextMenu({ menu: 'folder_context'},
-                                            function(action, el, pos) {																							
+                                            function(action, el, pos) {
+																							
 																							(options['actions'][action])(action, el, pos);                                            
                                             });
 						
 					}
 					
 					// Associate context-menus
-          $(".directory").contextMenu({ menu: 'folder_context'},
+          $("tr.directory, li.directory div").contextMenu({ menu: 'folder_context'},
                                             function(action, el, pos) {
-																							(options['actions'][action])(action, el, pos);                                            
+																							if ($(el).tagName() == 'DIV') {
+																								(options['actions'][action])(action, el.parent(), pos);
+																							} else {
+																								(options['actions'][action])(action, el, pos);
+																							}																							
                                             });
           
           $("tr.file").contextMenu({ menu: 'file_context'},
@@ -324,19 +343,23 @@ if (jQuery) (function($){
                                             });
 					
 					// Associate drag'n'drop
-					$('tr.file, tr.directory, li.directory a').draggable({cursorAt: { cursor: 'move', top: 0, left: -10 },
-																																helper: function(event) {
-																																					return $('<div style="display: block;">&nbsp;</div>')
-																																								.attr('title', $(this).attr('title'))
-																																								.attr('class', $(this).attr('class'))
-																																								.css('width', '20px');
-																																				}
+					$('tr.file, tr.directory, li.directory').draggable({cursorAt: { cursor: 'move', top: 0, left: -10 },
+																														  distance: 5,
+																															helper: function(event) {
+																																				return $('<div style="display: block;">&nbsp;</div>')
+																																							.attr('title', $(this).attr('title'))
+																																							.attr('class', $(this).attr('class'))
+																																							.css('width', '20px');
+																																			}
 																			}
 													);
 					
-					$('tr.directory, li.directory a').droppable({
-						drop: function(event, ui) {							
-							alert('Dragging: '+$(ui.helper).attr('title') + ' to: '+ $(this).attr('title')+'.');
+					$('tr.directory, li.directory').droppable({
+						greedy: true,
+						drop: function(event, ui) {
+							clipboard['is_dir'] = $(ui.helper).hasClass('directory');
+							clipboard['path']		= $(ui.helper).attr(pathAttribute);
+							copy($(ui.helper).attr('title'), $(this).attr('title'));
 						}
 					});	
           										
@@ -350,28 +373,28 @@ if (jQuery) (function($){
       }
       
       function bindBranch(t) {
-        $(t).find('LI A').bind(options.folderEvent,
+				$(t).find('LI').bind(options.folderEvent,
 					
 					function() {
-						if( $(this).parent().hasClass('directory') ) {
-							if( $(this).parent().hasClass('collapsed') ) {
+						if( $(this).hasClass('directory') ) {
+							if( $(this).hasClass('collapsed') ) {
 								// Expand
 								if( !options.multiFolder ) {
-									$(this).parent().parent().find('UL').slideUp({ duration: options.collapseSpeed, easing: options.collapseEasing });
-									$(this).parent().parent().find('LI.directory').removeClass('expanded').addClass('collapsed');
+									$(this).parent().find('UL').slideUp({ duration: options.collapseSpeed, easing: options.collapseEasing });
+									$(this).parent().find('LI.directory').removeClass('expanded').addClass('collapsed');
 								}
-								$(this).parent().find('UL').remove(); // cleanup
+								$(this).find('UL').remove(); // cleanup
 								// Go deeper
-								alert($(this).parent().attr('class'));
-								showBranch( $(this).parent(), escape($(this).attr('title').match( /.*\// )) );
-								$(this).parent().removeClass('collapsed').addClass('expanded');
+								//showBranch( $(this), escape($(this).attr('title').match( /.*\// )) );
+								showBranch( $(this), $(this).attr('title') );
+								$(this).removeClass('collapsed').addClass('expanded');
 							} else {
 								// Collapse
-								$(this).parent().find('UL').slideUp({ duration: options.collapseSpeed, easing: options.collapseEasing });
-								$(this).parent().removeClass('expanded').addClass('collapsed');
+								$(this).find('UL').slideUp({ duration: options.collapseSpeed, easing: options.collapseEasing });
+								$(this).removeClass('expanded').addClass('collapsed');
 							}
 						} else {
-							h($(this).attr('title'));
+							$(this).attr('title');
 						}
 						return false;
 					}
@@ -379,7 +402,7 @@ if (jQuery) (function($){
 				
         // Prevent A from triggering the # on non-click events
         if( options.folderEvent.toLowerCase != 'click' ) {
-					$(t).find('LI A').bind('click', function() { return false; });
+					$(t).find('LI').bind('click', function() { return false; });
 				}
 				
 			}

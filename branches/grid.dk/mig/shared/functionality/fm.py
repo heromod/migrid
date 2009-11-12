@@ -90,8 +90,11 @@ def html_tmpl():
         <li class="paste">
             <a href="#paste">Paste</a>
         </li>
-        <li class="delete separator">
+        <li class="delete">
             <a href="#rmdir">Delete Folder</a>
+        </li>
+        <li class="rename separator">
+            <a href="#rename">Rename...</a>
         </li>
     </ul>
     
@@ -108,8 +111,11 @@ def html_tmpl():
         <li class="paste">
             <a href="#paste">Paste</a>
         </li>
-        <li class="delete separator">
+        <li class="delete">
             <a href="#rm">Delete</a>
+        </li>
+        <li class="rename separator">
+            <a href="#rename">Rename...</a>
         </li>
         <li class="cat separator">
             <a href="#cat">cat</a>
@@ -120,7 +126,7 @@ def html_tmpl():
         <li class="tail">
             <a href="#tail">tail</a>
         </li>
-        <li class="submit">
+        <li class="submit separator">
             <a href="#submit">submit</a>
         </li>        
     </ul>
@@ -140,12 +146,21 @@ def html_tmpl():
     </div>
         
     <div id="mkdir_dialog" title="Create New Folder" style="display: none;">
-      <p id="validateTips">Enter the new name:</p>
     
       <form>
       <fieldset>
-        <label for="name">Folder Name</label>
-        <input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" />
+        <label for="name">Enter the new name:</label>
+        <input type="text" name="name" id="mk_name" class="text ui-widget-content ui-corner-all" />
+        
+      </fieldset>
+      </form>
+    </div>
+    
+    <div id="rename_dialog" title="Rename" style="display: none;">
+      <form>
+      <fieldset>
+        <label for="name">Enter the new name:</label>
+        <input type="text" name="name" id="rn_name" class="text ui-widget-content ui-corner-all" />
         
       </fieldset>
       </form>

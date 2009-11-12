@@ -294,8 +294,13 @@ if (jQuery) (function($){
 					if (t=='/') {
 						folders += '</li></ul>';
 					}
-										                															
-          addressbar.find('input').val(t);
+					if (t.substr(0,1)=='/') {
+						addressbar.find('input').val(t);	
+					} else {
+						addressbar.find('input').val('/'+t);	
+					}
+					
+          
           folder_pane.removeClass('wait').append(folders);
 					
 					// Inform tablesorter of new data

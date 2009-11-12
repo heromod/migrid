@@ -37,7 +37,11 @@ if (jQuery) (function($){
 				// Extract last directory from source
 				dst += src.split('/')[src.split('/').length-2];
 			}
+			if (dst == '') {
+				dst = '.';
+			}
 			
+			alert('['+src+'] ['+dst+']')
 			$.getJSON('/cgi-bin/cp.py',
 								{ src: src, dst: dst, output_format: 'json', flags: flag },
 								function(jsonRes, textStatus) {

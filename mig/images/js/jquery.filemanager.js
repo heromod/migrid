@@ -24,8 +24,11 @@ if (jQuery) (function($){
 			}
 		}
 
-		// TODO: - refresh view
-		//       - set recursive flag on directory
+		// TODO: fix this to redo request properly.
+		function reload(path) {
+			document.location = '/cgi-bin/fm.py';
+		}
+
 		function copy(src, dst) {
 									
 			var flag = '';
@@ -41,7 +44,7 @@ if (jQuery) (function($){
 				dst = '.';
 			}
 			
-			alert('['+src+'] ['+dst+']')
+			//alert('['+src+'] ['+dst+']')
 			$.getJSON('/cgi-bin/cp.py',
 								{ src: src, dst: dst, output_format: 'json', flags: flag },
 								function(jsonRes, textStatus) {
@@ -53,9 +56,43 @@ if (jQuery) (function($){
 										for(var i=2; jsonRes.length; i++) {
 											$($('#cmd_dialog').html('<p>Error:</p>'+jsonRes[i].text));
 										}										
-									} else {
-										// TODO: "refresh"
+									} else {										
 										$($('#cmd_dialog').html('<p>Copied: '+src+'</p><p>To: '+dst+'</p>'));
+										reload();
+									}
+								}
+			)
+			
+		}
+		
+		function move(src, dst) {
+									
+			var flag = '';
+						
+			// Handle directory copy, set flag and alter destination path.
+			if (clipboard['is_dir']) {
+				
+				flag = 'r';				
+				// Extract last directory from source
+				dst += src.split('/')[src.split('/').length-2];
+			}
+			if (dst == '') {
+				dst = '.';
+			}
+			
+			//alert('['+src+'] ['+dst+']')
+			$.getJSON('/cgi-bin/mv.py',
+								{ src: src, dst: dst, output_format: 'json', flags: flag },
+								function(jsonRes, textStatus) {
+																		
+									if (jsonRes.length > 3) {
+										for(var i=2; jsonRes.length; i++) {
+											$($('#rename_dialog').append('<p>Error:</p>'+jsonRes[i].text));
+										}										
+									} else {										
+										$($('#rename_dialog').append('<p>Copied: '+src+'</p><p>To: '+dst+'</p>'));
+										//reload();
+										$("#rename_dialog").dialog('close');
 									}
 								}
 			)
@@ -137,9 +174,10 @@ if (jQuery) (function($){
 			},
 			paste: 	function (action, el, pos) {
 				copy(clipboard['path'], $(el).attr(pathAttribute));
+				reload();
 			},
 			rm:			function (action, el, pos) {
-							
+			
 				$.getJSON('/cgi-bin/rm.py',
 									{ path: $(el).attr(pathAttribute), output_format: 'json' },
 									function(jsonRes, textStatus) {
@@ -154,13 +192,11 @@ if (jQuery) (function($){
 											}
 																						
 										} else {
-											
-											// TODO: "refresh"
 											$($('#cmd_dialog').html('<p>nice!</p>'));
-											
+											reload();
 										}
 									}
-				);
+				);				
 			
 			},
 			// Note: this uses rm.py backend and not rmdir.py since recursive deletion
@@ -182,9 +218,8 @@ if (jQuery) (function($){
 											}
 																						
 										} else {
-											// ok
-											// TODO: "refresh"
 											$($('#cmd_dialog').html('<p>nice!</p>'));
+											reload();
 										}
 									}
 				);
@@ -192,6 +227,7 @@ if (jQuery) (function($){
 			upload: function (action, el, pos) {
 								$($("#upload_dialog").dialog({buttons: {Upload: function() { $('#myForm').submit();  }, Cancel: function() {$(this).dialog('close');} }, autoOpen: false, closeOnEscape: true, modal: true}));
 								$($('#upload_dialog').dialog('open'));
+								// TODO: upload + reload();
 							},
 			mkdir:  function (action, el, pos) {
 								
@@ -199,15 +235,15 @@ if (jQuery) (function($){
 								$("#mkdir_dialog").dialog({ buttons: {
 																								Ok: function() {					
 																											$.getJSON('/cgi-bin/mkdir.py',
-																																{ path: $(el).attr(pathAttribute)+'/'+$('#name').val(), output_format: 'json' },
+																																{ path: $(el).attr(pathAttribute)+'/'+$('#mk_name').val(), output_format: 'json' },
 																																function(jsonRes, textStatus) {																																																		
 																																	if (jsonRes.length > 3) {																																			
 																																		for(var i=2; jsonRes.length; i++) {
 																																			$($('#mkdir_dialog').append('<p>Error:</p>'+jsonRes[i].text));
 																																		}																																														
-																																	} else {																																			
-																																		// TODO: "refresh"
+																																	} else {																																																																					
 																																		$('#mkdir_dialog').dialog('close');
+																																		reload();
 																																	}
 																																}
 																												);																										
@@ -220,7 +256,28 @@ if (jQuery) (function($){
 								
 																						);
 								$("#mkdir_dialog").dialog('open');
-							}
+							},
+							
+			// NOTE: it seems that the mv.py backend does not allow for folders to be moved so only
+			//       renaming of files works.
+			rename: function(action, el, pos) {
+				
+								$("#rename_dialog").dialog('destroy');
+								$("#rename_dialog").dialog({ buttons: {
+																								Ok: function() {
+																									//alert('rename!');
+																									move($(el).attr(pathAttribute), $('#rn_name').val());
+
+																								},
+																								Cancel: function() {$(this).dialog('close');}
+																							},
+																							autoOpen: false,
+																							closeOnEscape: true,
+																							modal: true}
+								
+																						);
+								$("#rename_dialog").dialog('open');
+			}
 		}
 
     var defaults = {

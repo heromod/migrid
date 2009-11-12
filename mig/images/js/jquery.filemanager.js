@@ -93,7 +93,40 @@ if (jQuery) (function($){
 			cat:		function (action, el, pos) { cmdHelper(el, '#cmd_dialog', '/cgi-bin/cat.py'); },
 			head:		function (action, el, pos) { cmdHelper(el, '#cmd_dialog', '/cgi-bin/head.py'); },
 			tail:		function (action, el, pos) { cmdHelper(el, '#cmd_dialog', '/cgi-bin/tail.py'); },
-			submit:	function (action, el, pos) { alert('wait'); },
+			submit:	function (action, el, pos) { 
+			
+				$.getJSON('/cgi-bin/submit.py',
+									{ path: $(el).attr(pathAttribute), output_format: 'json' },
+									function(jsonRes, textStatus) {
+										
+										$($('#cmd_dialog').dialog(okDialog));
+										$($('#cmd_dialog').dialog('open'));
+										
+										for(var i=0; i<jsonRes.length; i++) {
+											if (jsonRes[i]['object_type'] == 'submitstatuslist') {
+												for(j=0; j<jsonRes[i]['submitstatuslist'].length; j++) {
+													
+													if (jsonRes[i]['submitstatuslist'][j]['status']) {
+														$($('#cmd_dialog').html('<p>Submitted "'
+																										+jsonRes[i]['submitstatuslist'][j]['name']
+																										+'"</P>'
+																										+'<p>Job identfier: "'+jsonRes[i]['submitstatuslist'][j]['job_id']
+																										+'"</p>'));
+													} else {
+														$($('#cmd_dialog').html('<p>Failed submitting:</p><p>'
+																										+jsonRes[i]['submitstatuslist'][j]['name']
+																										+' '+jsonRes[i]['submitstatuslist'][j]['message']
+																										+'</p>'));
+													}													
+													
+												}
+											}
+										}
+										
+									}
+				);
+			
+			},
 			copy: 	function (action, el, pos) {
 				clipboard['is_dir'] = $(el).hasClass('directory');
 				clipboard['path']		= $(el).attr(pathAttribute);
@@ -112,7 +145,7 @@ if (jQuery) (function($){
 										
 										if (jsonRes.length > 3) {
 											
-											for(var i=2; jsonRes.length; i++) {
+											for(var i=2; i<jsonRes.length; i++) {
 												$($('#cmd_dialog').html('<p>Error:</p>'+jsonRes[i].text));
 											}
 																						
@@ -294,13 +327,14 @@ if (jQuery) (function($){
 					if (t=='/') {
 						folders += '</li></ul>';
 					}
+					
+					// Prefix '/' for the visual presentation of the current path.
 					if (t.substr(0,1)=='/') {
 						addressbar.find('input').val(t);	
 					} else {
 						addressbar.find('input').val('/'+t);	
 					}
 					
-          
           folder_pane.removeClass('wait').append(folders);
 					
 					// Inform tablesorter of new data

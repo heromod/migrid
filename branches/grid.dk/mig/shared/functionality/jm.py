@@ -75,18 +75,13 @@ def html_tmpl():
         <thead>
           <tr>
             <th>JobID</th>
-            <th>status</th>
-            <th>mRSL</th>
-            <th>rStatus</th>
-            <th>schedule</th>
-            <th>date</th>
-            <th>cancel</th>
-            <th>liveoutput</th>
-            <th>resubmit</th>
+            <th style="width: 80px;">Status</th>
+            <th style="width: 180px;">Date</th>
+            <th style="width: 105px;">Commands</th>
           </tr>        
         </thead>
         <tbody>
-          <tr><td>JobID</td><td>status</td><td>mRSL</td><td>rStatus</td><td>schedule</td><td>date</td><td>cancel</td><td>liveoutput</td><td>resubmit</td></tr>          
+          <tr><td>JobID</td><td>Status</td><td>Date</td><td>Commands</td></tr>
         </tbody>
       </table>
       </div>
@@ -95,83 +90,153 @@ def html_tmpl():
         
     <ul id="job_context" class="contextMenu">        
         <li class="Show">
-  <a href="#show">Resubmit</a>
+        <a href="#show">Resubmit</a>
         </li>
         <li class="edit">
-  <a href="#edit">Edit</a>
+        <a href="#edit">Edit</a>
         </li>
         <li class="delete separator">
-  <a href="#delete">Delete</a>
+        <a href="#delete">Delete</a>
         </li>
     </ul>
-    
+    <div id="cmd_helper" title="Command output" style="display: none;"></div>
     """
     
     return test
 
 def js_tmpl():
     
-    js = """
-    <script>
-      
-        $(document).ready(
-            function() {
-              $("table")
-              .tablesorter({widgets: ['zebra']})
-              .tablesorterPager({container: $("#pager"), size: 300});
-              
-              $("#append").click(function() { 
-                  
-                  $('table tbody').html('');
-                  
-                  // add some html      
-                  $.getJSON('jobstatus.py?output_format=json', {}, function(jsonRes, textStatus) {
-                  
-                    var jobList = new Array();
-                    var i =0;
-                    
-                    // Grab jobs from json response and place them in jobList.
-                    for(i=0; i<jsonRes.length; i++) {
-                        if (jsonRes[i].object_type == 'job_list') {    
-                          jobList = jobList.concat(jsonRes[i].jobs);
-                        }
-                    }   
+  js = """
+  <script>
+    
+  function toTimestamp(strDate) {
+      return Date.parse(strDate);
+  }
+
+  function cmdHelper(el) {
   
-                    // Wrap each json result into html
-                    $.each(jobList, function(i, item) {
-            
-                        $('table tbody').append('<tr>'+
-                           '<td>'+item.job_id+'</td>'+
-                           '<td>'+item.status+'</td>'+
-                           '<td><a href="'+item.mrsllink.destination+'">mRSL</a></td>'+
-                           '<td><a href="'+item.statuslink.destination+'">status</a></td>'+
-                           '<td><a href="'+item.jobschedulelink.destination+'">schedule</a></td>'+
-                           '<td>'+item.received_timestamp+'</td>'+
-                           '<td><a href="'+item.cancellink.destination+'">cancel</a></td>'+
-                           '<td><a href="'+item.liveoutputlink.destination+'">liveout</a></td>'+
-                           '<td><a href="'+item.resubmitlink.destination+'">resubmitlink</a></td>'+
-                           '</tr>'
-                           
-                           );
-                                    
-                    });
+    $.getJSON($(el).attr('title'),
+              { output_format: 'json' },
+              function(jsonRes, textStatus) {
+                
+                $('#cmd_helper').dialog({buttons: {Close: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true});
+                $('#cmd_helper').html('');
+                
+                var file_output = '';
+                for(i=0;i<jsonRes.length; i++) {
+                  
+                  if (jsonRes[i].object_type=='file_output') {
                     
-                    // Inform tablesorter of new data
-                    var sorting = [[0,0]]; 
-                    $("table").trigger("update");       
-                    $("table").trigger("sorton",[sorting]); 
+                    for(j=0; j<jsonRes[i].lines.length; j++) {
+                      file_output += jsonRes[i].lines[j]+"\\n";
+                    }
+                    $('#cmd_helper').html('<div style="max-height: 480px;"><pre>'+file_output+'</pre></div>');
+                    
+                  }
+                  
+                  if (jsonRes[i].object_type=='saveschedulejobs') {                    
+                    $('#cmd_helper').html('<div style="max-height: 480px;">'+jsonRes[i]['saveschedulejobs'][0]['message']+'</div>');
+                  }
+                  
+                  if (jsonRes[i].object_type=='changedstatusjobs') {                    
+                    $('#cmd_helper').html('<div style="max-height: 480px;">'+jsonRes[i]['changedstatusjobs'][0]['message']+'</div>');
+                  }
+                  
+                  if (jsonRes[i].object_type=='resubmitobjs') {                    
+                    $('#cmd_helper').html('<div style="max-height: 480px;">'+jsonRes[i]['resubmitobjs'][0]['message']+'</div>');
+                  }
+                  
+                  if (jsonRes[i].object_type=='text') {                    
+                    $('#cmd_helper').html('<div style="max-height: 480px;">'+jsonRes[i]['text']+'</div>');
+                  }
+                  
+                  if (jsonRes[i].object_type=='error_text') {                    
+                    $('#cmd_helper').html('<div style="max-height: 480px; color: red;">'+jsonRes[i]['text']+'</div>');
+                  }
+                  
+                  if (jsonRes[i].object_type=='file_not_found') {                    
+                    $('#cmd_helper').html('<div style="max-height: 480px; color: red;">File not found: '+jsonRes[i]['name']+'</div>');
+                  }
+                }                
+                
+                $('#cmd_helper').dialog('open');
+                
+              }
+    );
+
+  }
+
+  $(document).ready(
+
+    function() {
+    	
+    $("table")
+    .tablesorter({widgets: ['zebra'],
+                  textExtraction: function(node) {
+                                    var stuff = $('div', node).html();
+                                    if (stuff == null) {
+                                      stuff = ''; 
+                                    }
+                                    return stuff;
+                                  }
+                  })
+    .tablesorterPager({container: $("#pager"), size: 300});
+    
+    $("#append").click(function() { 
         
-                });
-
-            }); 
-
-            $("#append").click();
-
-        });
+        $('table tbody').html('');
         
-    </script>
-    """
-    return js
+        // add some html      
+        $.getJSON('jobstatus.py?output_format=json', {}, function(jsonRes, textStatus) {
+        
+          var jobList = new Array();
+          var i =0;
+          
+          // Grab jobs from json response and place them in jobList.
+          for(i=0; i<jsonRes.length; i++) {
+              if (jsonRes[i].object_type == 'job_list') {    
+                jobList = jobList.concat(jsonRes[i].jobs);
+              }
+          }   
+
+          // Wrap each json result into html
+          $.each(jobList, function(i, item) {
+  
+              $('table tbody').append('<tr>'+
+                 '<td><div class="sortkey">'+item.job_id.match(/^([0-9]+)_/)[1]+'</div>'+item.job_id+'</td>'+                 
+                 '<td><div class="sortkey">'+item.status+'</div><div class="statusfiles">'+item.status+'</div></td>'+
+                 '<td><div class="sortkey">'+toTimestamp(item.received_timestamp)+'</div>'+item.received_timestamp+'</td>'+                 
+                 
+                 '<td><div class="sortkey"></div><div class="cmd viewmrls" title="'+item.mrsllink.destination+'">&nbsp;</div>'+
+                 '<div class="sortkey"></div><div class="cmd status" title="'+item.statuslink.destination+'">&nbsp;</div>'+                 
+                 '<div class="sortkey"></div><div class="cmd schedule" title="'+item.jobschedulelink.destination+'">&nbsp;</div>'+                 
+                 '<div class="sortkey"></div>'+'<div class="cmd cancel" title="'+item.cancellink.destination+'">&nbsp;</div>'+                 
+                 '<div class="sortkey"></div>'+'<div class="cmd liveoutput" title="'+item.liveoutputlink.destination+'">&nbsp;</div>'+
+                 '<div class="sortkey"></div>'+'<div class="cmd resubmit" title="'+item.resubmitlink.destination+'">&nbsp;</div></td>'+
+                 '</tr>'
+                 
+                 );
+                          
+          });
+          
+          $('table tbody div').bind('click', function() { cmdHelper(this); });
+          
+          // Inform tablesorter of new data
+          var sorting = [[0,0]]; 
+          $("table").trigger("update");       
+          $("table").trigger("sorton",[sorting]); 
+
+      });
+
+    }); 
+
+    $("#append").click();
+
+  });
+      
+  </script>
+  """
+  return js
 
 def signature():
     """Signature of the main function"""

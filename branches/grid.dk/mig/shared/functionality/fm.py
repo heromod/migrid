@@ -164,7 +164,7 @@ def html_tmpl():
         
     <div id="mkdir_dialog" title="Create New Folder" style="display: none;">
     
-      <form>
+      <form onSubmit="return false;">
       <fieldset>
         <label for="name">Enter the new name:</label>
         <input type="text" name="name" id="mk_name" class="text ui-widget-content ui-corner-all" />
@@ -174,7 +174,7 @@ def html_tmpl():
     </div>
     
     <div id="rename_dialog" title="Rename" style="display: none;">
-      <form>
+      <form onSubmit="return false;">
       <fieldset>
         <label for="name">Enter the new name:</label>
         <input type="text" name="name" id="rn_name" class="text ui-widget-content ui-corner-all" />
@@ -184,7 +184,7 @@ def html_tmpl():
     </div>
     
     <div id="editor_dialog" title="Editor" style="display: none;">
-      <form>
+      <form onSubmit="return false;">
       <fieldset>
 
         <label for="path">Select file:</label>

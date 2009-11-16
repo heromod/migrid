@@ -604,7 +604,7 @@ if (jQuery) (function($){
       showBranch( $('.fm_folders', obj), escape(options.root) );
 			
     });
-
- };
+		
+	};
  
 })(jQuery);

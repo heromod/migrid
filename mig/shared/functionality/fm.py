@@ -46,7 +46,8 @@ from shared.useradm import client_id_dir
 
 def html_tmpl():
     
-    return  """    
+    return  """
+    
     <div id="fm_filemanager">
         <div class="fm_addressbar">
             <ul><li class="fm_path"><input type="text" value="/" readonly="readonly" /></li></ul>
@@ -134,14 +135,30 @@ def html_tmpl():
     <div id="cmd_dialog" title="Command output" style="display: none;"></div>
 
     <div id="upload_dialog" title="Upload File" style="display: none;">
-      <p>Please upload a file</p>      
-      <form id="myForm">
-      <fieldset>
-        <label for="file">Password</label>
-        <input type="file" name="file" id="file" value="" class="text ui-widget-content ui-corner-all" />
-        <input type="submit" />
-      </fieldset>
-      </form>
+    
+        <form id="uploadForm" enctype="multipart/form-data" method="POST" action="textarea.py">
+        <fieldset>
+            <input type="hidden" value="100000" name="MAX_FILE_SIZE"/>
+            
+            <label for="submitmrsl_0">Submit mRSL files (also .mRSL files included in packages):</label>
+            <input type="checkbox" checked="" name="submitmrsl_0"/>
+            <br />
+            
+            <label for="remotefilename_0">Optional remote filename (extra useful in windows):</label>
+            <input type="input" value="./" size="50" name="remotefilename_0" />
+            <br />
+            
+            <label for="extract_0">Extract package files (.zip, .tar.gz, .tar.bz2)</label>
+            <input type="checkbox" name="extract_0"/>
+            <br />
+            
+            <label for="fileupload_0_0_0">File:</label>
+            <input type="file" name="fileupload_0_0_0"/>
+
+        </fieldset>
+        </form>
+
+        <div id="uploadOutput"></div>
 
     </div>
         
@@ -172,26 +189,40 @@ def js_tmpl(entry_path='/'):
     
     js = """
     <script>
-        $.ui.dialog.defaults.bgiframe = true;
-        $("#mkdir_dialog").dialog({ closeOnEscape: true, modal: true });
-                
-        $(document).ready( function() {
-            $('#fm_filemanager').filemanager({
-                                        root: '/',
-                                        connector: 'ls.py?flags=f;output_format=json',
-                                        params: 'path',
-                                        expandSpeed: 0,
-                                        collapseSpeed: 0,
-                                        multiFolder: false
-                                        },
-                                        function(file) { alert(file); }
-                                    );
-
-                                });
+    
+    // pre-submit callback 
+    function showRequest(formData, jqForm, options) {
+        return true;
+    } 
+     
+    // post-submit callback 
+    function showResponse(responseText, statusText)  {
+        $('#uploadOutput').html(responseText);
+    } 
+    
+    $.ui.dialog.defaults.bgiframe = true;
+            
+    $(document).ready( function() {
+        
+        var options = {
+            target:        '#uploadOutput',   // target element(s) to be updated with server response 
+            beforeSubmit:  showRequest,  // pre-submit callback 
+            success:       showResponse  // post-submit callback 
+        };
+        $('#uploadForm').ajaxForm(options);
+    
+        $('#fm_filemanager').filemanager({
+                                    root: '/',
+                                    connector: 'ls.py?flags=f;output_format=json',
+                                    params: 'path',
+                                    expandSpeed: 0,
+                                    collapseSpeed: 0,
+                                    multiFolder: false
+                                    },
+                                    function(file) { alert(file); }
+                                );
                                 
-        $('#myForm').ajaxForm(function() { 
-                alert("Thank you for your comment!"); 
-            }); 
+    });
   
     </script>
     """

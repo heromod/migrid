@@ -18,15 +18,38 @@ if (jQuery) (function($){
 
 		function doubleClickEvent(el) {
 			if($(el).hasClass('directory')) {
-				// go deeper
+				reload($(el).attr(pathAttribute)+'/');
 			} else {
 				document.location = '/cert_redirect/' + $(el).attr(pathAttribute);
 			}
 		}
 
-		// TODO: fix this to redo request properly.
+		function toTimestamp(strDate){
+			var datum = Date.parse(strDate);
+			return datum/1000;
+		}
+
+		function str_is_dir(path) {
+			return path.lastIndexOf("/") == (path.length-1);
+		}
+
 		function reload(path) {
-			document.location = '/cgi-bin/fm.py';
+			
+			var reloadPath = '';
+			
+			if (str_is_dir(path)) {
+				reloadPath = path.substring(0, path.length-1);
+				reloadPath = path.substring(0, reloadPath.lastIndexOf('/'))+'/';
+			} else {				
+				reloadPath = path.substring(0, path.lastIndexOf('/'))+'/';				
+			}
+			if (reloadPath == '/') {
+				reloadPath = '';
+			}
+			//alert(path + ' ][ ' +reloadPath)
+			$('li [title='+reloadPath+']').click();
+			$('li [title='+reloadPath+']').click();
+
 		}
 
 		function copy(src, dst) {
@@ -49,16 +72,15 @@ if (jQuery) (function($){
 								{ src: src, dst: dst, output_format: 'json', flags: flag },
 								function(jsonRes, textStatus) {
 									
-									$($('#cmd_dialog').dialog(okDialog));
-									$($('#cmd_dialog').dialog('open'));
-									
 									if (jsonRes.length > 3) {
+										$($('#cmd_dialog').dialog(okDialog));
+										$($('#cmd_dialog').dialog('open'));
 										for(var i=2; jsonRes.length; i++) {
 											$($('#cmd_dialog').html('<p>Error:</p>'+jsonRes[i].text));
 										}										
-									} else {										
-										$($('#cmd_dialog').html('<p>Copied: '+src+'</p><p>To: '+dst+'</p>'));
-										reload();
+									} else {
+										// TODO: only refresh if destination is current folder
+										reload(dst);
 									}
 								}
 			)
@@ -90,9 +112,8 @@ if (jQuery) (function($){
 											$($('#rename_dialog').append('<p>Error:</p>'+jsonRes[i].text));
 										}										
 									} else {										
-										$($('#rename_dialog').append('<p>Copied: '+src+'</p><p>To: '+dst+'</p>'));
-										//reload();
-										$("#rename_dialog").dialog('close');
+										reload(src);
+										$("#rename_dialog").dialog('close');										
 									}
 								}
 			)
@@ -173,8 +194,7 @@ if (jQuery) (function($){
 				clipboard['path']		= $(el).attr(pathAttribute);
 			},
 			paste: 	function (action, el, pos) {
-				copy(clipboard['path'], $(el).attr(pathAttribute));
-				reload();
+				copy(clipboard['path'], $(el).attr(pathAttribute));				
 			},
 			rm:			function (action, el, pos) {
 			
@@ -182,18 +202,16 @@ if (jQuery) (function($){
 									{ path: $(el).attr(pathAttribute), output_format: 'json' },
 									function(jsonRes, textStatus) {
 										
-										$($('#cmd_dialog').dialog(okDialog));
-										$($('#cmd_dialog').dialog('open'));
-										
 										if (jsonRes.length > 3) {
 											
-											for(var i=2; i<jsonRes.length; i++) {
+											$($('#cmd_dialog').dialog(okDialog));
+											$($('#cmd_dialog').dialog('open'));
+											for(var i=2; i<jsonRes.length; i++) {												
 												$($('#cmd_dialog').html('<p>Error:</p>'+jsonRes[i].text));
 											}
 																						
 										} else {
-											$($('#cmd_dialog').html('<p>nice!</p>'));
-											reload();
+											reload($(el).attr(pathAttribute));
 										}
 									}
 				);				
@@ -210,22 +228,27 @@ if (jQuery) (function($){
 									{ path: $(el).attr(pathAttribute), flags: 'r', output_format: 'json' },
 									function(jsonRes, textStatus) {
 										
-										$($('#cmd_dialog').dialog('open'));
-										
 										if (jsonRes.length > 3) {
+											
+											$($('#cmd_dialog').dialog('open'));
 											for(var i=2; jsonRes.length; i++) {
 												$($('#cmd_dialog').html('<p>Error:</p>'+jsonRes[i].text));												
 											}
 																						
 										} else {
-											$($('#cmd_dialog').html('<p>nice!</p>'));
-											reload();
+											reload($(el).attr(pathAttribute)); // change to parent
 										}
 									}
 				);
 			},
 			upload: function (action, el, pos) {
-								$($("#upload_dialog").dialog({buttons: {Upload: function() { $('#myForm').submit();  }, Cancel: function() {$(this).dialog('close');} }, autoOpen: false, closeOnEscape: true, modal: true}));
+								$("#uploadOutput").html('');
+								$($("#upload_dialog").dialog({buttons: {Upload: function() { $('#uploadForm').submit(); },
+																							Cancel: function() {$(this).dialog('close');} },
+																							autoOpen: false,
+																							closeOnEscape: true,
+																							modal: true,
+																							width: '620px'}));
 								$($('#upload_dialog').dialog('open'));
 								// TODO: upload + reload();
 							},
@@ -242,8 +265,8 @@ if (jQuery) (function($){
 																																			$($('#mkdir_dialog').append('<p>Error:</p>'+jsonRes[i].text));
 																																		}																																														
 																																	} else {																																																																					
-																																		$('#mkdir_dialog').dialog('close');
-																																		reload();
+																																		$('#mkdir_dialog').dialog('close');																																		
+																																		reload($(el).attr(pathAttribute)+'/');
 																																	}
 																																}
 																												);																										
@@ -265,9 +288,7 @@ if (jQuery) (function($){
 								$("#rename_dialog").dialog('destroy');
 								$("#rename_dialog").dialog({ buttons: {
 																								Ok: function() {
-																									//alert('rename!');
 																									move($(el).attr(pathAttribute), $('#rn_name').val());
-
 																								},
 																								Cancel: function() {$(this).dialog('close');}
 																							},
@@ -300,10 +321,11 @@ if (jQuery) (function($){
             						
 			// Create the tree structure on the left and populates the table list of files on the right
       function showBranch(folder_pane, t) {
-        
+				
         var file_pane   = $('.fm_files', obj);        
         var statusbar   = $('.fm_statusbar', obj);
         var addressbar  = $('.fm_addressbar', obj);
+				var timestamp = 0;
         
         $(folder_pane).addClass('wait');
         $(".jqueryFileTree.start").remove();
@@ -510,7 +532,7 @@ if (jQuery) (function($){
       // Base sorting on the content of the hidden <div> element
 			var myTextExtraction = function(node) {  
 					return node.childNodes[0].innerHTML; 
-			} 
+			}
 			$('.fm_files table', obj).tablesorter({widgets: ['zebra'],
 																						textExtraction: myTextExtraction,
 																						sortColumn: 'Name'});

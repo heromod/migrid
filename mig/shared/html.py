@@ -115,6 +115,7 @@ def get_cgi_html_header(
 <link rel="stylesheet" type="text/css" href="%s" media="screen"/>
 
 <link rel="stylesheet" type="text/css" href="/images/css/jquery.filemanager.css" media="screen"/>
+<link rel="stylesheet" type="text/css" href="/images/css/jquery.jobmanager.css" media="screen"/>
 <link rel="stylesheet" type="text/css" href="/images/css/jquery.contextmenu.css" media="screen"/>
 <link rel="stylesheet" type="text/css" href="/images/css/jquery-ui-1.7.2.custom.css" media="screen"/>
 <link rel="icon" type="image/vnd.microsoft.icon" href="%s">
@@ -128,6 +129,7 @@ def get_cgi_html_header(
 <script type="text/javascript" src="/images/js/jquery.tablesorter.js"></script>
 <script type="text/javascript" src="/images/js/jquery.tablesorter.pager.js"></script>
 <script type="text/javascript" src="/images/js/jquery.contextmenu.js"></script>
+
 <title>
 %s
 </title>

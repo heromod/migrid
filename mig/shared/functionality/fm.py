@@ -182,6 +182,31 @@ def html_tmpl():
       </fieldset>
       </form>
     </div>
+    
+    <div id="editor_dialog" title="Editor" style="display: none;">
+      <form>
+      <fieldset>
+
+        <label for="path">Select file:</label>
+        <input class="edit_path" type="text" size="80" name="path" value=""><br />
+        
+        <label for="editarea">Edit contents:</label>
+        <textarea class="edit_textarea" cols="80" rows="20" wrap="off" name="editarea"></textarea>
+        
+        <label for="newline">Newline mode:</label>
+        <select class="edit_nl" name="newline">
+          <option selected value="unix">UNIX</option>
+          <option value="mac">Mac OS (pre OS X)</option>
+          <option value="windows">DOS / Windows</option>
+        </select>
+        
+        <label for="name">Submit file as job after saving </label>
+        <input class="edit_submitjob" type="checkbox" name="submitjob">
+                
+      </fieldset>
+      </form>
+      <div class="editor_dialog_output"></div>
+    </div>
 
     """
 

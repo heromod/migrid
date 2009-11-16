@@ -151,7 +151,69 @@ if (jQuery) (function($){
 		var callbacks = {
 			
 			show: 	function (action, el, pos) { document.location = '/cert_redirect/' + $(el).attr(pathAttribute) },
-			edit: 	function (action, el, pos) {},
+			edit: 	function (action, el, pos) {
+			
+			$("#editor_dialog").dialog('destroy');
+			$('.editor_dialog_output').html('');
+			$("#editor_dialog").dialog({ buttons: {
+																			'Save Changes': function() {
+																						
+																						var submitjob = '';
+																						if ($("#editor_dialog input.edit_submitjob").is(':checked')) {
+																							submitjob = 'on';
+																						}
+																						$('.editor_dialog_output').html('');
+																						$.getJSON('/cgi-bin/editfile.py',
+																											{ editarea: $("#editor_dialog textarea.edit_textarea").val(),
+																												newline: $("#editor_dialog select.edit_nl").val(),
+																												path: $("#editor_dialog input.edit_path").val(),
+																												submitjob: submitjob,
+																												output_format: 'json'
+																											},
+																											function(jsonRes, textStatus) {
+																												
+																												if (jsonRes.length > 3) {
+																													
+																													for(var i=3; (jsonRes.length-1); i++) {
+																														$('.editor_dialog_output').append(jsonRes[i].text);
+																													}																																														
+																												} else {																																																																					
+																													$('#editor_dialog').dialog('close');																																		
+																												}
+																											}
+																							);																										
+																					},
+																			Close: function() {$(this).dialog('close');}
+																		},
+																		autoOpen: false,
+																		closeOnEscape: true,
+																		modal: true,
+																		width: '800px'}
+			
+																	);
+			$.getJSON('/cgi-bin/cat.py',
+								{ path: $(el).attr(pathAttribute),  output_format: 'json' },
+								function(jsonRes, textStatus) {
+									
+									var file_output = '';
+									for(i=0;i<jsonRes.length; i++) {
+										
+										if (jsonRes[i].object_type=='file_output') {
+											
+											for(j=0; j<jsonRes[i].lines.length; j++) {
+												file_output += jsonRes[i].lines[j];
+											}
+											
+										}
+									}
+									
+									$("#editor_dialog input.edit_path").val('.'+$(el).attr(pathAttribute));
+									$("#editor_dialog textarea.edit_textarea").val(file_output);
+									$("#editor_dialog").dialog('open');
+								});
+
+				
+			},
 			cat:		function (action, el, pos) { cmdHelper(el, '#cmd_dialog', '/cgi-bin/cat.py'); },
 			head:		function (action, el, pos) { cmdHelper(el, '#cmd_dialog', '/cgi-bin/head.py'); },
 			tail:		function (action, el, pos) { cmdHelper(el, '#cmd_dialog', '/cgi-bin/tail.py'); },
@@ -279,7 +341,7 @@ if (jQuery) (function($){
 								
 																						);
 								$("#mkdir_dialog").dialog('open');
-							},
+			},
 							
 			// NOTE: it seems that the mv.py backend does not allow for folders to be moved so only
 			//       renaming of files works.

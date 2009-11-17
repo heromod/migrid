@@ -223,6 +223,7 @@ def js_tmpl(entry_path='/'):
     // post-submit callback 
     function showResponse(responseText, statusText)  {
         $('#uploadOutput').html(responseText);
+        $('#fm_filemanager').reload($('#uploadForm input[name=remotefilename_0]').val());
     } 
     
     $.ui.dialog.defaults.bgiframe = true;

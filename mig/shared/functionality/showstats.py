@@ -32,7 +32,7 @@
    couchdb (for sgas-experimental)."""
 
 import os
-import httplib
+import urllib
 import re
 import sys
 import time
@@ -190,9 +190,9 @@ def main(client_id, user_arguments_dict):
     # python starts by week 0, whereas javascript starts by week 1
     if group_in_time == 'week':
         t = time.strptime(time_start + '-07',"%Y-%m-%d")
-        time_start = time.strftime("%Y-%U",t)
+        time_start = time.strftime("%Y,week%U",t)
 
-    start_key = '["'+ time_start + '",null]'
+    start_key = '["'+ time_start.replace("-"," ") + '",null]'
     # 2nd component: user or machine
     # TODO allow only own user ID and only machines owned???
     # drawback: cannot restrict user/machine when requesting more than one time period 
@@ -206,9 +206,9 @@ def main(client_id, user_arguments_dict):
     else:
         if group_in_time == 'week':
             t = time.strptime(time_end + '-07',"%Y-%m-%d")
-            end_key = '["'+ time.strftime("%Y-%U-",t) + '",{}]'
+            end_key = '["'+ time.strftime("%Y,week%U-",t) + '",{}]'
         else:
-            end_key = '["'+ time_end + '-32' + '",{}]'
+            end_key = '["'+ time_end.replace("-"," ") + ' 32' + '",{}]'
             # append last day, so inclusive end
 
     #  1. get json data from couchdb using the view
@@ -229,23 +229,16 @@ def main(client_id, user_arguments_dict):
     # and contain views with names <category>-<timegrouping>
     query = '/'.join(['',db_name,'_design' ,group_in_time,'_view',view])
     query += '?'
-    query += '&'.join(['group=true'
-                       ,'group_level=%s' % group_level
-                       ,'startkey=%s' % html_escape(start_key)
-                       ,'endkey=%s'   % html_escape(end_key)])
-
+    query += urllib.urlencode({'group'      : 'true',
+                               'group_level': group_level,
+                               'startkey'   : start_key,
+                               'endkey'     : end_key,
+                               })
     try:
         logger.debug("asking database at %s: %s" % (db_url,query))
-        conn = httplib.HTTPConnection(db_url)
-        conn.request('GET',query)
-        res = conn.getresponse()
-        logger.debug('response: %s %s' % (res.status, res.reason))
-        if res.status != 200:
-            logger.error('%s to couchdb at %s replied: %s %s' \
-                         % (query, db_url, res.status, res.reason))
-            raise Exception(res.reason)
+        res = urllib.urlopen('http://' + db_url + query)
         jsonreply = res.read()
-        conn.close()
+        res.close()
     except Exception, err:
         logger.error('Could not get data from database: %s' % err)
         output_objects.append({'object_type': 'error_text', 'text'

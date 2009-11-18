@@ -205,8 +205,11 @@ def main(client_id, user_arguments_dict):
         end = '{}'
     else:
         if group_in_time == 'week':
-            t = time.strptime(time_end + '-07',"%Y-%m-%d")
-            end_key = '["'+ time.strftime("%Y,week%U-",t) + '",{}]'
+            # last week of the month = first week 1 month later
+            # we better compute this instead of tweaking the input
+            t = time.mktime(time.strptime(time_end + '-28',"%Y-%m-%d"))
+            t += 7*24*3600
+            end_key = '["'+ time.strftime("%Y,week%U",time.localtime(t)) + '",{}]'
         else:
             end_key = '["'+ time_end.replace("-"," ") + ' 32' + '",{}]'
             # append last day, so inclusive end

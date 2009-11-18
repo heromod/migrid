@@ -523,8 +523,7 @@ class UsageRecord:
             # might be a failed job, try execution history
             if 'EXECUTION_HISTORY' in job:
                 hist = job['EXECUTION_HISTORY']
-                lastTry = hist[len(hist)]
-                self.machine_name = lastTry.get('UNIQUE_RESOURCE_NAME',None)
+                self.machine_name = hist[-1].get('UNIQUE_RESOURCE_NAME',None)
 
         # local user on the resource, if available
         if job.has_key('RESOURCE_CONFIG'):
@@ -579,4 +578,8 @@ if __name__ == '__main__':
         usage_record.record_id = 'uninitialised'
         usage_record.status = 'unknown'
         usage_record.fill_from_mrsl(fname)
-        usage_record.write_xml(fname + '.xml')
+        if len(sys.argv) > 2:
+            target = sys.argv[2]
+        else:
+            target = '.'.join([fname,'xml'])
+        usage_record.write_xml(target)

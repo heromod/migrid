@@ -42,7 +42,6 @@ import simplejson as json
 import shared.returnvalues as returnvalues
 from shared.init import initialize_main_variables, find_entry
 from shared.functional import validate_input
-from shared.safeinput import html_escape
 
 
 # allowed parameters, first value is default
@@ -56,7 +55,7 @@ def signature():
     defaults = { 'group_in_time':time_groups[0:1]
                  ,'display'     :displays[0:1]
                  ,'time_start'  :['2009-09'] # allowed are year-month strings
-                 ,'time_end'    :[]          # ditto. 
+                 ,'time_end'    :[time.strftime('%Y-%m')] # ditto. 
                }
     return ['html_form', defaults]
 
@@ -82,6 +81,7 @@ def main(client_id, user_arguments_dict):
     # read view options
     group_in_time = accepted['group_in_time'][-1] # day, week, month
     time_start    = accepted['time_start'][-1]
+    time_end      = accepted['time_end'][-1]
     display       = accepted['display'][-1] # machine, user, summary
 
     # check arguments against configured lists of valid inputs:
@@ -106,15 +106,11 @@ def main(client_id, user_arguments_dict):
         time_start = '2009-09'
         reject = True
 
-    if accepted['time_end'] and accepted['time_end'] != ['']:
-        time_end  = accepted['time_end'][-1]
-        if not re.match('20\d\d-[01]\d', time_end):
-            output_objects.append({'object_type': 'error_text', 'text'
-                   : 'invalid end time specified: %s' % time_end })
-            time_end = ''
-            reject = True
-    else:
-        time_end = ''
+    if not re.match('20\d\d-[01]\d', time_end):
+        output_objects.append({'object_type': 'error_text', 'text'
+                    : 'invalid end time specified: %s' % time_end })
+        time_end = time.strftime('%Y-%m')
+        reject = True
 
     # always include a form to re-display with different values:
     updateform = '           <form action="%s" >' %  \
@@ -200,19 +196,15 @@ def main(client_id, user_arguments_dict):
     # have to be used. In which case only one user can be selected 
     # to keep the time period selection valid.
 
-    if not time_end:
-        end_key = '[{},{}]'
-        end = '{}'
+    if group_in_time == 'week':
+        # last week of the month = first week 1 month later
+        # we better compute this instead of tweaking the input
+        t = time.mktime(time.strptime(time_end + '-28',"%Y-%m-%d"))
+        t += 7*24*3600
+        end_key = '["'+ time.strftime("%Y,week%U",time.localtime(t)) + '",{}]'
     else:
-        if group_in_time == 'week':
-            # last week of the month = first week 1 month later
-            # we better compute this instead of tweaking the input
-            t = time.mktime(time.strptime(time_end + '-28',"%Y-%m-%d"))
-            t += 7*24*3600
-            end_key = '["'+ time.strftime("%Y,week%U",time.localtime(t)) + '",{}]'
-        else:
-            end_key = '["'+ time_end.replace("-"," ") + ' 32' + '",{}]'
-            # append last day, so inclusive end
+        end_key = '["'+ time_end.replace("-"," ") + ' 32' + '",{}]'
+        # append last day, so inclusive end
 
     #  1. get json data from couchdb using the view
     #     group=true, group_level as calculated,
@@ -264,6 +256,15 @@ The query you have requested did not return any data.
                                '''})
         return (output_objects, returnvalues.OK)
 
+    # process the received data:
+
+    # view field names, could be configurable as well, 
+    # but this is anyway highly proprietary code
+    table_names = {'count':'Job Count',
+                   'wall_duration': 'Accumulated Wall Clock Time',
+                   'charge': 'Accumulated Charge'}
+
+    
     lookupdict = dict( [ (tuple(d['key']),d['value']) for d in data ] )
 
     if group_level == 1: 
@@ -276,13 +277,59 @@ The query you have requested did not return any data.
         # date comes first in keys for all views we are using 
         dates = list(set([ date[0] for date in lookupdict ])) # :p
         dates.sort()
+        # TODO should instead generate the dates for the respective 
+        # period and interval, to make sure all dates occur
 
-        # build data rows, fill in missing data...
         nullval = {'count':0, 'wall_duration':0,'charge':0}
         keys = set([ date[-1] for date in lookupdict ])
         datarows = []
+
+        # machine view should present only a sum of all "oneclick" and
+        # "sandbox" resources. We sum all matching machines in all fields
+        if display == 'machine':
+            sums = [[((d,'oneclick (sum)'),
+                       dict([(n,0) for n in table_names ])),
+                     ((d,'sandbox (sum)'),
+                       dict([(n,0) for n in table_names ]))]
+                    for d in dates ]
+            def concat(l1,l2): return l1+l2
+            sumdict = dict(reduce(concat,sums))
+
+            new_keys = []
+            for k in keys:
+                if re.match("oneclick", k):
+                    new_keys.append('oneclick (sum)')
+                    for d in dates:
+                        if (d,k) in lookupdict:
+                            for n in table_names:
+                                sumdict[(d,'oneclick (sum)')][n] += lookupdict[(d,k)][n]
+                            del lookupdict[(d,k)]
+                elif re.match("sandbox", k):
+                    new_keys.append('sandbox (sum)')
+                    for d in dates:
+                        if (d,k) in lookupdict:
+                            for n in table_names:
+                                sumdict[(d,'sandbox (sum)')][n] += lookupdict[(d,k)][n]
+                            del lookupdict[(d,k)]
+                else: new_keys.append(k)
+            
+            lookupdict = dict(lookupdict.items() + sumdict.items())
+            keys = list(set(new_keys))
+
+        # keys should be shortened, especially only use the CN part of
+        # user DNs. This will be called when building data rows
+        def short_key(key_part):
+            if display == 'user':
+                # user: extract CN part from the DN
+                cn= re.findall('/CN=([^/]*)',key_part)
+                if cn: return cn[0]
+                else: return key_part
+            else:
+                return key_part # nothing special
+
+        # build data rows, fill in missing data...
         for k in keys:
-            row = [k]
+            row = [short_key(k)]
             for d in dates:
                 if (d,k) in lookupdict:
                     row.append(lookupdict[(d,k)])
@@ -296,12 +343,7 @@ The query you have requested did not return any data.
     # TODO extend the visualisation options here, estimate width by 
     # length of date list 
 
-    #   build tables for all data we have. could make field names
-    # configurable as well, but this is anyway highly proprietary code
-
-    table_names = {'count':'Job Count',
-                   'wall_duration': 'Accumulated Wall Clock Time',
-                   'charge': 'Accumulated Charge'}
+    # present the received data: build tables for all fields we have. 
     for key in table_names:
         output_objects.append({'object_type': 'text', 'text' :
                                ''}) # spacer.. :-S
@@ -323,7 +365,7 @@ The query you have requested did not return any data.
             html += '<td>'.join([ str(x[key]) for x in r[1:] ])
             
         html += '</tbody>'
-        html += '</table></p>'
+        html += '</table></p><p>&nbsp;</p>'
         output_objects.append({'object_type': 'html_form', 'text'
                               : html})
 
@@ -332,7 +374,7 @@ The query you have requested did not return any data.
 
     # visualisations for the different queries:
     bar_default = "barMargin:'0',barGroupMargin:'4',height:'300'"
-    pie_default = "type:'pie',height:'200',width:'400'"
+    pie_default = "type:'pie',height:'200',width:'600'"
 
     bars = len(dates) * len(datarows)
     # default width is table width. Avoid extremes...

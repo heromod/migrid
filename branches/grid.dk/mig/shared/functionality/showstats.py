@@ -380,8 +380,10 @@ The query you have requested did not return any data.
     # default width is table width. Avoid extremes...
     if bars < 30 or len(datarows) < 3:    # limit to a maximum width
         w = bars * 30 
-    elif bars > 150: # enforce a minimum width
-        w = bars * 10
+    elif bars > 150: # enforce a minimum width (but avoid js crash)
+        w = min(32764, bars * 10)
+        # 32764 has been determined by tests with firefox, 
+        # larger width results in browser crash.
     else:
         w = None
     if w: bar_default += ',width:"%s"' % w

@@ -206,6 +206,7 @@ UL.jqueryFileTree div:hover {
 .jqueryFileTree LI.expanded { background: url(/images/icons/folder_open.png) left top no-repeat; }
 .jqueryFileTree LI.file { background: url(/images/icons/file.png) left top no-repeat; }
 .jqueryFileTree LI.wait { background: url(/images/icons/spinner.gif) left top no-repeat; }
+.spinner { background: url(/images/icons/spinner.gif) left center no-repeat; }
 
 UL.jqueryFileList {
 	

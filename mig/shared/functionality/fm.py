@@ -48,9 +48,9 @@ def html_tmpl():
     
     return  """
     
-    <div id="fm_filemanager">
+    <div id="fm_filemanager">        
         <div class="fm_addressbar">
-            <ul><li class="fm_path"><input type="text" value="/" readonly="readonly" /></li></ul>
+            <ul><li class="fm_path"><input type="text" value="/" name="fm_current_path" readonly="readonly" /></li></ul>
         </div>
         <div class="fm_folders">
             <ul class="jqueryFileTree">                
@@ -136,9 +136,10 @@ def html_tmpl():
 
     <div id="upload_dialog" title="Upload File" style="display: none;">
     
-        <form id="uploadForm" enctype="multipart/form-data" method="POST" action="textarea.py">
+        <form id="upload_form" enctype="multipart/form-data" method="POST" action="textarea.py">
         <fieldset>
-            <input type="hidden" value="100000" name="MAX_FILE_SIZE"/>
+            <input type="hidden" name="output_format" value="json"/>
+            <input type="hidden" name="MAX_FILE_SIZE" value="100000"/>
             
             <label for="submitmrsl_0">Submit mRSL files (also .mRSL files included in packages):</label>
             <input type="checkbox" checked="" name="submitmrsl_0"/>
@@ -158,54 +159,66 @@ def html_tmpl():
         </fieldset>
         </form>
 
-        <div id="uploadOutput"></div>
+        <div id="upload_output"></div>
 
     </div>
         
     <div id="mkdir_dialog" title="Create New Folder" style="display: none;">
     
-      <form onSubmit="return false;">
+      <form id="mkdir_form" action="mkdir.py">
       <fieldset>
-        <label for="name">Enter the new name:</label>
-        <input type="text" name="name" id="mk_name" class="text ui-widget-content ui-corner-all" />
+        <input type="hidden" name="output_format" value="json" />
+        <input type="hidden" name="current_dir" value="./" />
+        <label for="path">Enter the new name:</label>
+        <input type="text" name="path"/>
         
       </fieldset>
       </form>
+      <div id="mkdir_output"></div>
     </div>
     
     <div id="rename_dialog" title="Rename" style="display: none;">
-      <form onSubmit="return false;">
-      <fieldset>
-        <label for="name">Enter the new name:</label>
-        <input type="text" name="name" id="rn_name" class="text ui-widget-content ui-corner-all" />
-        
-      </fieldset>
-      </form>
+    <form id="rename_form" action="mv.py">
+    <fieldset>
+    
+      <input type="hidden" name="output_format" value="json" />
+      <input type="hidden" name="flags" value="r" />
+      <input type="hidden" name="src" value="" />
+      <input type="hidden" name="dst" value="" />
+      
+      <label for="name">Enter the new name:</label>
+      <input type="text" name="name" value="" />
+      
+    </fieldset>
+    </form>
+    <div id="rename_output"></div>
     </div>
     
     <div id="editor_dialog" title="Editor" style="display: none;">
-      <form onSubmit="return false;">
-      <fieldset>
+    <form id="editor_form" action="editfile.py">
+    <fieldset>
 
-        <label for="path">Select file:</label>
-        <input class="edit_path" type="text" size="80" name="path" value=""><br />
-        
-        <label for="editarea">Edit contents:</label>
-        <textarea class="edit_textarea" cols="80" rows="20" wrap="off" name="editarea"></textarea>
-        
-        <label for="newline">Newline mode:</label>
-        <select class="edit_nl" name="newline">
-          <option selected value="unix">UNIX</option>
-          <option value="mac">Mac OS (pre OS X)</option>
-          <option value="windows">DOS / Windows</option>
-        </select>
-        
-        <label for="name">Submit file as job after saving </label>
-        <input class="edit_submitjob" type="checkbox" name="submitjob">
-                
-      </fieldset>
-      </form>
-      <div class="editor_dialog_output"></div>
+      <input type="hidden" name="output_format" value="json">
+
+      <label for="path">Select file:</label>
+      <input type="text" size="80" name="path" value=""><br />
+      
+      <label for="editarea">Edit contents:</label>
+      <textarea cols="80" rows="20" wrap="off" name="editarea"></textarea>
+      
+      <label for="newline">Newline mode:</label>
+      <select name="newline">
+        <option selected value="unix">UNIX</option>
+        <option value="mac">Mac OS (pre OS X)</option>
+        <option value="windows">DOS / Windows</option>
+      </select>
+      
+      <label for="name">Submit file as job after saving </label>
+      <input type="checkbox" name="submitjob">
+              
+    </fieldset>
+    </form>
+    <div id="editor_output"></div>
     </div>
 
     """
@@ -215,39 +228,21 @@ def js_tmpl(entry_path='/'):
     js = """
     <script>
     
-    // pre-submit callback 
-    function showRequest(formData, jqForm, options) {
-        return true;
-    } 
-     
-    // post-submit callback 
-    function showResponse(responseText, statusText)  {
-        $('#uploadOutput').html(responseText);
-        $('#fm_filemanager').reload($('#uploadForm input[name=remotefilename_0]').val());
-    } 
-    
     $.ui.dialog.defaults.bgiframe = true;
             
     $(document).ready( function() {
-        
-        var options = {
-            target:        '#uploadOutput',   // target element(s) to be updated with server response 
-            beforeSubmit:  showRequest,  // pre-submit callback 
-            success:       showResponse  // post-submit callback 
-        };
-        $('#uploadForm').ajaxForm(options);
     
-        $('#fm_filemanager').filemanager({
-                                    root: '/',
-                                    connector: 'ls.py?flags=f;output_format=json',
-                                    params: 'path',
-                                    expandSpeed: 0,
-                                    collapseSpeed: 0,
-                                    multiFolder: false
-                                    },
-                                    function(file) { alert(file); }
-                                );
-                                
+      $('#fm_filemanager').filemanager({
+                                        root: '/',
+                                        connector: 'ls.py?flags=f;output_format=json',
+                                        params: 'path',
+                                        expandSpeed: 0,
+                                        collapseSpeed: 0,
+                                        multiFolder: false
+                                        },
+                                        function(file) { alert(file); }
+      );
+    
     });
   
     </script>

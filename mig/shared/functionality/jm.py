@@ -74,6 +74,7 @@ def html_tmpl():
         <table id="jm_jobmanager">      
         <thead>
           <tr>
+            <th><input type="checkbox" name="job_identifiers_all" value="select_all" /></th>
             <th>JobID</th>
             <th style="width: 80px;">Status</th>
             <th style="width: 180px;">Date</th>
@@ -81,7 +82,7 @@ def html_tmpl():
           </tr>        
         </thead>
         <tbody>
-          <tr><td>JobID</td><td>Status</td><td>Date</td><td>Commands</td></tr>
+          <tr><td>.</td><td>JobID</td><td>Status</td><td>Date</td><td>Commands</td></tr>
         </tbody>
       </table>
       </div>
@@ -189,48 +190,72 @@ def js_tmpl():
         // add some html      
         $.getJSON('jobstatus.py?output_format=json', {}, function(jsonRes, textStatus) {
         
-          var jobList = new Array();
-          var i =0;
-          
-          // Grab jobs from json response and place them in jobList.
-          for(i=0; i<jsonRes.length; i++) {
-              if (jsonRes[i].object_type == 'job_list') {    
-                jobList = jobList.concat(jsonRes[i].jobs);
-              }
-          }   
-
-          // Wrap each json result into html
-          $.each(jobList, function(i, item) {
-  
-              $('table tbody').append('<tr>'+
-                 '<td><div class="sortkey">'+item.job_id.match(/^([0-9]+)_/)[1]+'</div>'+item.job_id+'</td>'+                 
-                 '<td><div class="sortkey">'+item.status+'</div><div class="statusfiles">'+item.status+'</div></td>'+
-                 '<td><div class="sortkey">'+toTimestamp(item.received_timestamp)+'</div>'+item.received_timestamp+'</td>'+                 
-                 
-                 '<td><div class="sortkey"></div><div class="cmd viewmrls" title="'+item.mrsllink.destination+'">&nbsp;</div>'+
-                 '<div class="sortkey"></div><div class="cmd status" title="'+item.statuslink.destination+'">&nbsp;</div>'+                 
-                 '<div class="sortkey"></div><div class="cmd schedule" title="'+item.jobschedulelink.destination+'">&nbsp;</div>'+                 
-                 '<div class="sortkey"></div>'+'<div class="cmd cancel" title="'+item.cancellink.destination+'">&nbsp;</div>'+                 
-                 '<div class="sortkey"></div>'+'<div class="cmd liveoutput" title="'+item.liveoutputlink.destination+'">&nbsp;</div>'+
-                 '<div class="sortkey"></div>'+'<div class="cmd resubmit" title="'+item.resubmitlink.destination+'">&nbsp;</div></td>'+
-                 '</tr>'
-                 
-                 );
-                          
-          });
-          
-          $('table tbody div').bind('click', function() { cmdHelper(this); });
-          
-          // Inform tablesorter of new data
-          var sorting = [[0,0]]; 
-          $("table").trigger("update");       
-          $("table").trigger("sorton",[sorting]); 
+            var jobList = new Array();
+            var i =0;
+            
+            // Grab jobs from json response and place them in jobList.
+            for(i=0; i<jsonRes.length; i++) {
+                if (jsonRes[i].object_type == 'job_list') {    
+                  jobList = jobList.concat(jsonRes[i].jobs);
+                }
+            }   
+    
+            // Wrap each json result into html
+            $.each(jobList, function(i, item) {
+    
+                $('#jm_jobmanager tbody').append('<tr id="'+item.job_id.match(/^([0-9]+)_/)[1]+'">'+
+                  '<td><div class="sortkey"></div><input type="checkbox" name="job_identifiers" value="'+item.job_id+'" /></td>'+
+                  '<td><div class="sortkey">'+item.job_id.match(/^([0-9]+)_/)[1]+'</div>'+item.job_id+'</td>'+                 
+                  '<td><div class="sortkey">'+item.status+'</div><div class="statusfiles">'+item.status+'</div></td>'+
+                  '<td><div class="sortkey">'+toTimestamp(item.received_timestamp)+'</div>'+item.received_timestamp+'</td>'+                 
+                  
+                  '<td><div class="sortkey"></div><div class="cmd viewmrls" title="'+item.mrsllink.destination+'">&nbsp;</div>'+
+                  '<div class="sortkey"></div><div class="cmd status" title="'+item.statuslink.destination+'">&nbsp;</div>'+                 
+                  '<div class="sortkey"></div><div class="cmd schedule" title="'+item.jobschedulelink.destination+'">&nbsp;</div>'+                 
+                  '<div class="sortkey"></div>'+'<div class="cmd cancel" title="'+item.cancellink.destination+'">&nbsp;</div>'+                 
+                  '<div class="sortkey"></div>'+'<div class="cmd liveoutput" title="'+item.liveoutputlink.destination+'">&nbsp;</div>'+
+                  '<div class="sortkey"></div>'+'<div class="cmd resubmit" title="'+item.resubmitlink.destination+'">&nbsp;</div></td>'+
+                  '</tr>'
+                  
+                  );
+                            
+            });
+        
+        $('#jm_jobmanager tbody tr td').bind('click', function(event) {
+            
+            var job_id = '';
+            
+            // Don't trigger on div commands
+            if (($('div.cmd', this).length == 0) && ($('input', this).length == 0)) {
+                job_id = $(this).parent().attr('id');
+                $('#'+job_id+' input').attr('checked', !$('#'+job_id+' input').attr('checked'));
+                
+            }
+        } );
+        $('#jm_jobmanager input[name=job_identifiers_all]').bind('click', function() {
+        
+                var is_checked = $('#jm_jobmanager input[name=job_identifiers_all]').attr('checked');
+                //alert(is_checked);
+                return true;
+                //$('#jm_jobmanager input[name=job_identifiers_all]').attr('checked', is_checked);
+                //$('#jm_jobmanager input[name=job_identifiers]').attr('checked', is_checked);
+            
+            }
+        
+        );
+        $('#jm_jobmanager tbody div.cmd').bind('click', function() { cmdHelper(this); });
+        
+        // Inform tablesorter of new data
+        var sorting = [[0,0]]; 
+        $("table").trigger("update");       
+        $("table").trigger("sorton",[sorting]); 
 
       });
 
     }); 
 
     $("#append").click();
+    
 
   });
       

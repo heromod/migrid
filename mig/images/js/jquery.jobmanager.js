@@ -50,6 +50,8 @@ if (jQuery) (function($){
           
         });
         
+        //$('.jobs tr').selectable();
+        
       });
 
     });

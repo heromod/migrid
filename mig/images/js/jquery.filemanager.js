@@ -3,6 +3,7 @@ if (jQuery) (function($){
 	$.fn.renderError = function(jsonRes) {
 		
 		var errors = '';
+		
 		for(var i=0; i<jsonRes.length; i++) {
 			if (jsonRes[i]['object_type'] == 'error_text')
 				errors +='<p>'+jsonRes[i].text+'</p>';
@@ -10,27 +11,46 @@ if (jQuery) (function($){
 		return errors;
 	}
 	
+	$.fn.renderFileoutput = function(jsonRes) {
+		
+		var file_output = '';
+		
+		for(i=0;i<jsonRes.length; i++) {
+			if (jsonRes[i].object_type=='file_output') {			
+				for(j=0; j<jsonRes[i].lines.length; j++) {
+					file_output += jsonRes[i].lines[j];
+				}
+			}
+		}
+		return file_output;
+	}
+	
 	$.fn.tagName = function() {
     return this.get(0).tagName;
 	}
 
 	$.fn.reload = function reload(path) {
-
-		var reloadPath = '';
+		var reloadPath = path;
 		
-		// Extract the parent of the path		
+		if (reloadPath == '') {			
+			reloadPath = $('.fm_addressbar input[name=fm_current_path]').val().substr(1);
+		}
+		
+		// Extract the parent of the path
+		/*
 		if (path.lastIndexOf("/") == (path.length-1)) { // is directory?
 			reloadPath = path.substring(0, path.length-1);
 			reloadPath = path.substring(0, reloadPath.lastIndexOf('/'))+'/';
 		} else {
-			reloadPath = path.substring(0, path.lastIndexOf('/'))+'/';				
+			reloadPath = path.substring(0, path.lastIndexOf('/'))+'/';
 		}
+		*/
 		
 		// Root is a special-case.
 		if (reloadPath == '/') {
 			reloadPath = '';
 		}
-		
+		//alert(path + ' | '+reloadPath);
 		// Trigger the click-event twice for obtaining the original state (collapse+expand).
 		$('.fm_folders li [title='+reloadPath+']').click();
 		$('.fm_folders li [title='+reloadPath+']').click();
@@ -44,14 +64,14 @@ if (jQuery) (function($){
 		
 		// Note: max-height is broken on autoHeight this is noted as a bug:
 		//       http://dev.jqueryui.com/ticket/4820
-		//       The stated workaround is used in cmdHelper.
+		//       The stated workaround is used in jsonWrapper.
 		var dialogOptions = { width: '620px', autoOpen: false, closeOnEscape: true, modal: true}
 		var okDialog			= { buttons: {Ok: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true}
 		var closeDialog		= { buttons: {Close: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true}		
 
 		function doubleClickEvent(el) {
 			if($(el).hasClass('directory')) {
-				$('#fm_filemanager').reload($(el).attr(pathAttribute)+'/');
+				$('#fm_filemanager').reload($(el).attr(pathAttribute));
 			} else {
 				document.location = '/cert_redirect/' + $(el).attr(pathAttribute);
 			}
@@ -77,81 +97,80 @@ if (jQuery) (function($){
 				dst = '.';
 			}
 			
+			$('#cmd_dialog').dialog(okDialog);
+			$('#cmd_dialog').dialog('open');
+			$('#cmd_dialog').html('<p class="spinner" style="padding-left: 26px;">Copying... "'+src+'" <br />To: "'+dst+'"</p>');			
+			
 			$.getJSON('/cgi-bin/cp.py',
 								{ src: src,
-									dst: dst, output_format: 'json', flags: flag },
+									dst: dst, output_format: 'json', flags: flag
+								},
 								function(jsonRes, textStatus) {
 									
-									if (jsonRes.length > 3) {
-										$($('#cmd_dialog').dialog(okDialog));
-										$($('#cmd_dialog').dialog('open'));
+									if (jsonRes.length > 3) {										
 										for(var i=2; i<jsonRes.length; i++) {
 											$($('#cmd_dialog').html('<p>Error:</p>'+jsonRes[i].text));
 										}										
 									} else {
-										// TODO: only refresh if destination is current folder
-										$('#fm_filemanager').reload(dst);
+										// Only reload if destination is current folder
+										if ($('.fm_addressbar input[name=fm_current_path]').val().substr(1) == dst.substring(0,dst.lastIndexOf('/'))+'/')
+											$('#fm_filemanager').reload($('.fm_addressbar input[name=fm_current_path]').val().substr(1));
+										$('#cmd_dialog').dialog('close');
 									}
 								}
 			)
 			
 		}
 		
-		function move(src, dst) {
-									
-			var flag = '';
-						
-			// Handle directory copy, set flag and alter destination path.
-			if (clipboard['is_dir']) {
-				
-				flag = 'r';				
-				// Extract last directory from source
-				dst += src.split('/')[src.split('/').length-2];
-			}
-			if (dst == '') {
-				dst = '.';
-			}
+		function jsonWrapper(el, dialog, url, jsonOptions) {
 			
-			$.getJSON('/cgi-bin/mv.py',
-								{ src: src, dst: dst, output_format: 'json', flags: flag },
-								function(jsonRes, textStatus) {
-																		
-									if (jsonRes.length > 3) {
-										/*
-										for(var i=2; i<jsonRes.length; i++) {
-											$($('#rename_dialog').append('<p>Error:</p>'+jsonRes[i].text));
-										}	*/									
-									} else {										
-										$('#fm_filemanager').reload(src);
-										$("#rename_dialog").dialog('close');										
-									}
-								}
-			)
+			var jsonSettings = {	path: $(el).attr(pathAttribute),
+														output_format: 'json' };
 			
-		}
-
-		function cmdHelper(el, dialog, url) {
-									
+			$.fn.extend(jsonSettings, jsonOptions);
+			
 			$.getJSON(url,
-								{ path: $(el).attr(pathAttribute), output_format: 'json' },
+								jsonSettings,
 								function(jsonRes, textStatus) {
 									
-									var file_output = '';
-									for(i=0;i<jsonRes.length; i++) {
-										
-										if (jsonRes[i].object_type=='file_output') {
+									var errors			= $(this).renderError(jsonRes);
+									var file_output = $(this).renderFileoutput(jsonRes);
+									var misc_output = '';
+			
+									for(var i=0; i<jsonRes.length; i++) {
+										if (jsonRes[i]['object_type'] == 'submitstatuslist') {
+											for(j=0; j<jsonRes[i]['submitstatuslist'].length; j++) {
+												
+												if (jsonRes[i]['submitstatuslist'][j]['status']) {
+													misc_output +=	'<p>Submitted "'
+																			+		jsonRes[i]['submitstatuslist'][j]['name']
+																			+		'"</P>'
+																			+		'<p>Job identfier: "'+jsonRes[i]['submitstatuslist'][j]['job_id']
+																			+		'"</p>';
+												} else {
+													misc_output +=	'<p>Failed submitting:</p><p>'
+																			+		jsonRes[i]['submitstatuslist'][j]['name']
+																			+		' '+jsonRes[i]['submitstatuslist'][j]['message']
+																			+		'</p>';
+												}													
 											
-											for(j=0; j<jsonRes[i].lines.length; j++) {
-												file_output += jsonRes[i].lines[j]+"\n";
 											}
-											
 										}
 									}
 									
-									$($(dialog).dialog(closeDialog));
-									$(dialog).html('<div style="max-height: 480px;"><pre>'+file_output+'</pre></div>');
-									$($(dialog).dialog('open'));
-									
+									if ((errors.length > 0) || (file_output.length > 0) || (misc_output.length>0)){
+										$(dialog).dialog(okDialog);
+										$(dialog).dialog('open');
+										
+										if (file_output.length>0) {
+											file_output = '<pre>'+file_output+'</pre>';	
+										}
+																				
+										$(dialog).html(errors+file_output+misc_output);
+									} else {
+										$('#fm_filemanager').reload($(el).attr(pathAttribute));	
+									}
+																		
 								}
 			)
 
@@ -162,37 +181,11 @@ if (jQuery) (function($){
 			
 			show: 	function (action, el, pos) { document.location = '/cert_redirect/' + $(el).attr(pathAttribute) },
 			edit: 	function (action, el, pos) {
-			
-			$("#editor_dialog").dialog('destroy');
-			$('.editor_dialog_output').html('');
-			$("#editor_dialog").dialog({ buttons: {
-																			'Save Changes': function() {
-																						
-																						var submitjob = '';
-																						if ($("#editor_dialog input.edit_submitjob").is(':checked')) {
-																							submitjob = 'on';
-																						}
-																						$('.editor_dialog_output').html('');
-																						$.getJSON('/cgi-bin/editfile.py',
-																											{ editarea: $("#editor_dialog textarea.edit_textarea").val(),
-																												newline: $("#editor_dialog select.edit_nl").val(),
-																												path: $("#editor_dialog input.edit_path").val(),
-																												submitjob: submitjob,
-																												output_format: 'json'
-																											},
-																											function(jsonRes, textStatus) {
-																												
-																												if (jsonRes.length > 3) {
-																													
-																													for(var i=3; i<(jsonRes.length); i++) {
-																														$('.editor_dialog_output').append(jsonRes[i].text);
-																													}																																														
-																												} else {																																																																					
-																													$('#editor_dialog').dialog('close');																																		
-																												}
-																											}
-																							);																										
-																					},
+				
+				$('#editor_dialog').dialog('destroy');
+				$('#editor_output').html('');
+				$("#editor_dialog").dialog({ buttons: {
+																			'Save Changes': function() { $('#editor_form').submit(); },
 																			Close: function() {$(this).dialog('close');}
 																		},
 																		autoOpen: false,
@@ -201,67 +194,32 @@ if (jQuery) (function($){
 																		width: '800px'}
 			
 																	);
-			$.getJSON('/cgi-bin/cat.py',
-								{ path: $(el).attr(pathAttribute),  output_format: 'json' },
-								function(jsonRes, textStatus) {
-									
-									var file_output = '';
-									for(i=0;i<jsonRes.length; i++) {
-										
-										if (jsonRes[i].object_type=='file_output') {
-											
-											for(j=0; j<jsonRes[i].lines.length; j++) {
-												file_output += jsonRes[i].lines[j];
-											}
-											
-										}
-									}
-									
-									$("#editor_dialog input.edit_path").val('.'+$(el).attr(pathAttribute));
-									$("#editor_dialog textarea.edit_textarea").val(file_output);
-									$("#editor_dialog").dialog('open');
-								});
-
+			
+				// Grab file info
+				$.getJSON('/cgi-bin/cat.py',
+				{ path: $(el).attr(pathAttribute),  output_format: 'json' },
+				function(jsonRes, textStatus) {
+					
+					var file_output = '';
+					for(i=0;i<jsonRes.length; i++) {
+						if (jsonRes[i].object_type=='file_output') {
+							for(j=0; j<jsonRes[i].lines.length; j++) {
+								file_output += jsonRes[i].lines[j];
+							}
+						}
+					}
+					
+					$("#editor_dialog input[name=path]").val('./'+$(el).attr(pathAttribute));
+					$("#editor_dialog textarea[name=editarea]").val(file_output);
+					$("#editor_dialog").dialog('open');
+				});
 				
 			},
-			cat:		function (action, el, pos) { cmdHelper(el, '#cmd_dialog', '/cgi-bin/cat.py'); },
-			head:		function (action, el, pos) { cmdHelper(el, '#cmd_dialog', '/cgi-bin/head.py'); },
-			tail:		function (action, el, pos) { cmdHelper(el, '#cmd_dialog', '/cgi-bin/tail.py'); },
-			submit:	function (action, el, pos) { 
+			cat:		function (action, el, pos) { jsonWrapper(el, '#cmd_dialog', '/cgi-bin/cat.py'); },
+			head:		function (action, el, pos) { jsonWrapper(el, '#cmd_dialog', '/cgi-bin/head.py'); },
+			tail:		function (action, el, pos) { jsonWrapper(el, '#cmd_dialog', '/cgi-bin/tail.py'); },
+			submit:	function (action, el, pos) { jsonWrapper(el, '#cmd_dialog', '/cgi-bin/submit.py'); },
 			
-				$.getJSON('/cgi-bin/submit.py',
-									{ path: $(el).attr(pathAttribute), output_format: 'json' },
-									function(jsonRes, textStatus) {
-										
-										// initialize form										
-										$($('#cmd_dialog').dialog(okDialog));
-										$($('#cmd_dialog').dialog('open'));
-										
-										for(var i=0; i<jsonRes.length; i++) {
-											if (jsonRes[i]['object_type'] == 'submitstatuslist') {
-												for(j=0; j<jsonRes[i]['submitstatuslist'].length; j++) {
-													
-													if (jsonRes[i]['submitstatuslist'][j]['status']) {
-														$($('#cmd_dialog').html('<p>Submitted "'
-																										+jsonRes[i]['submitstatuslist'][j]['name']
-																										+'"</P>'
-																										+'<p>Job identfier: "'+jsonRes[i]['submitstatuslist'][j]['job_id']
-																										+'"</p>'));
-													} else {
-														$($('#cmd_dialog').html('<p>Failed submitting:</p><p>'
-																										+jsonRes[i]['submitstatuslist'][j]['name']
-																										+' '+jsonRes[i]['submitstatuslist'][j]['message']
-																										+'</p>'));
-													}													
-													
-												}
-											}
-										}
-										
-									}
-				);
-			
-			},
 			copy: 	function (action, el, pos) {
 				clipboard['is_dir'] = $(el).hasClass('directory');
 				clipboard['path']		= $(el).attr(pathAttribute);
@@ -269,74 +227,37 @@ if (jQuery) (function($){
 			paste: 	function (action, el, pos) {
 				copy(clipboard['path'], $(el).attr(pathAttribute));				
 			},
-			rm:			function (action, el, pos) {
-			
-				$.getJSON('/cgi-bin/rm.py',
-									{ path: $(el).attr(pathAttribute), output_format: 'json' },
-									function(jsonRes, textStatus) {										
-										var errors = $(this).renderError(jsonRes);
-										if (errors.length > 0) {
-											$('#cmd_dialog').dialog(okDialog);
-											$('#cmd_dialog').dialog('open');
-											$('#cmd_dialog').html(errors);
-										}										
-										$('#fm_filemanager').reload($(el).attr(pathAttribute));									
-									}
-				);				
-			
-			},
+			rm:			function (action, el, pos) { jsonWrapper(el, '#cmd_dialog', '/cgi-bin/rm.py');	},
 			// Note: this uses rm.py backend and not rmdir.py since recursive deletion
-			//       usually the behaviour one expects when deleting a folder in a
+			//       is usually the behaviour one expects when deleting a folder in a
 			//       filemanager gui.
-			rmdir:	function (action, el, pos) {
-				
-				$.getJSON('/cgi-bin/rm.py',
-									{ path: $(el).attr(pathAttribute), flags: 'r', output_format: 'json' },									
-									function(jsonRes, textStatus) {										
-										var errors = $(this).renderError(jsonRes);
-										if (errors.length > 0) {
-											$('#cmd_dialog').dialog(okDialog);
-											$('#cmd_dialog').dialog('open');
-											$('#cmd_dialog').html(errors);
-										}										
-										$('#fm_filemanager').reload($(el).attr(pathAttribute));									
-									}
-				);
-			},
+			rmdir:	function (action, el, pos) { jsonWrapper(el, '#cmd_dialog', '/cgi-bin/rm.py', {flags: 'r'}); },
 			upload: function (action, el, pos) {
-								$("#uploadOutput").html('');
-								$("#upload_dialog").dialog({buttons: {Upload: function() {
-																																	$('#uploadForm').submit();																																	
-																																},
-																							Cancel: function() {$(this).dialog('close');} },
-																							autoOpen: false,
-																							closeOnEscape: true,
-																							modal: true,
-																							width: '620px'});
-								$($('#upload_dialog').dialog('open'));
+																
+								$("#upload_form input[name=remotefilename_0]").val('./'+$(el).attr(pathAttribute));
+								$("#upload_form input[name=fileupload_0_0_0]").val('');
+								$("#upload_output").html('');
+								$("#upload_dialog").dialog({buttons: {
+																							Upload: function() { $('#upload_form').submit(); },
+																							Cancel: function() {$(this).dialog('close');}
+																						},
+																						autoOpen:				false,
+																						closeOnEscape:	true,
+																						modal:	true,
+																						width: '620px'});
+								$('#upload_dialog').dialog('open');
 
 							},
 			mkdir:  function (action, el, pos) {
 								
+								// Initialize the form
+								$('#mkdir_form input[name=current_dir]').val($(el).attr(pathAttribute));
+								$('#mkdir_form input[name=path]').val('');
+								$('#mkdir_output').html('');
+																
 								$("#mkdir_dialog").dialog('destroy');
 								$("#mkdir_dialog").dialog({ buttons: {
-																								Ok: function() {					
-																											$.getJSON('/cgi-bin/mkdir.py',
-																																{ path: $(el).attr(pathAttribute)+'/'+$('#mk_name').val(),
-																																	output_format: 'json' },
-																																	
-																																function(jsonRes, textStatus) {																																																		
-																																	if (jsonRes.length > 3) {																																			
-																																		for(var i=2; i<jsonRes.length; i++) {
-																																			$($('#mkdir_dialog').append('<p>Error:</p>'+jsonRes[i].text));
-																																		}																																														
-																																	} else {																																																																					
-																																		$('#mkdir_dialog').dialog('close');																																		
-																																		$('#fm_filemanager').reload($(el).attr(pathAttribute)+'/');
-																																	}
-																																}
-																												);																										
-																										},
+																								Ok: function() { $('#mkdir_form').submit(); },
 																								Cancel: function() {$(this).dialog('close');}
 																							},
 																							autoOpen: false,
@@ -351,19 +272,23 @@ if (jQuery) (function($){
 			//       renaming of files works.
 			rename: function(action, el, pos) {
 				
-								$("#rename_dialog").dialog('destroy');
-								$("#rename_dialog").dialog({ buttons: {
-																								Ok: function() {
-																									move($(el).attr(pathAttribute), $('#rn_name').val());
-																								},
-																								Cancel: function() {$(this).dialog('close');}
-																							},
-																							autoOpen: false,
-																							closeOnEscape: true,
-																							modal: true}
-								
-																						);
-								$("#rename_dialog").dialog('open');
+				pathEl = $(el).attr(pathAttribute).split('/');
+				
+				// Initialize the form
+				$('#rename_form input[name=src]').val($(el).attr(pathAttribute));
+				$('#rename_form input[name=name]').val(pathEl[pathEl.length-1]);
+				$("#rename_output").html('');
+				$("#rename_dialog").dialog('destroy');
+				$("#rename_dialog").dialog({ buttons: {
+																				Ok: function() { $("#rename_form").submit(); },
+																				Cancel: function() {$(this).dialog('close');}
+																			},
+																			autoOpen: false,
+																			closeOnEscape: true,
+																			modal: true}
+				
+																		);
+				$("#rename_dialog").dialog('open');
 			}
 		}
 
@@ -392,9 +317,17 @@ if (jQuery) (function($){
         var statusbar   = $('.fm_statusbar', obj);
         var addressbar  = $('.fm_addressbar', obj);
 				var timestamp = 0;
-        
+        var emptyDir = true;
+				
+				// Refix the root
+				/*
+				if (t=='/') {
+					t= '';
+				}*/
+				
         $(folder_pane).addClass('wait');
         $(".jqueryFileTree.start").remove();
+				$('.fm_files div').remove();
 				
         $.getJSON(options.connector, { path: t }, function(jsonRes, textStatus) {
           
@@ -413,6 +346,7 @@ if (jQuery) (function($){
 
 					// Root node					
 					if (t=='/') {
+					//if ((t=='') || (t=='/')) {
 						folders +=	'<ul class="jqueryFileTree">'+
 												'<li class="directory collapsed" title=""><div>/</div>';
 					}
@@ -439,7 +373,10 @@ if (jQuery) (function($){
 						file_count++;
             total_file_size += listing[i]['file_info']['size'];
 												
-						path = t+listing[i]['name'];
+						path = listing[i]['name'];
+						if (t != '/') { // Do not prepend the fake-root.
+							path = t+path;	
+						}
 						
             if (is_dir) {
               base_css_style = 'directory';
@@ -467,6 +404,7 @@ if (jQuery) (function($){
 															'<td><div>'+listing[i]['file_info']['created']+'</div>'+pp_date(listing[i]['file_info']['created'])+'</td>'
 														)
 													));
+						emptyDir = false;
 										
           }
 					
@@ -474,27 +412,31 @@ if (jQuery) (function($){
 					
 					// End the root node
 					if (t=='/') {
+					//if ((t=='') || (t=='/')) {
 						folders += '</li></ul>';
 					}
 					
 					// Prefix '/' for the visual presentation of the current path.
 					if (t.substr(0,1)=='/') {
-						addressbar.find('input').val(t);	
+						addressbar.find('input[name=fm_current_path]').val(t);	
 					} else {
-						addressbar.find('input').val('/'+t);	
+						addressbar.find('input[name=fm_current_path]').val('/'+t);	
 					}
 					
           folder_pane.removeClass('wait').append(folders);
 					
 					// Inform tablesorter of new data
 					var sorting = [[0,0]]; 
-					$("table").trigger("update");       
-					$("table").trigger("sorton",[sorting]);
+					$("table").trigger("update");
+					if (!emptyDir)  { // Don't try and sort an empty table, this causes error!
+						$("table").trigger("sorton",[sorting]);
+					}
 					
 					// Update statusbar
           statusbar.html(file_count+' files in current folder of total '+pp_bytes(total_file_size)+' bytes in size.');
   
           if( options.root == t ) {
+					//if( options.root == t+'/' ) {
             folder_pane.find('UL:hidden').show();
           } else {
             folder_pane.find('UL:hidden').slideDown({ duration: options.expandSpeed, easing: options.expandEasing });
@@ -517,7 +459,6 @@ if (jQuery) (function($){
 					// Associate context-menus
           $("tr.directory, li.directory div").contextMenu({ menu: 'folder_context'},
                                             function(action, el, pos) {
-																							//alert(action);
 																							if ($(el).tagName() == 'DIV') {
 																								(options['actions'][action])(action, el.parent(), pos);
 																							} else {
@@ -573,7 +514,6 @@ if (jQuery) (function($){
 								}
 								$(this).find('UL').remove(); // cleanup
 								// Go deeper
-								//showBranch( $(this), escape($(this).attr('title').match( /.*\// )) );
 								showBranch( $(this), $(this).attr('title') );
 								$(this).removeClass('collapsed').addClass('expanded');
 							} else {
@@ -606,6 +546,101 @@ if (jQuery) (function($){
 			// Loading message
       $('.fm_folders', obj).html('<ul class="jqueryFileTree start"><li class="wait">' + options.loadMessage + '<li></ul>');
       showBranch( $('.fm_folders', obj), escape(options.root) );
+			
+			/**
+			 * Bind handlers for forms. This is redicoulous and tedious repetitive code.
+			 *
+			 */
+			$('#upload_form').ajaxForm({target: '#upload_output',
+																	dataType: 'json',
+																	success: function(responseObject, statusText) {
+																		
+																		var errors = $(this).renderError(responseObject);
+																		if (errors.length > 0) {
+																			$('#upload_output').html(errors);
+																		}	else {
+																			// TODO: reload destination
+																			$('#fm_filemanager').reload('');
+																			$('#upload_dialog').dialog('close');																			
+																		}
+																		
+																	}
+																});
+			
+			$('#mkdir_form').ajaxForm({target: '#mkdir_output',
+																	dataType: 'json',
+																	success: function(responseObject, statusText) {
+																		
+																		var errors = $(this).renderError(responseObject);
+																		if (errors.length > 0) {
+																			$('#mkdir_output').html(errors);
+																		}	else {
+																			$('#mkdir_dialog').dialog('close');
+																			$('#fm_filemanager').reload('');
+																		}
+																		
+																	}
+																});
+			
+			$('#rename_form').ajaxForm(
+				{target: '#rename_output',
+				 dataType: 'json',
+				 success: function(responseObject, statusText) {
+					 
+					 var errors = $(this).renderError(responseObject);
+					 if (errors.length > 0) {
+						 $('#rename_output').html(errors);
+					 }	else {
+						 $('#rename_dialog').dialog('close');
+						 $('#fm_filemanager').reload('');
+					 }
+					 
+				 },
+				beforeSubmit: function(formData, jqForm, options) {
+										
+					var src = $('#rename_form input[name=src]').val();
+					// Extract the parent of the path
+					var dst = '';
+					// New name of file/dir
+					var newName = $('#rename_form input[name=name]').val();
+				
+					// Extract the parent of the path		
+					if (src.lastIndexOf("/") == (src.length-1)) { // is directory?
+						dst = src.substring(0, src.length-1);
+						dst = src.substring(0, dst.lastIndexOf('/'))+'/';
+					} else {
+						dst = src.substring(0, src.lastIndexOf('/'))+'/';				
+					}
+		
+					for(var i=0; i<formData.length; i++) {
+						if (formData[i].name == 'dst') {
+							formData[i].value = dst+newName;
+						}
+						if (formData[i].name == 'name') {
+							formData[i].value = ''; // Remove the field value othervise the backend pukes.
+						}
+						
+					}
+					
+					return true;
+					
+				}
+				}
+			);
+						
+			// This is the only form not matching the stuff above
+			$('#editor_form').ajaxForm({target: '#editor_output',
+																	dataType: 'json',
+																	success: function(responseObject, statusText) {
+																		
+																		var stuff =''
+																		for(var i=3; i<(responseObject.length); i++) {
+																			stuff += '<p>'+responseObject[i].text+'</p>';
+																		}
+																		$('#editor_output').html(stuff);
+																		
+																	}
+																});
 			
     });
 		

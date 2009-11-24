@@ -28,6 +28,17 @@ if (jQuery) (function($){
 	$.fn.tagName = function() {
     return this.get(0).tagName;
 	}
+	
+	$.fn.parentPath = function(path) {
+		// Extract the parent of the path
+		if (path.lastIndexOf("/") == (path.length-1)) { // is directory?
+			reloadPath = path.substring(0, path.length-1);
+			reloadPath = path.substring(0, reloadPath.lastIndexOf('/'))+'/';
+		} else {
+			reloadPath = path.substring(0, path.lastIndexOf('/'))+'/';
+		}
+		return reloadPath;
+	}
 
 	$.fn.reload = function reload(path) {
 		var reloadPath = path;
@@ -35,16 +46,6 @@ if (jQuery) (function($){
 		if (reloadPath == '') {			
 			reloadPath = $('.fm_addressbar input[name=fm_current_path]').val().substr(1);
 		}
-		
-		// Extract the parent of the path
-		/*
-		if (path.lastIndexOf("/") == (path.length-1)) { // is directory?
-			reloadPath = path.substring(0, path.length-1);
-			reloadPath = path.substring(0, reloadPath.lastIndexOf('/'))+'/';
-		} else {
-			reloadPath = path.substring(0, path.lastIndexOf('/'))+'/';
-		}
-		*/
 		
 		// Root is a special-case.
 		if (reloadPath == '/') {
@@ -168,7 +169,8 @@ if (jQuery) (function($){
 																				
 										$(dialog).html(errors+file_output+misc_output);
 									} else {
-										$('#fm_filemanager').reload($(el).attr(pathAttribute));	
+										
+										$('#fm_filemanager').reload($(this).parentPath($(el).attr(pathAttribute)));	
 									}
 																		
 								}
@@ -272,11 +274,17 @@ if (jQuery) (function($){
 			//       renaming of files works.
 			rename: function(action, el, pos) {
 				
+				var path_name = '';
 				pathEl = $(el).attr(pathAttribute).split('/');
-				
+				if ($(el).attr(pathAttribute).lastIndexOf('/') == $(el).attr(pathAttribute).length-1) {
+					path_name = pathEl[pathEl.length-2];
+				} else {
+					path_name = pathEl[pathEl.length-1];
+				}
+			
 				// Initialize the form
 				$('#rename_form input[name=src]').val($(el).attr(pathAttribute));
-				$('#rename_form input[name=name]').val(pathEl[pathEl.length-1]);
+				$('#rename_form input[name=name]').val(path_name);
 				$("#rename_output").html('');
 				$("#rename_dialog").dialog('destroy');
 				$("#rename_dialog").dialog({ buttons: {
@@ -559,8 +567,7 @@ if (jQuery) (function($){
 																		if (errors.length > 0) {
 																			$('#upload_output').html(errors);
 																		}	else {
-																			// TODO: reload destination
-																			$('#fm_filemanager').reload('');
+																			$('#fm_filemanager').reload($('#upload_form input[name=remotefilename_0]').val().substr(2));																																					
 																			$('#upload_dialog').dialog('close');																			
 																		}
 																		

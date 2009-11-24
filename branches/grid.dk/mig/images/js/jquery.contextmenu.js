@@ -17,7 +17,7 @@
 if(jQuery)( function() {
 	$.extend($.fn, {
 		
-		contextMenu: function(o, callback) {
+		contextMenu: function(o, callback, onShow) {
 			// Defaults
 			if( o.menu == undefined ) return false;
 			if( o.inSpeed == undefined ) o.inSpeed = 150;
@@ -68,6 +68,7 @@ if(jQuery)( function() {
 							(e.pageY) ? y = e.pageY : x = e.clientY + d.scrollTop;
 							
 							// Show the menu
+							if( onShow ) onShow($(srcElement));
 							$(document).unbind('click');
 							$(menu).css({ top: y, left: x }).fadeIn(o.inSpeed);
 							// Hover events

@@ -88,18 +88,35 @@ def html_tmpl():
       </div>
       
     </div>
-        
+    
     <ul id="job_context" class="contextMenu">        
-        <li class="Show">
-        <a href="#show">Resubmit</a>
+        <li class="resubmit single">
+            <a href="#resubmit">Resubmit</a>
         </li>
-        <li class="edit">
-        <a href="#edit">Edit</a>
+        <li class="cancel single">
+            <a href="#cancel">Cancel</a>
         </li>
-        <li class="delete separator">
-        <a href="#delete">Delete</a>
+        <li class="mrsl separator single">
+            <a href="#mrsl">mRSL File</a>
         </li>
+        <li class="schedule single">
+            <a href="#schedule">Scheduler</a>
+        </li>
+        <li class="statusfiles single">
+            <a href="#statusfiles">Status Files</a>
+        </li>
+        <li class="liveoutput single">
+            <a href="#liveoutput">Live output</a>
+        </li>        
+        
+        <li class="resubmit multi">
+            <a href="#resubmit">Resubmit All</a>
+        </li>
+        <li class="cancel multi separator">
+            <a href="#cancel">Cancel All</a>
+        </li>        
     </ul>
+    
     <div id="cmd_helper" title="Command output" style="display: none;"></div>
     """
     
@@ -170,9 +187,33 @@ def js_tmpl():
   $(document).ready(
 
     function() {
-    	
+    
+    $.tablesorter.addWidget({ 
+
+        id: "contextual", 
+        format: function(table) { 
+
+            $("#jm_jobmanager tr td").contextMenu({ menu: 'job_context'},
+                function(action, el, pos) {
+                    alert('single selection');
+                },
+                function(el) {
+                    if ($(el).parent().hasClass('ui-selected')) {
+                        $('#job_context .single').hide();
+                        $('#job_context .multi').show();    
+                    } else {
+                        $('#job_context .single').show();
+                        $('#job_context .multi').hide();
+                    }
+                    
+                }
+            );
+
+        } 
+    });
+    
     $("table")
-    .tablesorter({widgets: ['zebra'],
+    .tablesorter({widgets: ['zebra','contextual'],
                   textExtraction: function(node) {
                                     var stuff = $('div', node).html();
                                     if (stuff == null) {
@@ -220,43 +261,50 @@ def js_tmpl():
                   );
                             
             });
-        
+            
         $('#jm_jobmanager tbody tr td').bind('click', function(event) {
             
             var job_id = '';
+            var is_checked = false;
             
             // Don't trigger on div commands
             if (($('div.cmd', this).length == 0) && ($('input', this).length == 0)) {
                 job_id = $(this).parent().attr('id');
-                $('#'+job_id+' input').attr('checked', !$('#'+job_id+' input').attr('checked'));
+                is_checked = $('#'+job_id+' input').attr('checked');
+                
+                $('#'+job_id+' input').attr('checked', !is_checked);
+                
+                if (!is_checked) {
+                    $('#'+job_id).addClass('ui-selected');
+                } else {
+                    $('#'+job_id).removeClass('ui-selected');
+                }
                 
             }
         } );
+        
         $('#jm_jobmanager input[name=job_identifiers_all]').bind('click', function() {
         
-                var is_checked = $('#jm_jobmanager input[name=job_identifiers_all]').attr('checked');
-                //alert(is_checked);
-                return true;
-                //$('#jm_jobmanager input[name=job_identifiers_all]').attr('checked', is_checked);
-                //$('#jm_jobmanager input[name=job_identifiers]').attr('checked', is_checked);
-            
-            }
+            var is_checked = $('#jm_jobmanager input[name=job_identifiers_all]').attr('checked');
+            //alert(is_checked);
+            return true;
+            //$('#jm_jobmanager input[name=job_identifiers_all]').attr('checked', is_checked);
+            //$('#jm_jobmanager input[name=job_identifiers]').attr('checked', is_checked);
         
-        );
+        });
         $('#jm_jobmanager tbody div.cmd').bind('click', function() { cmdHelper(this); });
         
         // Inform tablesorter of new data
         var sorting = [[0,0]]; 
         $("table").trigger("update");       
-        $("table").trigger("sorton",[sorting]); 
-
+        $("table").trigger("sorton",[sorting]);
+        
       });
 
     }); 
 
     $("#append").click();
     
-
   });
       
   </script>

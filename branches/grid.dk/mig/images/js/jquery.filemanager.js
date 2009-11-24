@@ -106,7 +106,9 @@ if (jQuery) (function($){
 			
 			$.getJSON('/cgi-bin/cp.py',
 								{ src: src,
-									dst: dst, output_format: 'json', flags: flag
+									dst: dst,
+									output_format: 'json',
+									flags: flag
 								},
 								function(jsonRes, textStatus) {
 									
@@ -201,7 +203,8 @@ if (jQuery) (function($){
 			
 				// Grab file info
 				$.getJSON('/cgi-bin/cat.py',
-				{ path: $(el).attr(pathAttribute),  output_format: 'json' },
+				{ path: $(el).attr(pathAttribute),
+					output_format: 'json' },
 				function(jsonRes, textStatus) {
 					
 					var file_output = '';
@@ -234,17 +237,18 @@ if (jQuery) (function($){
 			rm:			function (action, el, pos) {
 			
 				var flags = '';
+				var rm_path = $(el).attr(pathAttribute);
 				if ($(el).attr(pathAttribute).lastIndexOf('/') == $(el).attr(pathAttribute).length-1) {
 					flags = 'r';
 				}
-				
-				$('#cmd_dialog').html('<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>The file will be permanently deleted. Are you sure?</p></div>');
+				$('#cmd_dialog').dialog('destroy');
+				$('#cmd_dialog').html('<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>"'+rm_path+'" will be permanently deleted. Are you sure?</p></div>');
 				$('#cmd_dialog').dialog({ buttons: {Ok: function() { $(this).dialog('close');
 																							jsonWrapper(el, '#cmd_dialog', '/cgi-bin/rm.py', {flags: flags});
 																						},
 																						Cancel: function() { $(this).dialog('close'); }
 																	},
-																	width: '300px',
+																	width: '500px',
 																	autoOpen: false,
 																	closeOnEscape: true,
 																	modal: true});
@@ -351,16 +355,17 @@ if (jQuery) (function($){
         var emptyDir = true;
 				
 				// Refix the root
-				/*
-				if (t=='/') {
-					t= '';
-				}*/
 				
         $(folder_pane).addClass('wait');
         $(".jqueryFileTree.start").remove();
 				$('.fm_files div').remove();
 				
-        $.getJSON(options.connector, { path: t }, function(jsonRes, textStatus) {
+        $.getJSON(options.connector,
+									{	path: t,
+										output_format: 'json',
+										flags: 'fa'
+									},
+									function(jsonRes, textStatus) {
           
 					// Place ls.py output in listing array
           var listing = new Array();
@@ -377,7 +382,6 @@ if (jQuery) (function($){
 
 					// Root node					
 					if (t=='/') {
-					//if ((t=='') || (t=='/')) {
 						folders +=	'<ul class="jqueryFileTree">'+
 												'<li class="directory collapsed" title=""><div>/</div>';
 					}
@@ -396,6 +400,12 @@ if (jQuery) (function($){
           
           for (i=0;i<listing.length;i++) {
             
+						// ignore the pseudo-dirs
+						if ((listing[i]['name'] == '.') ||
+								(listing[i]['name'] == '..')) {
+							continue;
+						}
+						
             is_dir = listing[i]['type'] == 'directory';
             base_css_style	= 'file';
 						dir_prefix			= '';
@@ -412,12 +422,11 @@ if (jQuery) (function($){
             if (is_dir) {
               base_css_style = 'directory';
 
-							//folders +=  '<li class="'+base_css_style+' collapsed" title="'+t+'/'+listing[i]['name']+'/"><div>'
 							path += '/';
 							folders +=  '<li class="'+base_css_style+' collapsed" title="'+path+'	"><div>'
                           + listing[i]['name']
 													+'</div></li>\n';
-							dir_prefix = '__';
+							dir_prefix = '##';
 							
             }
 						
@@ -443,7 +452,6 @@ if (jQuery) (function($){
 					
 					// End the root node
 					if (t=='/') {
-					//if ((t=='') || (t=='/')) {
 						folders += '</li></ul>';
 					}
 					
@@ -482,7 +490,6 @@ if (jQuery) (function($){
 						$('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;" title="'+t+'"></div>');
 						$("div.filespacer").contextMenu({ menu: 'folder_context'},
                                             function(action, el, pos) {
-																							
 																							(options['actions'][action])(action, el, pos);                                            
                                             });
 					}

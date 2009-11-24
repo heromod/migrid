@@ -234,7 +234,7 @@ def js_tmpl(entry_path='/'):
     
       $('#fm_filemanager').filemanager({
                                         root: '/',
-                                        connector: 'ls.py?flags=f;output_format=json',
+                                        connector: 'ls.py',
                                         params: 'path',
                                         expandSpeed: 0,
                                         collapseSpeed: 0,

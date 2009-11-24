@@ -8,3 +8,6 @@
 .resubmit { background-image: url(/images/icons/arrow_redo.png); background-repeat: no-repeat; background-position: 2px 50%; }
 .cancel { background-image: url(/images/icons/cancel.png); background-repeat: no-repeat; background-position: 2px 50%; }
 .liveoutput { background-image: url(/images/icons/file.png); background-repeat: no-repeat; background-position: 2px 50%; }
+.selection { display: none; }
+
+#jm_jobmanager tbody tr.ui-selected td { color: red; }

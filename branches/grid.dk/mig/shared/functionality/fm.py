@@ -92,7 +92,7 @@ def html_tmpl():
             <a href="#paste">Paste</a>
         </li>
         <li class="delete">
-            <a href="#rmdir">Delete Folder</a>
+            <a href="#rm">Delete Folder</a>
         </li>
         <li class="rename separator">
             <a href="#rename">Rename...</a>

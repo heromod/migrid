@@ -68,13 +68,15 @@ if (jQuery) (function($){
 		//       The stated workaround is used in jsonWrapper.
 		var dialogOptions = { width: '620px', autoOpen: false, closeOnEscape: true, modal: true}
 		var okDialog			= { buttons: {Ok: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true}
-		var closeDialog		= { buttons: {Close: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true}		
+		var closeDialog		= { buttons: {Close: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true}
 
 		function doubleClickEvent(el) {
 			if($(el).hasClass('directory')) {
 				$('#fm_filemanager').reload($(el).attr(pathAttribute));
 			} else {
-				document.location = '/cert_redirect/' + $(el).attr(pathAttribute);
+				// Do stuff with files.
+				callbacks['edit']('action', el, null);
+				//document.location = '/cert_redirect/' + escape($(el).attr(pathAttribute));
 			}
 		}
 
@@ -229,27 +231,48 @@ if (jQuery) (function($){
 			paste: 	function (action, el, pos) {
 				copy(clipboard['path'], $(el).attr(pathAttribute));				
 			},
-			rm:			function (action, el, pos) { jsonWrapper(el, '#cmd_dialog', '/cgi-bin/rm.py');	},
-			// Note: this uses rm.py backend and not rmdir.py since recursive deletion
-			//       is usually the behaviour one expects when deleting a folder in a
-			//       filemanager gui.
-			rmdir:	function (action, el, pos) { jsonWrapper(el, '#cmd_dialog', '/cgi-bin/rm.py', {flags: 'r'}); },
-			upload: function (action, el, pos) {
-																
-								$("#upload_form input[name=remotefilename_0]").val('./'+$(el).attr(pathAttribute));
-								$("#upload_form input[name=fileupload_0_0_0]").val('');
-								$("#upload_output").html('');
-								$("#upload_dialog").dialog({buttons: {
-																							Upload: function() { $('#upload_form').submit(); },
-																							Cancel: function() {$(this).dialog('close');}
+			rm:			function (action, el, pos) {
+			
+				var flags = '';
+				if ($(el).attr(pathAttribute).lastIndexOf('/') == $(el).attr(pathAttribute).length-1) {
+					flags = 'r';
+				}
+				
+				$('#cmd_dialog').html('<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>The file will be permanently deleted. Are you sure?</p></div>');
+				$('#cmd_dialog').dialog({ buttons: {Ok: function() { $(this).dialog('close');
+																							jsonWrapper(el, '#cmd_dialog', '/cgi-bin/rm.py', {flags: flags});
 																						},
-																						autoOpen:				false,
-																						closeOnEscape:	true,
-																						modal:	true,
-																						width: '620px'});
-								$('#upload_dialog').dialog('open');
+																						Cancel: function() { $(this).dialog('close'); }
+																	},
+																	width: '300px',
+																	autoOpen: false,
+																	closeOnEscape: true,
+																	modal: true});
+				$('#cmd_dialog').dialog('open');
+				
+			},
+			upload: function (action, el, pos) {
+				
+				var remote_path = $(el).attr(pathAttribute);
+				if (remote_path == '/') {
+					remote_path = './';												
+				} else {
+					remote_path = './'+remote_path;
+				}
+				$("#upload_form input[name=remotefilename_0]").val(remote_path);
+				$("#upload_form input[name=fileupload_0_0_0]").val('');
+				$("#upload_output").html('');
+				$("#upload_dialog").dialog({buttons: {
+																			Upload: function() { $('#upload_form').submit(); },
+																			Cancel: function() {$(this).dialog('close');}
+																		},
+																		autoOpen:				false,
+																		closeOnEscape:	true,
+																		modal:	true,
+																		width: '620px'});
+				$('#upload_dialog').dialog('open');
 
-							},
+			},
 			mkdir:  function (action, el, pos) {
 								
 								// Initialize the form

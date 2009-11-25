@@ -1,4 +1,3 @@
-/* File browser v.00.1 */
 #fm_filemanager {
   width: auto;
 
@@ -11,19 +10,29 @@
   -moz-border-radius-bottomleft: 4px;
   -moz-border-radius-bottomright: 4px;
   -webkit-border-radius: 4px;
-	cursor: default;
-  
+	cursor: default;  
 }
-#fm_filemanager table {
+#jm_jobmanager {
+	border-spacing: 0;
+  background: #ccc;
+  border: 1px solid grey;
+  padding: 4px;
+  -moz-border-radius: 0;
+  -moz-border-radius-bottomleft: 4px;
+  -moz-border-radius-bottomright: 4px;
+  -webkit-border-radius: 4px;
+	cursor: default;	
+}
+#fm_filemanager table, #jm_jobmanager table {
   border: 0;
   padding: 0;
   background-color: #fff;
 }
-#fm_filemanager thead {
+#fm_filemanager thead, #jm_jobmanager thead {
   background-color: #eee;
 }
 
-#fm_filemanager thead td {
+#fm_filemanager thead td, #jm_jobmanager thead td {
   border: 0;
   border-right: 1px solid #ccc;
   border-bottom: 1px solid grey;
@@ -34,11 +43,18 @@
 #fm_filelisting table {
 	padding: 2px;
 }
-#fm_filelisting tbody tr:hover {
+#fm_filelisting tbody tr.odd:hover, #jm_jobmanager tbody tr.odd:hover {
+	background-color: #ffdd4d;
+}
+#fm_filelisting tbody tr.even:hover, #jm_jobmanager tbody tr.even:hover {
 	background-color: #ffdd7f;
 }
+#jm_jobmanager tbody tr.odd.ui-selected { background-color: #ffdd4d; }
+#jm_jobmanager tbody tr.even.ui-selected { background-color: #ffdd7f; }
+
 #fm_filelisting td, th { padding: 4px; background-position: 2px 50%; }
-#fm_filelisting .header { 
+#jm_jobmanager td, th { padding: 4px; background-position: 2px 50%; }
+#fm_filelisting .header, #jm_jobmanager .header { 
     background-image: url('/images/icons/desc.gif'); 
 		background-image: url('/images/icons/small.gif');     
     cursor: pointer; 
@@ -49,11 +65,11 @@
     border-right: 1px solid #dad9c7; 
     margin-left: -1px; 		
 } 
-#fm_filelisting .headerSortDown { 
+#fm_filelisting .headerSortDown, #jm_jobmanager .headerSortDown { 
     background-image: url('/images/icons/asc.gif'); 
     background-color: #3399FF; 
 }
-#fm_filelisting .headerSortUp { 
+#fm_filelisting .headerSortUp, #jm_jobmanager .headerSortUp { 
     background-image: url('/images/icons/desc.gif'); 
     background-color: #3399FF; 
 }

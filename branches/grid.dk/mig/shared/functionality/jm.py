@@ -45,7 +45,8 @@ from shared.useradm import client_id_dir
 
 def html_tmpl():
     
-    test =  """    
+    test =  """
+    
     <div>
       <div class="toolbar">        
         <div class="pager" id="pager">
@@ -57,8 +58,9 @@ def html_tmpl():
           <img class="last" src="/images/icons/arrow_right.png"/>
           <select class="pagesize">
             <option value="10">10</option>
+            <option value="15" selected>15</option>
             <option value="20">20</option>
-            <option value="25" selected>25</option>
+            <option value="25">25</option>
             <option value="40">40</option>
             <option value="50">50</option>
             <option value="60">60</option>
@@ -74,15 +76,14 @@ def html_tmpl():
         <table id="jm_jobmanager">      
         <thead>
           <tr>
-            <th><input type="checkbox" name="job_identifiers_all" value="select_all" /></th>
+            <th style="width: 20px;"><input type="checkbox" id="checkAll" /></th>
             <th>JobID</th>
             <th style="width: 80px;">Status</th>
             <th style="width: 180px;">Date</th>
-            <th style="width: 105px;">Commands</th>
           </tr>        
         </thead>
         <tbody>
-          <tr><td>.</td><td>JobID</td><td>Status</td><td>Date</td><td>Commands</td></tr>
+          <tr><td>.</td><td>JobID</td><td>Status</td><td>Date</td></tr>
         </tbody>
       </table>
       </div>
@@ -188,14 +189,42 @@ def js_tmpl():
 
     function() {
     
+    $.tablesorter.addWidget({
+        id: 'multiselect',
+        format: function(table) {
+        
+            /* todo: fix the double event on first page */
+            $('#jm_jobmanager tbody tr td').bind('click', function(event) {
+                            
+                var job_id = $(this).parent().attr('id');
+                var is_checked = $('#'+job_id+' input').attr('checked');
+                
+                $('#'+job_id+' input').attr('checked', !is_checked);
+                
+                if (!is_checked) {
+                    $('#'+job_id).addClass('ui-selected');
+                } else {
+                    $('#'+job_id).removeClass('ui-selected');
+                }
+//                alert('1');
+                return true;
+                
+            });
+        }
+    });
+    
     $.tablesorter.addWidget({ 
 
         id: "contextual", 
         format: function(table) { 
 
-            $("#jm_jobmanager tr td").contextMenu({ menu: 'job_context'},
+            $("#jm_jobmanager tbody tr td").contextMenu({ menu: 'job_context'},
                 function(action, el, pos) {
-                    alert('single selection');
+
+                    alert(action+' '+$('#jm_jobmanager tbody tr.ui-selected').length+' jobs.');
+                    // todo: single vs multi
+                    //cmdHelper(this);
+                    
                 },
                 function(el) {
                     if ($(el).parent().hasClass('ui-selected')) {
@@ -208,21 +237,24 @@ def js_tmpl():
                     
                 }
             );
-
+            
         } 
     });
     
     $("table")
-    .tablesorter({widgets: ['zebra','contextual'],
-                  textExtraction: function(node) {
+    .tablesorter({  widgets: ['zebra','contextual','multiselect'],
+                    textExtraction: function(node) {
                                     var stuff = $('div', node).html();
                                     if (stuff == null) {
                                       stuff = ''; 
                                     }
                                     return stuff;
-                                  }
+                                  },
+                    headers: {0: {sorter: false}}
                   })
-    .tablesorterPager({container: $("#pager"), size: 300});
+    .tablesorterPager({ container: $("#pager"),
+                        size: 300
+                    });
     
     $("#append").click(function() { 
         
@@ -244,58 +276,18 @@ def js_tmpl():
             // Wrap each json result into html
             $.each(jobList, function(i, item) {
     
-                $('#jm_jobmanager tbody').append('<tr id="'+item.job_id.match(/^([0-9]+)_/)[1]+'">'+
-                  '<td><div class="sortkey"></div><input type="checkbox" name="job_identifiers" value="'+item.job_id+'" /></td>'+
+                $('#jm_jobmanager tbody').append('<tr id="'+item.job_id.match(/^([0-9_]+)__/)[1]+'">'+
+                  '<td><div class="sortkey"></div><input type="checkbox" name="job_identifier" value="'+item.job_id+'" /></td>'+
                   '<td><div class="sortkey">'+item.job_id.match(/^([0-9]+)_/)[1]+'</div>'+item.job_id+'</td>'+                 
                   '<td><div class="sortkey">'+item.status+'</div><div class="statusfiles">'+item.status+'</div></td>'+
                   '<td><div class="sortkey">'+toTimestamp(item.received_timestamp)+'</div>'+item.received_timestamp+'</td>'+                 
-                  
-                  '<td><div class="sortkey"></div><div class="cmd viewmrls" title="'+item.mrsllink.destination+'">&nbsp;</div>'+
-                  '<div class="sortkey"></div><div class="cmd status" title="'+item.statuslink.destination+'">&nbsp;</div>'+                 
-                  '<div class="sortkey"></div><div class="cmd schedule" title="'+item.jobschedulelink.destination+'">&nbsp;</div>'+                 
-                  '<div class="sortkey"></div>'+'<div class="cmd cancel" title="'+item.cancellink.destination+'">&nbsp;</div>'+                 
-                  '<div class="sortkey"></div>'+'<div class="cmd liveoutput" title="'+item.liveoutputlink.destination+'">&nbsp;</div>'+
-                  '<div class="sortkey"></div>'+'<div class="cmd resubmit" title="'+item.resubmitlink.destination+'">&nbsp;</div></td>'+
-                  '</tr>'
-                  
+                  '</tr>'                  
                   );
-                            
+
             });
-            
-        $('#jm_jobmanager tbody tr td').bind('click', function(event) {
-            
-            var job_id = '';
-            var is_checked = false;
-            
-            // Don't trigger on div commands
-            if (($('div.cmd', this).length == 0) && ($('input', this).length == 0)) {
-                job_id = $(this).parent().attr('id');
-                is_checked = $('#'+job_id+' input').attr('checked');
-                
-                $('#'+job_id+' input').attr('checked', !is_checked);
-                
-                if (!is_checked) {
-                    $('#'+job_id).addClass('ui-selected');
-                } else {
-                    $('#'+job_id).removeClass('ui-selected');
-                }
-                
-            }
-        } );
-        
-        $('#jm_jobmanager input[name=job_identifiers_all]').bind('click', function() {
-        
-            var is_checked = $('#jm_jobmanager input[name=job_identifiers_all]').attr('checked');
-            //alert(is_checked);
-            return true;
-            //$('#jm_jobmanager input[name=job_identifiers_all]').attr('checked', is_checked);
-            //$('#jm_jobmanager input[name=job_identifiers]').attr('checked', is_checked);
-        
-        });
-        $('#jm_jobmanager tbody div.cmd').bind('click', function() { cmdHelper(this); });
         
         // Inform tablesorter of new data
-        var sorting = [[0,0]]; 
+        var sorting = [[1,1]]; 
         $("table").trigger("update");       
         $("table").trigger("sorton",[sorting]);
         
@@ -304,6 +296,18 @@ def js_tmpl():
     }); 
 
     $("#append").click();
+    
+    $('#checkAll').bind('click', function(event) {
+        event.stopPropagation();
+
+        $("#jm_jobmanager tbody input[type='checkbox']").attr('checked', $('#checkAll').is(':checked'));
+        if ($('#checkAll').is(':checked')) {
+            $("#jm_jobmanager tbody tr").addClass('ui-selected');
+        } else {
+            $("#jm_jobmanager tbody tr").removeClass('ui-selected');
+        }
+        return true;
+    });
     
   });
       

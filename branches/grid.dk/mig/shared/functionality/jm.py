@@ -45,259 +45,200 @@ from shared.useradm import client_id_dir
 
 def html_tmpl():
     
-    test =  """
-    
-    <div>
-      <div class="toolbar">        
-        <div class="pager" id="pager">
-        <form style="display: inline;">
-          <img class="first" src="/images/icons/arrow_left.png"/>
-          <img class="prev" src="/images/icons/arrow_left.png"/>
-          <input type="text" class="pagedisplay" />
-          <img class="next" src="/images/icons/arrow_right.png"/>
-          <img class="last" src="/images/icons/arrow_right.png"/>
-          <select class="pagesize">
-            <option value="10">10</option>
-            <option value="15" selected>15</option>
-            <option value="20">20</option>
-            <option value="25">25</option>
-            <option value="40">40</option>
-            <option value="50">50</option>
-            <option value="60">60</option>
-            <option value="70">70</option>
-            <option value="80">80</option>
-          </select>
-        </form>
-        <div id="append"  style="display: inline;"><img src="/images/icons/arrow_refresh.png" /></div>
-        </div>
-        
-      </div>
-      <div class="stuff">
-        <table id="jm_jobmanager">      
-        <thead>
-          <tr>
-            <th style="width: 20px;"><input type="checkbox" id="checkAll" /></th>
-            <th>JobID</th>
-            <th style="width: 80px;">Status</th>
-            <th style="width: 180px;">Date</th>
-          </tr>        
-        </thead>
-        <tbody>
-          <tr><td>.</td><td>JobID</td><td>Status</td><td>Date</td></tr>
-        </tbody>
-      </table>
+  test =  """
+  
+  <div>
+    <div class="toolbar">        
+      <div class="pager" id="pager">
+      <form style="display: inline;">
+        <img class="first" src="/images/icons/arrow_left.png"/>
+        <img class="prev" src="/images/icons/arrow_left.png"/>
+        <input type="text" class="pagedisplay" />
+        <img class="next" src="/images/icons/arrow_right.png"/>
+        <img class="last" src="/images/icons/arrow_right.png"/>
+        <select class="pagesize">
+          <option value="10">10</option>
+          <option value="15" selected>15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+          <option value="40">40</option>
+          <option value="50">50</option>
+          <option value="60">60</option>
+          <option value="70">70</option>
+          <option value="80">80</option>
+        </select>
+      </form>
+      <div id="append"  style="display: inline;"><img src="/images/icons/arrow_refresh.png" /></div>
       </div>
       
     </div>
+    <div class="stuff">
+      <table id="jm_jobmanager">      
+      <thead>
+        <tr>
+          <th style="width: 20px;"><input type="checkbox" id="checkAll" /></th>
+          <th>JobID</th>
+          <th style="width: 80px;">Status</th>
+          <th style="width: 180px;">Date</th>
+        </tr>        
+      </thead>
+      <tbody>
+        <tr><td>.</td><td>JobID</td><td>Status</td><td>Date</td></tr>
+      </tbody>
+    </table>
+    </div>
     
-    <ul id="job_context" class="contextMenu">        
-        <li class="resubmit single">
-            <a href="#resubmit">Resubmit</a>
-        </li>
-        <li class="cancel single">
-            <a href="#cancel">Cancel</a>
-        </li>
-        <li class="mrsl separator single">
-            <a href="#mrsl">mRSL File</a>
-        </li>
-        <li class="schedule single">
-            <a href="#schedule">Scheduler</a>
-        </li>
-        <li class="statusfiles single">
-            <a href="#statusfiles">Status Files</a>
-        </li>
-        <li class="liveoutput single">
-            <a href="#liveoutput">Live output</a>
-        </li>        
-        
-        <li class="resubmit multi">
-            <a href="#resubmit">Resubmit All</a>
-        </li>
-        <li class="cancel multi separator">
-            <a href="#cancel">Cancel All</a>
-        </li>        
-    </ul>
-    
-    <div id="cmd_helper" title="Command output" style="display: none;"></div>
-    """
-    
-    return test
+  </div>
+  
+  <ul id="job_context" class="contextMenu">        
+      <li class="resubmit single">
+          <a href="#resubmit">Resubmit</a>
+      </li>
+      <li class="cancel single">
+          <a href="#cancel">Cancel</a>
+      </li>
+      <li class="mrsl separator single">
+          <a href="#mrsl">mRSL File</a>
+      </li>
+      <li class="schedule single">
+          <a href="#schedule">Scheduler</a>
+      </li>
+      <li class="statusfiles single">
+          <a href="#statusfiles">Status Files</a>
+      </li>
+      <li class="liveoutput single">
+          <a href="#liveoutput">Live output</a>
+      </li>        
+      
+      <li class="resubmit multi">
+          <a href="#resubmit">Resubmit All</a>
+      </li>
+      <li class="cancel multi separator">
+          <a href="#cancel">Cancel All</a>
+      </li>        
+  </ul>
+  
+  <div id="cmd_helper" title="Command output" style="display: none;"></div>
+  """
+  
+  return test
 
 def js_tmpl():
     
   js = """
   <script>
-    
+  
   function toTimestamp(strDate) {
       return Date.parse(strDate);
   }
 
-
-    function jsonWrapper(el_id, dialog, url, jsonOptions) {
+  function jsonWrapper(el_id, dialog, url, jsonOptions) {
+        
+    var jsonSettings = {	output_format: 'json' };
+    
+    $.fn.extend(jsonSettings, jsonOptions);
+    
+    $.getJSON(
+    url,
+    jsonSettings,
+    function(jsonRes, textStatus) {
+    
+      var errors			= '';
+      var file_output = '';
+      var dir_listings = '';
+      var misc_output = '';
+      
+      for(var i=0; i<jsonRes.length; i++) {
+      
+        switch(jsonRes[i]['object_type']) {
+            
+          case 'error_text':
+            errors +='<p>'+jsonRes[i].text+'</p>';
+          break;
           
-        var jsonSettings = {	output_format: 'json' };
-        
-        $.fn.extend(jsonSettings, jsonOptions);
-        
-        $.getJSON(
-        url,
-        jsonSettings,
-        function(jsonRes, textStatus) {
-        
-            var errors			= '';
-            var file_output = '';
-            var dir_listings = '';
-            var misc_output = '';
-            
-            for(var i=0; i<jsonRes.length; i++) {
-            
-                switch(jsonRes[i]['object_type']) {
-                    
-                    case 'error_text':
-                        errors +='<p>'+jsonRes[i].text+'</p>';
-                    break;
-                    
-                    case 'file_output':
-                        for(j=0; j<jsonRes[i].lines.length; j++) {
-                            file_output += jsonRes[i].lines[j];
-                        }
-                    break;
-                    
-                    case 'dir_listings':
-                        for(j=0; j<jsonRes[i]['dir_listings'].length; j++) {
-                            dir_listings += jsonRes[i]['dir_listings'][j];
-                        }
-                    break;
-                    
-                    case 'submitstatuslist':
-                    
-                        for(j=0; j<jsonRes[i]['submitstatuslist'].length; j++) {
-                        
-                            if (jsonRes[i]['submitstatuslist'][j]['status']) {
-                              misc_output +=	'<p>Submitted "'
-                                          +		jsonRes[i]['submitstatuslist'][j]['name']
-                                          +		'"</P>'
-                                          +		'<p>Job identfier: "'+jsonRes[i]['submitstatuslist'][j]['job_id']
-                                          +		'"</p>';
-                            } else {
-                              misc_output +=	'<p>Failed submitting:</p><p>'
-                                          +		jsonRes[i]['submitstatuslist'][j]['name']
-                                          +		' '+jsonRes[i]['submitstatuslist'][j]['message']
-                                          +		'</p>';
-                            }													
-                        
-                        }
-                        
-                    break;
-                    
-                    case 'changedstatusjobs':
-                    
-                        for(j=0; j<jsonRes[i]['changedstatusjobs'].length; j++) {
-                            misc_output += jsonRes[i].changedstatusjobs[j]['message'];
-                        }
-                        
-                    break;
-                    
-                    case 'saveschedulejobs':
-                        for(j=0; j<jsonRes[i]['saveschedulejobs'].length; j++) {
-                            misc_output += jsonRes[i].saveschedulejobs[j]['message'];
-                        }
-                    break;
-                    
-                    case 'resubmitobjs':
-                        for(j=0; j<jsonRes[i]['resubmitobjs'].length; j++) {
-                            misc_output += jsonRes[i].resubmitobjs[j]['message'];
-                        }
-                    break;
-                    
-                    case 'text':
-                        misc_output += jsonRes[i]['text'];                        
-                    break;
-                    
-                    case 'file_not_found':
-                        misc_output += jsonRes[i]['name'];
-                    break;
-                    
-                }
-                  
-                
+          case 'file_output':
+            for(j=0; j<jsonRes[i].lines.length; j++) {
+              file_output += jsonRes[i].lines[j];
             }
+          break;
+          
+          case 'dir_listings':
+            for(j=0; j<jsonRes[i]['dir_listings'].length; j++) {
+              dir_listings += jsonRes[i]['dir_listings'][j];
+            }
+          break;
+          
+          case 'submitstatuslist':
+          
+            for(j=0; j<jsonRes[i]['submitstatuslist'].length; j++) {
             
-            if ((errors.length + file_output.length + misc_output.length + dir_listings.length) >0){
+              if (jsonRes[i]['submitstatuslist'][j]['status']) {
+                misc_output +=	'<p>Submitted "'
+                            +		jsonRes[i]['submitstatuslist'][j]['name']
+                            +		'"</P>'
+                            +		'<p>Job identfier: "'+jsonRes[i]['submitstatuslist'][j]['job_id']
+                            +		'"</p>';
+              } else {
+                misc_output +=	'<p>Failed submitting:</p><p>'
+                            +		jsonRes[i]['submitstatuslist'][j]['name']
+                            +		' '+jsonRes[i]['submitstatuslist'][j]['message']
+                            +		'</p>';
+              }													
             
-                $('#cmd_helper').html('');
-                $('#cmd_helper').dialog({buttons: {Close: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true});
-                $('#cmd_helper').dialog('open');
-                
-                if (file_output.length>0) {
-                  file_output = '<pre>'+file_output+'</pre>';	
-                }
-                
-                if (dir_listings.length>0) {
-                    dir_listings = '<pre>'+dir_listings+'</pre>';	
-                }
-                                    
-                $('#cmd_helper').html(errors+file_output+misc_output+dir_listings);
-                
-            } else {
+            }
               
-              // success
+          break;
+          
+          case 'changedstatusjobs':
+          
+            for(j=0; j<jsonRes[i]['changedstatusjobs'].length; j++) {
+              misc_output += jsonRes[i].changedstatusjobs[j]['message'];
             }
-        });
+              
+          break;
+          
+          case 'saveschedulejobs':
+            for(j=0; j<jsonRes[i]['saveschedulejobs'].length; j++) {
+              misc_output += jsonRes[i].saveschedulejobs[j]['message'];
+            }
+          break;
+          
+          case 'resubmitobjs':
+            for(j=0; j<jsonRes[i]['resubmitobjs'].length; j++) {
+              misc_output += jsonRes[i].resubmitobjs[j]['message'];
+            }
+          break;
+          
+          case 'text':
+            misc_output += jsonRes[i]['text'];                        
+          break;
+          
+          case 'file_not_found':
+            misc_output += jsonRes[i]['name'];
+          break;
+            
+        }
+          
+      }
         
-    }
-
-  function cmdHelper(el_id) {
-  
-    $.getJSON($(el).attr('title'),
-              { output_format: 'json' },
-              function(jsonRes, textStatus) {
-                
-                $('#cmd_helper').dialog({buttons: {Close: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true});
-                $('#cmd_helper').html('');
-                
-                var file_output = '';
-                for(i=0;i<jsonRes.length; i++) {
-                  
-                  if (jsonRes[i].object_type=='file_output') {
+      if ((errors.length + file_output.length + misc_output.length + dir_listings.length) >0){
                     
-                    for(j=0; j<jsonRes[i].lines.length; j++) {
-                      file_output += jsonRes[i].lines[j]+"\\n";
-                    }
-                    $('#cmd_helper').html('<div style="max-height: 480px;"><pre>'+file_output+'</pre></div>');
-                    
-                  }
-                  
-                  if (jsonRes[i].object_type=='saveschedulejobs') {                    
-                    $('#cmd_helper').html('<div style="max-height: 480px;">'+jsonRes[i]['saveschedulejobs'][0]['message']+'</div>');
-                  }
-                  
-                  if (jsonRes[i].object_type=='changedstatusjobs') {                    
-                    $('#cmd_helper').html('<div style="max-height: 480px;">'+jsonRes[i]['changedstatusjobs'][0]['message']+'</div>');
-                  }
-                  
-                  if (jsonRes[i].object_type=='resubmitobjs') {                    
-                    $('#cmd_helper').html('<div style="max-height: 480px;">'+jsonRes[i]['resubmitobjs'][0]['message']+'</div>');
-                  }
-                  
-                  if (jsonRes[i].object_type=='text') {                    
-                    $('#cmd_helper').html('<div style="max-height: 480px;">'+jsonRes[i]['text']+'</div>');
-                  }
-                  
-                  if (jsonRes[i].object_type=='error_text') {                    
-                    $('#cmd_helper').html('<div style="max-height: 480px; color: red;">'+jsonRes[i]['text']+'</div>');
-                  }
-                  
-                  if (jsonRes[i].object_type=='file_not_found') {                    
-                    $('#cmd_helper').html('<div style="max-height: 480px; color: red;">File not found: '+jsonRes[i]['name']+'</div>');
-                  }
-                }                
-                
-                $('#cmd_helper').dialog('open');
-                
-              }
-    );
-
+        if (file_output.length>0) {
+          file_output = '<pre>'+file_output+'</pre>';	
+        }
+        
+        if (dir_listings.length>0) {
+          dir_listings = '<pre>'+dir_listings+'</pre>';	
+        }
+        
+        $('#cmd_helper div[title='+el_id+']').removeClass('spinner');
+        $('#cmd_helper div[title='+el_id+'] p').append('<br />'+errors+file_output+misc_output+dir_listings);
+        
+      } else {        
+        // success
+      }
+    });
+      
   }
 
   $(document).ready(
@@ -331,7 +272,7 @@ def js_tmpl():
         format: function(table) { 
 
             var actions = {
-                cancel: function (job_id) {
+                cancel: function (job_id) {                    
                     jsonWrapper(job_id, '#cmd_dialog', 'canceljob.py', {job_id: job_id})
                 },
                 mrsl: function (job_id) {
@@ -356,17 +297,25 @@ def js_tmpl():
                 function(action, el, pos) {
                     
                     var single_selection = !$(el).parent().hasClass('ui-selected');
+                    var job_id = '';
                     
+                    $('#cmd_helper').dialog({buttons: {Close: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true});
+                    $('#cmd_helper').dialog('open');
+                    $('#cmd_helper').html('');
+                                                            
                     if (single_selection) {
                     
-                        actions[action]($('input[name=job_identifier]', $(el).parent()).val());
+                        job_id = $('input[name=job_identifier]', $(el).parent()).val();
+                        $('#cmd_helper').append('<div class="spinner" title="'+job_id+'" style="padding-left: 20px;"><p>'+action+'ing: '+job_id+'</p></div>');
+                        actions[action](job_id);
                         
                     } else {
                         
                         $('#jm_jobmanager tbody tr.ui-selected').each(function(i) {
-                            actions[action]($('input[name=job_identifier]', this).val());
-                        });
-                        
+                            job_id = $('input[name=job_identifier]', this).val();
+                            $('#cmd_helper').append('<div class="spinner" title="'+job_id+'" style="padding-left: 20px;"><p>'+action+'ing: '+job_id+'</p></div>');
+                            actions[action](job_id);
+                        });                        
                     }
                     
                     $("#append").click();
@@ -462,37 +411,37 @@ def js_tmpl():
   return js
 
 def signature():
-    """Signature of the main function"""
+  """Signature of the main function"""
 
-    defaults = {'dir' : ['']}
-    return ['', defaults]
+  defaults = {'dir' : ['']}
+  return ['', defaults]
 
 def main(client_id, user_arguments_dict):
-    """Main function used by front end"""
+  """Main function used by front end"""
 
-    (configuration, logger, output_objects, op_name) = \
-        initialize_main_variables(op_header=False)
-    client_dir = client_id_dir(client_id)
-    defaults = signature()[1]
-    (validate_status, accepted) = validate_input_and_cert(
-        user_arguments_dict,
-        defaults,
-        output_objects,
-        client_id,
-        configuration,
-        allow_rejects=False,
-        )
-    if not validate_status:
-        return (accepted, returnvalues.CLIENT_ERROR)
-    
-    status = returnvalues.OK
-    
-    title_entry = find_entry(output_objects, 'title')
-    title_entry['text'] = 'Jobmanager'
-    title_entry['javascript'] = js_tmpl()
-    
-    output_objects.append({'object_type': 'header', 'text': 'Jobmanager' })
-    
-    output_objects.append({'object_type': 'html_form', 'text': html_tmpl()})
-    
-    return (output_objects, status)
+  (configuration, logger, output_objects, op_name) = \
+      initialize_main_variables(op_header=False)
+  client_dir = client_id_dir(client_id)
+  defaults = signature()[1]
+  (validate_status, accepted) = validate_input_and_cert(
+      user_arguments_dict,
+      defaults,
+      output_objects,
+      client_id,
+      configuration,
+      allow_rejects=False,
+      )
+  if not validate_status:
+      return (accepted, returnvalues.CLIENT_ERROR)
+  
+  status = returnvalues.OK
+  
+  title_entry = find_entry(output_objects, 'title')
+  title_entry['text'] = 'Jobmanager'
+  title_entry['javascript'] = js_tmpl()
+  
+  output_objects.append({'object_type': 'header', 'text': 'Jobmanager' })
+  
+  output_objects.append({'object_type': 'html_form', 'text': html_tmpl()})
+  
+  return (output_objects, status)

@@ -132,7 +132,122 @@ def js_tmpl():
       return Date.parse(strDate);
   }
 
-  function cmdHelper(el) {
+
+    function jsonWrapper(el_id, dialog, url, jsonOptions) {
+          
+        var jsonSettings = {	output_format: 'json' };
+        
+        $.fn.extend(jsonSettings, jsonOptions);
+        
+        $.getJSON(
+        url,
+        jsonSettings,
+        function(jsonRes, textStatus) {
+        
+            var errors			= '';
+            var file_output = '';
+            var dir_listings = '';
+            var misc_output = '';
+            
+            for(var i=0; i<jsonRes.length; i++) {
+            
+                switch(jsonRes[i]['object_type']) {
+                    
+                    case 'error_text':
+                        errors +='<p>'+jsonRes[i].text+'</p>';
+                    break;
+                    
+                    case 'file_output':
+                        for(j=0; j<jsonRes[i].lines.length; j++) {
+                            file_output += jsonRes[i].lines[j];
+                        }
+                    break;
+                    
+                    case 'dir_listings':
+                        for(j=0; j<jsonRes[i]['dir_listings'].length; j++) {
+                            dir_listings += jsonRes[i]['dir_listings'][j];
+                        }
+                    break;
+                    
+                    case 'submitstatuslist':
+                    
+                        for(j=0; j<jsonRes[i]['submitstatuslist'].length; j++) {
+                        
+                            if (jsonRes[i]['submitstatuslist'][j]['status']) {
+                              misc_output +=	'<p>Submitted "'
+                                          +		jsonRes[i]['submitstatuslist'][j]['name']
+                                          +		'"</P>'
+                                          +		'<p>Job identfier: "'+jsonRes[i]['submitstatuslist'][j]['job_id']
+                                          +		'"</p>';
+                            } else {
+                              misc_output +=	'<p>Failed submitting:</p><p>'
+                                          +		jsonRes[i]['submitstatuslist'][j]['name']
+                                          +		' '+jsonRes[i]['submitstatuslist'][j]['message']
+                                          +		'</p>';
+                            }													
+                        
+                        }
+                        
+                    break;
+                    
+                    case 'changedstatusjobs':
+                    
+                        for(j=0; j<jsonRes[i]['changedstatusjobs'].length; j++) {
+                            misc_output += jsonRes[i].changedstatusjobs[j]['message'];
+                        }
+                        
+                    break;
+                    
+                    case 'saveschedulejobs':
+                        for(j=0; j<jsonRes[i]['saveschedulejobs'].length; j++) {
+                            misc_output += jsonRes[i].saveschedulejobs[j]['message'];
+                        }
+                    break;
+                    
+                    case 'resubmitobjs':
+                        for(j=0; j<jsonRes[i]['resubmitobjs'].length; j++) {
+                            misc_output += jsonRes[i].resubmitobjs[j]['message'];
+                        }
+                    break;
+                    
+                    case 'text':
+                        misc_output += jsonRes[i]['text'];                        
+                    break;
+                    
+                    case 'file_not_found':
+                        misc_output += jsonRes[i]['name'];
+                    break;
+                    
+                }
+                  
+                
+            }
+            
+            if ((errors.length + file_output.length + misc_output.length + dir_listings.length) >0){
+            
+                $('#cmd_helper').html('');
+                $('#cmd_helper').dialog({buttons: {Close: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true});
+                $('#cmd_helper').dialog('open');
+                
+                if (file_output.length>0) {
+                  file_output = '<pre>'+file_output+'</pre>';	
+                }
+                
+                if (dir_listings.length>0) {
+                    dir_listings = '<pre>'+dir_listings+'</pre>';	
+                }
+                                    
+                $('#cmd_helper').html(errors+file_output+misc_output+dir_listings);
+                
+            } else {
+              
+              // success
+            }
+        });
+        
+    }
+
+  function cmdHelper(el_id) {
   
     $.getJSON($(el).attr('title'),
               { output_format: 'json' },
@@ -193,20 +308,17 @@ def js_tmpl():
         id: 'multiselect',
         format: function(table) {
         
-            /* todo: fix the double event on first page */
-            $('#jm_jobmanager tbody tr td').bind('click', function(event) {
-                            
-                var job_id = $(this).parent().attr('id');
+            $('#jm_jobmanager tbody tr td input').bind('click', function(event) {
+
+                var job_id = $(this).parent().parent().attr('id');
                 var is_checked = $('#'+job_id+' input').attr('checked');
-                
-                $('#'+job_id+' input').attr('checked', !is_checked);
-                
-                if (!is_checked) {
+                                
+                if (is_checked) {
                     $('#'+job_id).addClass('ui-selected');
                 } else {
                     $('#'+job_id).removeClass('ui-selected');
                 }
-//                alert('1');
+
                 return true;
                 
             });
@@ -218,12 +330,46 @@ def js_tmpl():
         id: "contextual", 
         format: function(table) { 
 
+            var actions = {
+                cancel: function (job_id) {
+                    jsonWrapper(job_id, '#cmd_dialog', 'canceljob.py', {job_id: job_id})
+                },
+                mrsl: function (job_id) {
+                    jsonWrapper(job_id, '#cmd_dialog', 'mrslview.py', {job_id: job_id})
+                },
+                resubmit: function (job_id) {
+                    jsonWrapper(job_id, '#cmd_dialog', 'resubmit.py', {job_id: job_id})
+                },
+                statusfiles: function (job_id) {    
+                    jsonWrapper(job_id, '#cmd_dialog', 'ls.py', {path: 'out'+job_id})
+                },
+                liveoutput: function (job_id) {
+                    jsonWrapper(job_id, '#cmd_dialog', 'liveoutput.py', {job_id: job_id})
+                },
+                schedule: function (job_id) {
+                    jsonWrapper(job_id, '#cmd_dialog', 'jobschedule.py', {job_id: job_id})
+                },
+            };
+
+
             $("#jm_jobmanager tbody tr td").contextMenu({ menu: 'job_context'},
                 function(action, el, pos) {
-
-                    alert(action+' '+$('#jm_jobmanager tbody tr.ui-selected').length+' jobs.');
-                    // todo: single vs multi
-                    //cmdHelper(this);
+                    
+                    var single_selection = !$(el).parent().hasClass('ui-selected');
+                    
+                    if (single_selection) {
+                    
+                        actions[action]($('input[name=job_identifier]', $(el).parent()).val());
+                        
+                    } else {
+                        
+                        $('#jm_jobmanager tbody tr.ui-selected').each(function(i) {
+                            actions[action]($('input[name=job_identifier]', this).val());
+                        });
+                        
+                    }
+                    
+                    $("#append").click();
                     
                 },
                 function(el) {
@@ -242,7 +388,7 @@ def js_tmpl():
     });
     
     $("table")
-    .tablesorter({  widgets: ['zebra','contextual','multiselect'],
+    .tablesorter({  widgets: ['zebra', 'multiselect', 'contextual'],
                     textExtraction: function(node) {
                                     var stuff = $('div', node).html();
                                     if (stuff == null) {

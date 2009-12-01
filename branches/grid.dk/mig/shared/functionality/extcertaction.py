@@ -33,8 +33,8 @@ import tempfile
 import pickle
 
 import shared.returnvalues as returnvalues
+from shared.functional import validate_input_and_cert, REJECT_UNSET
 from shared.init import initialize_main_variables
-from shared.functional import validate_input, REJECT_UNSET
 from shared.notification import send_email
 from shared.useradm import db_name, distinguished_name_to_user, \
      create_user, fill_user
@@ -64,8 +64,15 @@ def main(client_id, user_arguments_dict):
                           : 'MiG external certificate sign up'})
 
     defaults = signature()[1]
-    (validate_status, accepted) = validate_input(user_arguments_dict,
-            defaults, output_objects, allow_rejects=False)
+    (validate_status, accepted) = validate_input_and_cert(
+        user_arguments_dict,
+        defaults,
+        output_objects,
+        client_id,
+        configuration,
+        allow_rejects=False,
+        require_user=False
+        )
     if not validate_status:
         return (accepted, returnvalues.CLIENT_ERROR)
 
@@ -195,7 +202,7 @@ cd ~/mig/server
 
     user_dict['command_user_create'] = command_user_create
     user_dict['command_user_delete'] = command_user_delete
-    user_dict['migserver_https_url'] = configuration.migserver_https_url
+    user_dict['https_cert_url'] = configuration.migserver_https_cert_url
     email_header = 'MiG sign up request for %s' % cert_id
     email_msg = \
         """
@@ -213,7 +220,7 @@ Command to create user on MiG server:
 %(command_user_create)s
 
 Finally add the user to any relevant VGrids from:
-%(migserver_https_url)s/cgi-bin/vgridadmin.py
+%(https_cert_url)s/cgi-bin/vgridadmin.py
 
 ---
 Command to delete user again on MiG server:

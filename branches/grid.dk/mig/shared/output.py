@@ -96,6 +96,8 @@ ___%s___
             lines.append('%s\n' % i['text'])
         elif i['object_type'] == 'verbatim':
             lines.append('%s\n' % i['text'])
+        elif i['object_type'] == 'binary':
+            lines.append(i['data'])
         elif i['object_type'] == 'link':
 
             # We do not want link junk in plain text
@@ -380,6 +382,8 @@ def html_format(ret_val, ret_msg, out_obj):
             lines.append('<p>%s</p>' % html_escape(i['text']))
         elif i['object_type'] == 'verbatim':
             lines.append('%s' % html_escape(i['text']))
+        elif i['object_type'] == 'binary':
+            lines.append(i['data'])
         elif i['object_type'] == 'link':
             lines.append(html_link(i))
         elif i['object_type'] == 'job_list':
@@ -765,20 +769,20 @@ def html_format(ret_val, ret_msg, out_obj):
                 lines.append('</table>')
         elif i['object_type'] == 'sandboxinfos':
             sandboxinfos = i['sandboxinfos']
-            if len(sandboxinfos) == 0:
-                lines.append('No sandboxes found!')
-            else:
-                lines.append('<table class="sandboxinfo"><th>Username</th><th>Resource(s)</th><th>Jobs</th><th>Walltime</th></tr>'
-                             )
-                row_number = 1
-                for sandboxinfo in sandboxinfos:
-                    row_class = row_name[row_number % 2]
-                    lines.append('<tr class=%s>%s</tr>'
-                                  % (row_class, html_table_if_have_keys(sandboxinfo,
-                                 ['username', 'resource', 'jobs',
-                                 'walltime'])))
-                    row_number += 1
-                lines.append('</table>')
+            lines.append('<table class="sandboxinfo"><th>Username</th><th>Resource(s)</th><th>Jobs</th><th>Walltime</th></tr>'
+                         )
+            row_number = 1
+            if not sandboxinfos:
+                help_text = 'No sandboxes found - please download a sandbox below to proceed'
+                lines.append('<tr class=%s><td colspan=4>%s</td></tr>' % (row_name[row_number], help_text))
+            for sandboxinfo in sandboxinfos:
+                row_class = row_name[row_number % 2]
+                lines.append('<tr class=%s>%s</tr>'
+                             % (row_class, html_table_if_have_keys(sandboxinfo,
+                                                                   ['username', 'resource', 'jobs',
+                                                                    'walltime'])))
+                row_number += 1
+            lines.append('</table>')
         elif i['object_type'] == 'runtimeenvironments':
             runtimeenvironments = i['runtimeenvironments']
             if len(runtimeenvironments) == 0:
@@ -1018,17 +1022,20 @@ def xmlrpc_format(ret_val, ret_msg, out_obj):
 def json_format(ret_val, ret_msg, out_obj):
     """Generate output in json format"""
 
-    import simplejson as json
     try:
-
+        try:
+            import json
+        except:
+            import simplejson as json
         # python >=2.6 includes native json module with loads/dumps methods
-
-        return json.dumps(out_obj)
-    except AttributeError:
-
         # python <2.6 + python-json module with read/write methods
-
-        return json.write(out_obj)
+        if not hasattr(json, 'dumps') and hasattr(json, 'write'):
+            json.dumps = json.write
+        return json.dumps(out_obj)
+    except Exception, exc:
+        print 'json not available on server! Defaulting to .txt output. (%s)'\
+             % exc
+        return None
 
 def get_valid_outputformats():
     """Return list of valid outputformats"""

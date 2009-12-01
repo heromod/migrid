@@ -28,10 +28,10 @@
 import os
 
 import shared.confparser as confparser
-from shared.findtype import is_owner
-from shared.init import initialize_main_variables
-from shared.functional import validate_input_and_cert, REJECT_UNSET
 import shared.returnvalues as returnvalues
+from shared.findtype import is_owner
+from shared.functional import validate_input_and_cert, REJECT_UNSET
+from shared.init import initialize_main_variables
 
 
 def signature():
@@ -76,8 +76,8 @@ def main(client_id, user_arguments_dict):
 
     # TODO: race if two confs are uploaded concurrently!
 
-    tmp_path = configuration.resource_home + os.sep\
-         + unique_resource_name + os.sep + 'config.tmp'
+    tmp_path = os.path.join(configuration.resource_home,
+                            unique_resource_name, 'config.tmp')
 
     # write new proposed config file to disk
 
@@ -100,8 +100,8 @@ def main(client_id, user_arguments_dict):
                               : msg})
         return (output_objects, returnvalues.CLIENT_ERROR)
 
-    accepted_path = configuration.resource_home + os.sep\
-         + unique_resource_name + os.sep + 'config.MiG'
+    accepted_path = os.path.join(configuration.resource_home,
+                                 unique_resource_name, 'config.MiG')
 
     # truncate old conf with new accepted file
 

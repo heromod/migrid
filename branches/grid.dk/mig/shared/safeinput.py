@@ -51,6 +51,7 @@ ALLOW_UNSAFE = \
     'THIS INPUT IS NOT VERIFIED: DO NOT EVER PRINT IT UNESCAPED! '
 
 # Allow these chars in addition to plain letters and digits
+# We explicitly allow email chars in CN to work around broken DNs
 
 name_extras = ' -@.'
 

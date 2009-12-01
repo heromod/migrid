@@ -9,6 +9,8 @@ import sys
 import migscripts.miglib as miglib
 import string 
 
+from mylogger import log
+
 ####### CREATE JOBS / SUBMIT ############
 
 def create_job(exec_commands, input_files, executables, local_working_dir, mig_working_dir, output_files, static_files=[], resource_specs={}, args=[]):
@@ -213,6 +215,7 @@ def parse_status(status_msg):
 
 def parse_job_info(status_list):
     #import time
+    print str(status_list)
     status_str = "".join(status_list)
     job_info_str_list= status_str.split("Job ")[1:] # we don't need the preceding  information
     job_info_list = []
@@ -267,22 +270,31 @@ def remove_files_local(files):
         except OSError:
             print "Can't delete : "+f
 
-
 def mig_function_wrapper(func,*args):
     #print args
     #funct = "miglib."+func
     #print func, args
-    code, out = func(*args)
+    retries = 3
+    retry_wait = 2 # 2 seconds
+    exit_code, out = func(*args)
     #print out
-    exit_code = get_exit_code(out)
+    if exit_code != 0:
+        exit_code = get_exit_code(out)
     
     #print "exit code", exit_code
     if exit_code != 0:
+        for i in range(retries):
+            time.sleep(retry_wait)
+            print out
+            print "exit code", exit_code, "retrying... ",i
+            code, out = func(*args)
+            exit_code = get_exit_code(out)
+            if exit_code == 0:
+                return out
         raise Exception("MiG Error: \n"+str(func)+":"+str(args)+"\n"+"".join(out))
-    
-    
+    else:
+        return out
 
-    return out
 
 def command_test():
     (code, out) = miglib.ls_file(".")
@@ -295,5 +307,6 @@ def get_exit_code(output_lines):
         code = exit_code_str.strip("'Exit code: ").split()[0]
         #print code
     else:
-        code = 0
+        code = -1
+        
     return int(code)

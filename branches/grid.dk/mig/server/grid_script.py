@@ -192,9 +192,10 @@ def graceful_shutdown():
     handler to avoid interfering with other active requests.
     """
 
-    print 'graceful_shutdown called'
+    msg = '%s: graceful_shutdown called' % sys.argv[0]
+    print msg
     try:
-        logger.info('graceful_shutdown called')
+        logger.info(msg)
         job_time_out_stop.set()
         print 'graceful_shutdown: giving time out thread a chance to terminate'
 
@@ -600,7 +601,8 @@ while True:
         # previously dispatched job is not marked done yet
 
         last_req_file = os.path.join(configuration.resource_home,
-                                     unique_resource_name, 'last_request.' + exe)
+                                     unique_resource_name,
+                                     'last_request.%s' % exe)
         last_req = unpickle(last_req_file, logger)
         if last_req == False:
 
@@ -1172,8 +1174,9 @@ while True:
 
         # delete requestnewjob lock
 
-        lock_file = configuration.resource_home + '/'\
-             + unique_resource_name + '/jobrequest_pending.' + exe
+        lock_file = os.path.join(configuration.resource_home,
+                                 unique_resource_name,
+                                 'jobrequest_pending.%s' % exe)
         try:
             os.remove(lock_file)
         except OSError, ose:
@@ -1321,9 +1324,9 @@ while True:
 
         # read resource config file
 
-        resource_config = unpickle(configuration.resource_home
-                                    + unique_resource_name + '/config',
-                                   logger)
+        res_file = os.path.join(configuration.resource_home,
+                                unique_resource_name, 'config')
+        resource_config = unpickle(res_file, logger)
 
         just_dequeue_status_list = ['QUEUED', 'RETRY']
         kill_executing_status_list = ['EXECUTING']
@@ -1424,9 +1427,9 @@ while True:
 
         # read resource config file
 
-        resource_config = unpickle(configuration.resource_home
-                                    + unique_resource_name + '/config',
-                                   logger)
+        res_file = os.path.join(configuration.resource_home,
+                                unique_resource_name, 'config')
+        resource_config = unpickle(res_file, logger)
 
         # Retrieve job_dict
 

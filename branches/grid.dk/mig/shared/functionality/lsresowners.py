@@ -29,11 +29,11 @@
 
 import os
 
-from shared.listhandling import list_items_in_pickled_list
-from shared.findtype import is_owner
-from shared.init import initialize_main_variables
-from shared.functional import validate_input_and_cert, REJECT_UNSET
 import shared.returnvalues as returnvalues
+from shared.findtype import is_owner
+from shared.functional import validate_input_and_cert, REJECT_UNSET
+from shared.init import initialize_main_variables
+from shared.listhandling import list_items_in_pickled_list
 
 
 def signature():
@@ -72,9 +72,9 @@ def main(client_id, user_arguments_dict):
     # is_owner incorporates unique_resource_name verification - no need to
     # specifically check for illegal directory traversal
 
-    base_dir = os.path.abspath(configuration.resource_home + os.sep
-                                + unique_resource_name) + os.sep
-    owners_file = base_dir + 'owners'
+    base_dir = os.path.abspath(os.path.join(configuration.resource_home, 
+                                            unique_resource_name)) + os.sep
+    owners_file = os.path.join(base_dir, 'owners')
 
     (status, msg) = list_items_in_pickled_list(owners_file, logger)
     if not status:

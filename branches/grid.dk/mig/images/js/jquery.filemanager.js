@@ -216,6 +216,7 @@ if (jQuery) (function($){
 						}
 					}
 					
+					$("#editor_dialog input[name=submitjob]").attr('checked', false);
 					$("#editor_dialog input[name=path]").val('./'+$(el).attr(pathAttribute));
 					$("#editor_dialog textarea[name=editarea]").val(file_output);
 					$("#editor_dialog").dialog('open');
@@ -671,8 +672,26 @@ if (jQuery) (function($){
 																	success: function(responseObject, statusText) {
 																		
 																		var stuff =''
-																		for(var i=3; i<(responseObject.length); i++) {
-																			stuff += '<p>'+responseObject[i].text+'</p>';
+																		for(var i=0; i<(responseObject.length); i++) {
+																			
+																			switch(responseObject[i]['object_type']) {
+																				case 'text':
+																					stuff += '<p>'+responseObject[i]['text']+'</p>';	
+																				break;
+																			
+																				case 'submitstatuslist':
+
+																					for(var j=0;j<responseObject[i]['submitstatuslist'].length; j++) {
+																						
+																						if (responseObject[i]['submitstatuslist'][j]['status']) {
+																							stuff += '<p>Submitted as: '+responseObject[i]['submitstatuslist'][j]['job_id']+'</p>';
+																						} else {
+																							stuff += '<p style="color: red;">'+responseObject[i]['submitstatuslist'][j]['message']+'</p>';
+																						}
+																					}
+																				break;
+																			}
+																			
 																		}
 																		$('#editor_output').html(stuff);
 																		

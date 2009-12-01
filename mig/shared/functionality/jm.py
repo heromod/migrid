@@ -158,7 +158,7 @@ def js_tmpl():
           
           case 'file_output':
             for(j=0; j<jsonRes[i].lines.length; j++) {
-              file_output += jsonRes[i].lines[j];
+              file_output += jsonRes[i].lines[j]+'\\n';
             }
           break;
           
@@ -175,7 +175,7 @@ def js_tmpl():
               if (jsonRes[i]['submitstatuslist'][j]['status']) {
                 misc_output +=	'<p>Submitted "'
                             +		jsonRes[i]['submitstatuslist'][j]['name']
-                            +		'"</P>'
+                            +		'"</p>'
                             +		'<p>Job identfier: "'+jsonRes[i]['submitstatuslist'][j]['job_id']
                             +		'"</p>';
               } else {
@@ -214,7 +214,7 @@ def js_tmpl():
           break;
           
           case 'file_not_found':
-            misc_output += jsonRes[i]['name'];
+            misc_output += '<p>File not found: "'+jsonRes[i]['name']+'".</p>';
           break;
             
         }
@@ -231,12 +231,19 @@ def js_tmpl():
           dir_listings = '<pre>'+dir_listings+'</pre>';	
         }
         
-        $('#cmd_helper div[title='+el_id+']').removeClass('spinner');
+        if ((errors.length>0) || (misc_output.length>0)) {
+          $('#cmd_helper div[title='+el_id+']').removeClass('spinner').addClass('error');  
+        } else {
+          $('#cmd_helper div[title='+el_id+']').removeClass('spinner').addClass('ok');
+        }
+        
         $('#cmd_helper div[title='+el_id+'] p').append('<br />'+errors+file_output+misc_output+dir_listings);
         
       } else {        
-        // success
+        $('#cmd_helper div[title='+el_id+']').removeClass('spinner').addClass('ok');
+        $('#cmd_helper div[title='+el_id+'] p').append('<br />Success!');
       }
+      
     });
       
   }
@@ -259,10 +266,11 @@ def js_tmpl():
                 } else {
                     $('#'+job_id).removeClass('ui-selected');
                 }
-
+                
                 return true;
                 
             });
+            
         }
     });
     
@@ -276,7 +284,7 @@ def js_tmpl():
                     jsonWrapper(job_id, '#cmd_dialog', 'canceljob.py', {job_id: job_id})
                 },
                 mrsl: function (job_id) {
-                    jsonWrapper(job_id, '#cmd_dialog', 'mrslview.py', {job_id: job_id})
+                  jsonWrapper(job_id, '#cmd_dialog', 'mrslview.py', {job_id: job_id})
                 },
                 resubmit: function (job_id) {
                     jsonWrapper(job_id, '#cmd_dialog', 'resubmit.py', {job_id: job_id})
@@ -292,7 +300,6 @@ def js_tmpl():
                 },
             };
 
-
             $("#jm_jobmanager tbody tr td").contextMenu({ menu: 'job_context'},
                 function(action, el, pos) {
                     
@@ -306,14 +313,15 @@ def js_tmpl():
                     if (single_selection) {
                     
                         job_id = $('input[name=job_identifier]', $(el).parent()).val();
-                        $('#cmd_helper').append('<div class="spinner" title="'+job_id+'" style="padding-left: 20px;"><p>'+action+'ing: '+job_id+'</p></div>');
+                        $('#cmd_helper').append('<div class="spinner" title="'+job_id+'" style="padding-left: 20px;"><p>JobId: '+job_id+'</p></div>');
                         actions[action](job_id);
                         
                     } else {
-                        
-                        $('#jm_jobmanager tbody tr.ui-selected').each(function(i) {
-                            job_id = $('input[name=job_identifier]', this).val();
-                            $('#cmd_helper').append('<div class="spinner" title="'+job_id+'" style="padding-left: 20px;"><p>'+action+'ing: '+job_id+'</p></div>');
+                        var selected_rows = $('#jm_jobmanager tbody tr.ui-selected');
+                        $('#cmd_helper').append('<p>'+action+'ing '+selected_rows.length+' jobs, see individual status below:</p>');
+                        selected_rows.each(function(i) {
+                            job_id = $('input[name=job_identifier]', this).val();                            
+                            $('#cmd_helper').append('<div class="spinner" title="'+job_id+'" style="padding-left: 20px;"><p>'+job_id+'</p></div>');
                             actions[action](job_id);
                         });                        
                     }
@@ -350,6 +358,9 @@ def js_tmpl():
     .tablesorterPager({ container: $("#pager"),
                         size: 300
                     });
+
+    // Check CheckAll when read all
+    $('table').bind('sortEnd', function() { $('#checkAll').attr('checked', false); });
     
     $("#append").click(function() { 
         

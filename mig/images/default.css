@@ -432,3 +432,8 @@ table.monitorruntimeenvreq {
 .jm {
   margin-top: -15px; 
 }
+
+.error { background: url('/images/icons/exclamation.png') no-repeat; }
+.warn { background: url('/images/icons/error.png') no-repeat; }
+.info { background: url('/images/icons/information.png') no-repeat; }
+.ok { background: url('/images/icons/accept.png') no-repeat; }

@@ -147,22 +147,27 @@ def js_tmpl():
       var file_output = '';
       var dir_listings = '';
       var misc_output = '';
+      var submit_output = '';
+      var success_message = '<br />Success!';
       
       for(var i=0; i<jsonRes.length; i++) {
       
         switch(jsonRes[i]['object_type']) {
             
           case 'error_text':
+            errors += '<p>Errors:</p>';
             errors +='<p>'+jsonRes[i].text+'</p>';
           break;
           
           case 'file_output':
+            file_output += '<p>File output:</p>';
             for(j=0; j<jsonRes[i].lines.length; j++) {
               file_output += jsonRes[i].lines[j]+'\\n';
             }
           break;
           
           case 'dir_listings':
+            dir_listings += '<p>Directory Listings</p>';
             for(j=0; j<jsonRes[i]['dir_listings'].length; j++) {
               dir_listings += jsonRes[i]['dir_listings'][j];
             }
@@ -192,20 +197,25 @@ def js_tmpl():
           case 'changedstatusjobs':
           
             for(j=0; j<jsonRes[i]['changedstatusjobs'].length; j++) {
-              misc_output += jsonRes[i].changedstatusjobs[j]['message'];
+              misc_output += jsonRes[i]['changedstatusjobs'][j]['message'];
             }
               
           break;
           
           case 'saveschedulejobs':
             for(j=0; j<jsonRes[i]['saveschedulejobs'].length; j++) {
-              misc_output += jsonRes[i].saveschedulejobs[j]['message'];
+              misc_output += jsonRes[i]['saveschedulejobs'][j]['message'];
             }
           break;
           
           case 'resubmitobjs':
             for(j=0; j<jsonRes[i]['resubmitobjs'].length; j++) {
-              misc_output += jsonRes[i].resubmitobjs[j]['message'];
+              if (jsonRes[i]['resubmitobjs'][j]['status']) {
+                success_message = '<br /> New JobID: '+jsonRes[i]['resubmitobjs'][j]['new_job_id'];
+              } else {
+                misc_output += jsonRes[i]['resubmitobjs'][j]['message'];  
+              }
+              
             }
           break;
           
@@ -239,9 +249,10 @@ def js_tmpl():
         
         $('#cmd_helper div[title='+el_id+'] p').append('<br />'+errors+file_output+misc_output+dir_listings);
         
-      } else {        
+      } else {
         $('#cmd_helper div[title='+el_id+']').removeClass('spinner').addClass('ok');
-        $('#cmd_helper div[title='+el_id+'] p').append('<br />Success!');
+        $('#cmd_helper div[title='+el_id+'] p').append(success_message);
+        
       }
       
     });

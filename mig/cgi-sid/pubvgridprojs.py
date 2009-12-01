@@ -3,7 +3,7 @@
 #
 # --- BEGIN_HEADER ---
 #
-# startstore - [insert a few words of module description on this line]
+# pubvgridprojects - [insert a few words of module description on this line]
 # Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
@@ -25,6 +25,11 @@
 # -- END_HEADER ---
 #
 
-# "redirect" to restart
+import cgi
+import cgitb
+cgitb.enable()
 
-from shared.functionality.restartstore import *
+from shared.functionality.pubvgridprojs import main
+from shared.cgiscriptstub import run_cgi_script_possibly_with_cert
+
+run_cgi_script_possibly_with_cert(main)

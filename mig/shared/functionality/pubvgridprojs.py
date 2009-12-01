@@ -3,7 +3,7 @@
 #
 # --- BEGIN_HEADER ---
 #
-# pubvgridprojects - [insert a few words of module description on this line]
+# pubvgridprojs - [insert a few words of module description on this line]
 # Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
@@ -28,8 +28,8 @@
 import os
 
 import shared.returnvalues as returnvalues
-from shared.init import initialize_main_variables
 from shared.functional import validate_input
+from shared.init import initialize_main_variables
 
 
 def signature():

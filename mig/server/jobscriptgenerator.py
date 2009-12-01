@@ -54,8 +54,9 @@ def create_empty_job(
     ):
 
     job_dict = {'': ''}
-    helper_dict_filename = configuration.resource_home\
-         + unique_resource_name + '/empty_job_helper_dict.' + exe
+    helper_dict_filename = os.path.join(configuration.resource_home,
+                                        unique_resource_name,
+                                        'empty_job_helper_dict.%s' % exe)
 
     max_cputime = int(request_cputime)
     scaled_cputime = int(float(configuration.cputime_for_empty_jobs)
@@ -161,8 +162,9 @@ def create_job_script(
     job_dict = {'': ''}
     sessionid = hexlify(open('/dev/urandom').read(32))
     iosessionid = hexlify(open('/dev/urandom').read(32))
-    helper_dict_filename = configuration.resource_home\
-         + unique_resource_name + '/empty_job_helper_dict.' + exe
+    helper_dict_filename = os.path.join(configuration.resource_home,
+                                        unique_resource_name,
+                                        'empty_job_helper_dict.%s' % exe)
 
     # TODO: What decides that only these fields should be copied???
     #  Since job_dict is used to generate the job script we may very
@@ -252,8 +254,8 @@ def create_job_script(
          + '.sendupdatefiles'
     make_symlink(linkdest5, linkloc5, logger)
 
-    path_without_extension = configuration.resource_home\
-         + unique_resource_name + '/' + localjobname
+    path_without_extension = os.path.join(configuration.resource_home,
+                                          unique_resource_name, localjobname)
     gen_res = gen_job_script(
         job_dict,
         resource_config,
@@ -510,7 +512,7 @@ def gen_job_script(
             job_dictionary,
             resource_config,
             exe,
-            configuration.migserver_https_url,
+            configuration.migserver_https_sid_url,
             localjobname,
             path_without_extension,
             )
@@ -519,13 +521,13 @@ def gen_job_script(
             job_dictionary,
             resource_config,
             exe,
-            configuration.migserver_https_url,
+            configuration.migserver_https_sid_url,
             localjobname,
             path_without_extension,
             )
     elif script_language == 'java':
         generator = genjobscriptjava.GenJobScriptJava(job_dictionary,
-                resource_config, configuration.migserver_https_url,
+                resource_config, configuration.migserver_https_sid_url,
                 localjobname, path_without_extension)
     else:
         print 'Unknown script language! (is in configuration.scriptlanguages but not in jobscriptgenerator) %s '\

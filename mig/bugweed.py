@@ -1,10 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# --- BEGIN_HEADER ---
-#
-# pubvgridprojects - [insert a few words of module description on this line]
-# Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
+# bugweed - a simple helper to locate simple error in the project code.
+# Copyright (C) 2009  Jonas Bardino
 #
 # This file is part of MiG.
 #
@@ -21,15 +19,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-#
-# -- END_HEADER ---
-#
 
-import cgi
-import cgitb
-cgitb.enable()
+"""Grep for obvious errors in pylint output for all code"""
 
-from shared.functionality.pubvgridprojects import main
-from shared.cgiscriptstub import run_cgi_script_possibly_with_cert
+import os
+import sys
 
-run_cgi_script_possibly_with_cert(main)
+from codegrep import code_files
+
+if '__main__' == __name__:
+    if len(sys.argv) != 1:
+        print 'Usage: %s' % sys.argv[0]
+        print 'Grep for obvious errors in all code files'
+        sys.exit(1)
+
+    command = "pylint -e %s" % (' '.join(code_files))
+    print "Bug weeding command: %s" % command
+    print "*** Not all lines reported are necessarily errors ***"
+    print
+    os.system(command)

@@ -29,10 +29,10 @@
 
 """Oneclick resource back end"""
 
-from shared.init import initialize_main_variables
-from shared.functional import validate_input
-from shared.sandbox import get_resource
 import shared.returnvalues as returnvalues
+from shared.functional import validate_input
+from shared.init import initialize_main_variables
+from shared.sandbox import get_resource
 
 
 def signature():
@@ -68,13 +68,13 @@ def main(client_id, user_arguments_dict):
         'cookie': result[2],
         'cputime': result[3],
         'codebase': '%s/sid_redirect/%s.oneclick/'\
-             % (configuration.migserver_https_url, result[0]),
+             % (configuration.migserver_https_sid_url, result[0]),
         'oneclick_code': 'MiG.oneclick.Applet.class',
         'resource_code': 'MiG.oneclick.Resource.class',
         'oneclick_archive': 'MiGOneClickCodebase.jar',
         'info_code': 'JavaInfoApplet.class',
         'info_archive': '',
-        'server': configuration.migserver_https_url,
+        'server': configuration.migserver_https_sid_url,
         }
 
     if 'false' == accepted['debug'][0].lower():

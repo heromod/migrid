@@ -136,7 +136,7 @@ def main(client_id, user_arguments_dict):
                           : 'showvgridmonitor.py?vgrid_name=ALL'})
 
     output_objects.append({'object_type': 'sectionheader', 'text'
-                          : 'VGrid request'})
+                          : 'VO request'})
     output_objects.append({'object_type': 'link', 'text'
                           : 'Request ownership or membership of an existing VO'
                           , 'destination': 'vgridmemberrequest.py'})

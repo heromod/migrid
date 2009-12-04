@@ -58,7 +58,7 @@ def main(client_id, user_arguments_dict):
         return (accepted, returnvalues.CLIENT_ERROR)
 
     title_entry = find_entry(output_objects, 'title')
-    title_entry['text'] = 'MiG Advanced Shell'
+    title_entry['text'] = 'Advanced Shell'
     # Please have href points to the CSS file and have basedir changed to the directory where JavaScripts are placed.
     title_entry['javascript']='<link rel="stylesheet" type="text/css" href="/images/css/shell.css"/>\
 <script type="text/javascript">var shell; var state=false; var interval; var  basedir="/images/js/";\
@@ -67,7 +67,7 @@ for(var i=0;i<scripts.length;i++){scripts[i]=basedir+scripts[i];}\
 </script>'
     title_entry['bodyfunctions']='onload="load(scripts, 0);"'
     
-    output_objects.append({'object_type': 'header', 'text': 'MiG Advanced Shell'
+    output_objects.append({'object_type': 'header', 'text': 'Advanced Shell'
                           })
     output_objects.append({'object_type': 'html_form', 'text'
                           : """

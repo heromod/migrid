@@ -44,7 +44,7 @@ Lib.prototype.Init=function ()
 }
 Lib.prototype.Open=function()
 {
-    this.gui.Output("Minimium Intrusion Grid - Advanced Shell Interface");
+    this.gui.Output("Grid - Advanced Shell Interface");
     this.gui.Output(Date());
     this.gui.SetPrompt(this.status.GetPrompt());
 }

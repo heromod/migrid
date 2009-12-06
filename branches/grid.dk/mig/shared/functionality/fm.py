@@ -47,7 +47,7 @@ from shared.useradm import client_id_dir
 def html_tmpl():
     
   return  """
-  
+  <div id="debug"></div>
   <div id="fm_filemanager">        
     <div class="fm_addressbar">
       <ul><li class="fm_path"><input type="text" value="/" name="fm_current_path" readonly="readonly" /></li></ul>
@@ -82,8 +82,11 @@ def html_tmpl():
     <li class="mkdir separator">
       <a href="#mkdir">Create Folder</a>
     </li>
+    <li class="create">
+      <a href="#create">Create File</a>
+    </li>
     <li class="upload">
-      <a href="#upload">Upload file</a>
+      <a href="#upload">Upload File</a>
     </li>
     <li class="copy separator">
       <a href="#copy">Copy</a>
@@ -196,6 +199,7 @@ def html_tmpl():
   
   <div id="editor_dialog" title="Editor" style="display: none;">
   <form id="editor_form" action="editfile.py">
+  <div class="spinner" style="padding-left: 20px;">Loading file...</div>
   <fieldset>
 
     <input type="hidden" name="output_format" value="json">

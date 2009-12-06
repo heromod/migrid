@@ -185,14 +185,15 @@ if (jQuery) (function($){
 		// Callback helpers for context menu
 		var callbacks = {
 			
-			show: 	function (action, el, pos) { document.location = '/cert_redirect/' + $(el).attr(pathAttribute) },
+			show: 	function (action, el, pos) { document.location = '/cgi-bin/cat.py?path='+$(el).attr(pathAttribute)+'&output_format=file' },
 			edit: 	function (action, el, pos) {
 				
 				$('#editor_dialog').dialog('destroy');
 				$('#editor_output').html('');
 				$("#editor_dialog").dialog({ buttons: {
 																			'Save Changes': function() { $('#editor_form').submit(); },
-																			Close: function() {$(this).dialog('close');}
+																			Close: function() {$(this).dialog('close');},
+																			Download: function() { document.location = '/cgi-bin/cat.py?path='+$(el).attr(pathAttribute)+'&output_format=file' }
 																		},
 																		autoOpen: false,
 																		closeOnEscape: true,
@@ -200,7 +201,11 @@ if (jQuery) (function($){
 																		width: '800px'}
 			
 																	);
-			
+				$("#editor_dialog div.spinner").show();
+				$("#editor_dialog input[name=submitjob]").attr('checked', false);
+				$("#editor_dialog input[name=path]").val('./'+$(el).attr(pathAttribute));
+				$("#editor_dialog").dialog('open');				
+				
 				// Grab file info
 				$.getJSON('/cgi-bin/cat.py',
 				{ path: $(el).attr(pathAttribute),
@@ -216,11 +221,50 @@ if (jQuery) (function($){
 						}
 					}
 					
-					$("#editor_dialog input[name=submitjob]").attr('checked', false);
-					$("#editor_dialog input[name=path]").val('./'+$(el).attr(pathAttribute));
 					$("#editor_dialog textarea[name=editarea]").val(file_output);
-					$("#editor_dialog").dialog('open');
+					$("#editor_dialog div.spinner").hide();
+					
 				});
+				
+			},
+			create: 	function (action, el, pos) {
+				
+				$('#editor_dialog').dialog('destroy');
+				$('#editor_output').html('');
+				$("#editor_dialog").dialog({ buttons: {
+																			'Save Changes': function() {
+																				$('#editor_form').submit();																				
+																			},
+																			Close: function() {$(this).dialog('close');}
+																		},
+																		autoOpen: false,
+																		closeOnEscape: true,
+																		modal: true,
+																		width: '800px'}
+			
+																	);
+			
+				// determine file-name of new file
+				var new_file_name = 'unknown';
+				var name_taken = true;
+
+				for(var i=1; name_taken; i++) {
+					name_taken = false;
+					$('#fm_filelisting tbody tr').each(function(item) {
+						if ( $(this).attr('title') == $(el).attr(pathAttribute)+'new_empty_file'+'-'+i ) {
+							name_taken = true;							
+						} else {
+							new_file_name = $(el).attr(pathAttribute)+'new_empty_file'+'-'+i;
+						}
+					});
+					
+				}
+
+				$("#editor_dialog input[name=submitjob]").attr('checked', false);
+				$("#editor_dialog input[name=path]").val('./'+new_file_name);
+				$("#editor_dialog textarea[name=editarea]").val('');
+				$("#editor_dialog div.spinner").hide();
+				$("#editor_dialog").dialog('open');				
 				
 			},
 			cat:		function (action, el, pos) { jsonWrapper(el, '#cmd_dialog', '/cgi-bin/cat.py'); },
@@ -488,7 +532,12 @@ if (jQuery) (function($){
 					var spacerHeight = $("#fm_filelisting").height() - $(".fm_files").height();
 					if (spacerHeight < 0) {
 						spacerHeight = $(".fm_files").height() - $("#fm_filelisting").height()-20;
-						$('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;" title="'+t+'"></div>');
+						if (t != '/') { // Do not prepend the fake-root.
+							$('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;" title="'+t+'"></div>');
+						} else {
+							$('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;" title=""></div>');	
+						}
+						
 						$("div.filespacer").contextMenu({ menu: 'folder_context'},
                                             function(action, el, pos) {
 																							(options['actions'][action])(action, el, pos);                                            
@@ -670,7 +719,7 @@ if (jQuery) (function($){
 			$('#editor_form').ajaxForm({target: '#editor_output',
 																	dataType: 'json',
 																	success: function(responseObject, statusText) {
-																		
+																																				
 																		var stuff =''
 																		for(var i=0; i<(responseObject.length); i++) {
 																			
@@ -694,6 +743,7 @@ if (jQuery) (function($){
 																			
 																		}
 																		$('#editor_output').html(stuff);
+																		$('#fm_filemanager').reload('');
 																		
 																	}
 																});

@@ -103,12 +103,12 @@ def html_tmpl():
       <li class="schedule single">
           <a href="#schedule">Scheduler</a>
       </li>
-      <li class="statusfiles single">
+      <li class="liveoutput single">
+          <a href="#liveoutput">Live Output</a>
+      </li>
+      <li class="statusfiles single separator">
           <a href="#statusfiles">Status Files</a>
       </li>
-      <li class="liveoutput single">
-          <a href="#liveoutput">Live output</a>
-      </li>        
       
       <li class="resubmit multi">
           <a href="#resubmit">Resubmit All</a>
@@ -160,16 +160,22 @@ def js_tmpl():
           break;
           
           case 'file_output':
-            file_output += '<p>File output:</p>';
+            
             for(j=0; j<jsonRes[i].lines.length; j++) {
               file_output += jsonRes[i].lines[j]+'\\n';
+            }
+            if (file_output.length>0) {
+              file_output += '<p>File output:</p>'+file_output;  
             }
           break;
           
           case 'dir_listings':
-            dir_listings += '<p>Directory Listings</p>';
+            
             for(j=0; j<jsonRes[i]['dir_listings'].length; j++) {
               dir_listings += jsonRes[i]['dir_listings'][j];
+            }
+            if (dir_listings.length >0) {
+              dir_listings = '<p>Directory Listings</p>'+dir_listings;  
             }
           break;
           
@@ -197,14 +203,18 @@ def js_tmpl():
           case 'changedstatusjobs':
           
             for(j=0; j<jsonRes[i]['changedstatusjobs'].length; j++) {
-              misc_output += jsonRes[i]['changedstatusjobs'][j]['message'];
+              if (!jsonRes[i]['changedstatusjobs'][j]['status']) {
+                misc_output += jsonRes[i]['changedstatusjobs'][j]['message'];
+              }
             }
               
           break;
           
           case 'saveschedulejobs':
             for(j=0; j<jsonRes[i]['saveschedulejobs'].length; j++) {
-              misc_output += jsonRes[i]['saveschedulejobs'][j]['message'];
+              if (!jsonRes[i]['saveschedulejobs'][j]['status']) {
+                misc_output += jsonRes[i]['saveschedulejobs'][j]['message'];
+              }
             }
           break;
           
@@ -317,7 +327,7 @@ def js_tmpl():
                     var single_selection = !$(el).parent().hasClass('ui-selected');
                     var job_id = '';
                     
-                    $('#cmd_helper').dialog({buttons: {Close: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true});
+                    $('#cmd_helper').dialog({buttons: {Close: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true, position: [300, 70]});
                     $('#cmd_helper').dialog('open');
                     $('#cmd_helper').html('');
                                                             

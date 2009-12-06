@@ -51,7 +51,7 @@ if (jQuery) (function($){
 		if (reloadPath == '/') {
 			reloadPath = '';
 		}
-		//alert(path + ' | '+reloadPath);
+
 		// Trigger the click-event twice for obtaining the original state (collapse+expand).
 		$('.fm_folders li [title='+reloadPath+']').click();
 		$('.fm_folders li [title='+reloadPath+']').click();
@@ -75,8 +75,7 @@ if (jQuery) (function($){
 				$('#fm_filemanager').reload($(el).attr(pathAttribute));
 			} else {
 				// Do stuff with files.
-				callbacks['edit']('action', el, null);
-				//document.location = '/cert_redirect/' + escape($(el).attr(pathAttribute));
+				callbacks['edit']('action', el, null);				
 			}
 		}
 
@@ -383,7 +382,8 @@ if (jQuery) (function($){
   			collapseEasing: null,
         multiFolder: true,
         loadMessage: 'Loading...',
-				actions: callbacks				
+				actions: callbacks,
+				subFolder: '/'
     };
     var options = $.extend(defaults, user_options);
 
@@ -413,6 +413,7 @@ if (jQuery) (function($){
 									function(jsonRes, textStatus) {
           
 					// Place ls.py output in listing array
+					var cur_folder_names = new Array();
           var listing = new Array();
           var i,j;          
           for(i=0;i<jsonRes.length; i++) {            
@@ -472,6 +473,8 @@ if (jQuery) (function($){
                           + listing[i]['name']
 													+'</div></li>\n';
 							dir_prefix = '##';
+							
+							cur_folder_names.push(listing[i]['name']);
 							
             }
 						
@@ -584,7 +587,33 @@ if (jQuery) (function($){
 					// or
 					// Binds: Collapse
 					bindBranch(folder_pane);					
-										
+				
+					// Go to subFolder					
+					var current_dir = addressbar.find('input[name=fm_current_path]').val();
+					var first_child = options.subFolder.slice(0, options.subFolder.indexOf('/'));
+					
+					var descend = false;
+					for(var i=0; i<cur_folder_names.length; i++) {
+						if (first_child == cur_folder_names[i]) {
+							descend = true;
+						}
+					}
+					if ((descend == false) && (options.subFolder!='')) {
+						
+						// Inform the user
+						$('#cmd_dialog').html('Path does not exist! '+ current_dir.slice(1)+options.subFolder);
+						$('#cmd_dialog').dialog(okDialog);
+						$('#cmd_dialog').dialog('open');
+						
+						// Stop trying to find it.
+						options.subFolder = '';
+						
+					}
+					if (descend) {
+						options.subFolder = options.subFolder.slice(first_child.length+1);						
+						$('.fm_folders li [title='+current_dir.slice(1)+first_child+'/]').click();						
+					}
+					
         });
 
       }
@@ -633,7 +662,20 @@ if (jQuery) (function($){
 			
 			// Loading message
       $('.fm_folders', obj).html('<ul class="jqueryFileTree start"><li class="wait">' + options.loadMessage + '<li></ul>');
-      showBranch( $('.fm_folders', obj), escape(options.root) );
+			
+			// Sanitize the subfolder path, simple checks, a malicious user would only hurt himself..
+			
+			// Ignore the root
+			if (options.subFolder == '/') {
+				options.subFolder = '';
+			}
+			
+			// Append a slash to path
+			if ((options.subFolder != '') && (options.subFolder.lastIndexOf('/') != options.subFolder.length)) {
+				options.subFolder = options.subFolder + '/';	
+			}
+			
+      showBranch( $('.fm_folders', obj), escape(options.root) );			
 			
 			/**
 			 * Bind handlers for forms. This is redicoulous and tedious repetitive code.

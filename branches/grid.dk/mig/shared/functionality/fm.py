@@ -242,7 +242,8 @@ def js_tmpl(entry_path='/'):
                                       params: 'path',
                                       expandSpeed: 0,
                                       collapseSpeed: 0,
-                                      multiFolder: false
+                                      multiFolder: false,
+                                      subFolder: '%s'
                                       },
                                       function(file) { alert(file); }
     );
@@ -250,7 +251,7 @@ def js_tmpl(entry_path='/'):
   });
 
   </script>
-  """
+  """ % entry_path
   return js
     
 def signature():

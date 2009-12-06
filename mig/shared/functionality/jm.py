@@ -311,7 +311,7 @@ def js_tmpl():
                     jsonWrapper(job_id, '#cmd_dialog', 'resubmit.py', {job_id: job_id})
                 },
                 statusfiles: function (job_id) {    
-                    jsonWrapper(job_id, '#cmd_dialog', 'ls.py', {path: 'out'+job_id})
+                    document.location = '/cgi-bin/fm.py?path='+'out'+job_id;
                 },
                 liveoutput: function (job_id) {
                     jsonWrapper(job_id, '#cmd_dialog', 'liveoutput.py', {job_id: job_id})
@@ -324,16 +324,24 @@ def js_tmpl():
             $("#jm_jobmanager tbody tr td").contextMenu({ menu: 'job_context'},
                 function(action, el, pos) {
                     
+                    // Status-files redirect to the filemanger they therefore do not match the general case of jsonwrapping/commandoutput
+                    if (action == 'statusfiles') {
+                      actions[action]($('input[name=job_identifier]', $(el).parent()).val());                      
+                      return true;
+                    }                    
+                    
+                    // All other actions are handled by the general case.
                     var single_selection = !$(el).parent().hasClass('ui-selected');
                     var job_id = '';
                     
                     $('#cmd_helper').dialog({buttons: {Close: function() {$(this).dialog('close');} }, width: '620px', autoOpen: false, closeOnEscape: true, modal: true, position: [300, 70]});
                     $('#cmd_helper').dialog('open');
                     $('#cmd_helper').html('');
-                                                            
+                                                        
                     if (single_selection) {
                     
                         job_id = $('input[name=job_identifier]', $(el).parent()).val();
+                                                
                         $('#cmd_helper').append('<div class="spinner" title="'+job_id+'" style="padding-left: 20px;"><p>JobId: '+job_id+'</p></div>');
                         actions[action](job_id);
                         

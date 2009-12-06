@@ -60,6 +60,7 @@
 .contextMenu LI.resubmit A { background-image: url(/images/icons/arrow_redo.png); }
 .contextMenu LI.mkdir A { background-image: url(/images/icons/folder_add.png); }
 .contextMenu LI.upload A { background-image: url(/images/icons/page_white_add.png); }
+.contextMenu LI.create A { background-image: url(/images/icons/page_white_add.png); }
 .contextMenu LI.cat A { background-image: url(/images/icons/application_osx_terminal.png); }
 .contextMenu LI.head A { background-image: url(/images/icons/application_osx_terminal.png); }
 .contextMenu LI.tail A { background-image: url(/images/icons/application_osx_terminal.png); }

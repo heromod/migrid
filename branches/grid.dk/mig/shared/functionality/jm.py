@@ -203,8 +203,10 @@ def js_tmpl():
           case 'changedstatusjobs':
           
             for(j=0; j<jsonRes[i]['changedstatusjobs'].length; j++) {
-              if (!jsonRes[i]['changedstatusjobs'][j]['status']) {
+              if (jsonRes[i]['changedstatusjobs'][j]['message']) {
                 misc_output += jsonRes[i]['changedstatusjobs'][j]['message'];
+              } else {
+                success_message = '<p>Job-Status changed from "'+ jsonRes[i]['changedstatusjobs'][j]['oldstatus'] + '" to "'+jsonRes[i]['changedstatusjobs'][j]['newstatus']+'".</p>';
               }
             }
               
@@ -212,8 +214,10 @@ def js_tmpl():
           
           case 'saveschedulejobs':
             for(j=0; j<jsonRes[i]['saveschedulejobs'].length; j++) {
-              if (!jsonRes[i]['saveschedulejobs'][j]['status']) {
+              if (jsonRes[i]['saveschedulejobs'][j]['message']) {
                 misc_output += jsonRes[i]['saveschedulejobs'][j]['message'];
+              } else {
+                success_message = '<p>Job-Schedule "'+ jsonRes[i]['saveschedulejobs'][j]['oldstatus']+'".';
               }
             }
           break;
@@ -311,7 +315,7 @@ def js_tmpl():
                     jsonWrapper(job_id, '#cmd_dialog', 'resubmit.py', {job_id: job_id})
                 },
                 statusfiles: function (job_id) {    
-                    document.location = '/cgi-bin/fm.py?path='+'out'+job_id;
+                    document.location = '/cgi-bin/fm.py?path='+'job_output/'+job_id;
                 },
                 liveoutput: function (job_id) {
                     jsonWrapper(job_id, '#cmd_dialog', 'liveoutput.py', {job_id: job_id})
@@ -394,7 +398,7 @@ def js_tmpl():
     $("#append").click(function() { 
         
         $('table tbody').html('');
-        
+        var job_count = 0;
         // add some html      
         $.getJSON('jobstatus.py?output_format=json', {}, function(jsonRes, textStatus) {
         
@@ -403,8 +407,9 @@ def js_tmpl():
             
             // Grab jobs from json response and place them in jobList.
             for(i=0; i<jsonRes.length; i++) {
-                if (jsonRes[i].object_type == 'job_list') {    
+                if ((jsonRes[i].object_type == 'job_list') && (jsonRes[i].jobs.length >0)) {    
                   jobList = jobList.concat(jsonRes[i].jobs);
+                  job_count++;
                 }
             }   
     
@@ -421,10 +426,12 @@ def js_tmpl():
 
             });
         
-        // Inform tablesorter of new data
         var sorting = [[1,1]]; 
-        $("table").trigger("update");       
-        $("table").trigger("sorton",[sorting]);
+        // Inform tablesorter of new data
+        $("table").trigger("update");
+        if (job_count>0) {
+          $("table").trigger("sorton",[sorting]);
+        }
         
       });
 

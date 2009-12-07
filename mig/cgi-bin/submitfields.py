@@ -3,7 +3,7 @@
 #
 # --- BEGIN_HEADER ---
 #
-# resadmin - Resource view for ARC resources
+# submitfields - Submit job as fields
 # Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
@@ -29,7 +29,7 @@ import cgi
 import cgitb
 cgitb.enable()
 
-from shared.functionality.arcresources import main
+from shared.functionality.submitfields import main
 from shared.cgiscriptstub import run_cgi_script
 
 run_cgi_script(main)

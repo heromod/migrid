@@ -198,7 +198,7 @@ def html_tmpl():
   </div>
   
   <div id="editor_dialog" title="Editor" style="display: none;">
-  <form id="editor_form" action="editfile.py">
+  <form id="editor_form" action="editfile.py" method="post">
   <div class="spinner" style="padding-left: 20px;">Loading file...</div>
   <fieldset>
 

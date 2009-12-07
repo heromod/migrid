@@ -454,7 +454,7 @@ if (jQuery) (function($){
 						
             is_dir = listing[i]['type'] == 'directory';
             base_css_style	= 'file';
-						dir_prefix			= '';
+						dir_prefix			= '__';
 						
 						// Stats for the statusbar
 						file_count++;

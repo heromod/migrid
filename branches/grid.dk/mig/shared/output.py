@@ -114,6 +114,17 @@ ___%s___
             #    lines.append(' / \n'.join([txt_link(link) for link in links])
 
             continue
+        elif i['object_type'] == 'file':
+            lines.append('%s\n' % i['name'])
+        elif i['object_type'] == 'submitstatuslist':
+            submitstatuslist = i['submitstatuslist']
+            if len(submitstatuslist) == 0:
+                lines.append('No job submit status found!\n')
+            else:
+                header = [['File', 'Status', 'Job ID', 'Message']]
+                lines += pprint_table(txt_table_if_have_keys(header,
+                                  submitstatuslist, ['name', 'status',
+                                                     'job_id', 'message']))
         elif i['object_type'] == 'changedstatusjobs':
             changedstatusjobs = i['changedstatusjobs']
             if len(changedstatusjobs) == 0:
@@ -974,8 +985,13 @@ def soap_format(ret_val, ret_msg, out_obj):
 def pickle_helper(ret_val, ret_msg, out_obj, protocol=None):
     """Generate output in requested pickle protocol format"""
 
-    import pickle
-    return pickle.dumps(out_obj, protocol)
+    try:
+        from shared.serial import dumps
+        return dumps(out_obj, protocol)
+    except Exception, exc:
+        print 'pickle not available on server! Defaulting to .txt output. (%s)'\
+             % exc
+        return None
 
 def pickle_format(ret_val, ret_msg, out_obj):
     """Generate output in default pickle protocol format"""

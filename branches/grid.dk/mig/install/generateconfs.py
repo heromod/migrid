@@ -141,38 +141,37 @@ cert and sid based https!
     except OSError:
         pass
 
-    apache_envs_template = os.path.join(source,
-            'apache-envs-template.conf')
-    apache_envs_conf = os.path.join(destination, 'envvars')
-    fill_template(apache_envs_template, apache_envs_conf, user_dict)
-    apache_apache2_template = os.path.join(source,
-                                         'apache-apache2-template.conf')
-    apache_apache2_conf = os.path.join(destination, 'apache2.conf')
-    fill_template(apache_apache2_template, apache_apache2_conf, user_dict)
-    apache_httpd_template = os.path.join(source,
-                                         'apache-httpd-template.conf')
-    apache_httpd_conf = os.path.join(destination, 'httpd.conf')
-    fill_template(apache_httpd_template, apache_httpd_conf, user_dict)
-    apache_ports_template = os.path.join(source,
-                                         'apache-ports-template.conf')
-    apache_ports_conf = os.path.join(destination, 'ports.conf')
-    fill_template(apache_ports_template, apache_ports_conf, user_dict)
-    apache_mig_template = os.path.join(source,
-            'apache-MiG-template.conf')
-    apache_mig_conf = os.path.join(destination, 'MiG.conf')
-    fill_template(apache_mig_template, apache_mig_conf, user_dict)
-    apache_initd_template = os.path.join(source,
-            'apache-init.d-template')
-    apache_initd_script = os.path.join(destination, 'apache-%s' % user)
-    fill_template(apache_initd_template, apache_initd_script, user_dict)
-    os.chmod(apache_initd_script, 0755)
+    def fill((template,target)):
+        _in  = os.path.join(source,template)
+        _out = os.path.join(destination,target)
+        # to avoid generating a file, leave out the template
+        if os.path.exists(_in):
+            return fill_template( _in, _out, user_dict )
+        else:
+            return False
 
-    server_template = os.path.join(source, 'MiGserver-template.conf')
-    server_conf = os.path.join(destination, 'MiGserver.conf')
-    fill_template(server_template, server_conf, user_dict)
+    # modify this list when adding/removing template->target  
+    replacement_list = \
+        [("apache-envs-template.conf"   ,"envvars"),
+         ("apache-apache2-template.conf","apache2.conf"),
+         ("apache-httpd-template.conf"  ,"httpd.conf"),
+         ("apache-ports-template.conf"  ,"ports.conf"),
+         ("apache-MiG-template.conf"    ,"MiG.conf"),
+         ("apache-init.d-template"      ,"apache-%s" % user),
+         ("apache-MiG-template.conf"    ,"MiG.conf"),
+         ("MiGserver-template.conf"    ,"MiGserver.conf"),
+         # service script for MiG daemons
+         ("MiG-init.d-template"         ,"MiG"),
+         ]
+    
+    # generate from all templates in the list (if they exist):
+    results = map( fill, replacement_list )
+
+    # adjust permissions on service scripts
+    for file in ["apache-%s" % user, "MiG" ]:
+        if os.path.exists(file): os.chmod(file, 0755)
 
     return True
-
 
 if '__main__' == __name__:
 

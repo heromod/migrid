@@ -85,7 +85,7 @@ def translate(mrsl_dict, session_id = None):
         if session_id:
             # we have been given a destination to put output files. Insert 
             # MiG server URL (automatic output download, will use PUT)
-            destination = '/'.join([config.migserver_https_url
+            destination = '/'.join([config.migserver_https_sid_url
                                    , 'sid_redirect'
                                    , session_id, ''])
         else:

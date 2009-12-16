@@ -82,7 +82,7 @@ stop() {
 	else
             # try a shutdown before killing it
 	    echo -n "SHUTDOWN MiG server (pid $pid)"
-	    echo SHUTDOWN >> $MIG_PATH/mig/server/server.stdin
+	    echo SHUTDOWN >> $MIG_HOME/server/server.stdin
 	    sleep ${DELAY}
 	    checkpid $pid
 	    KILLED=$?

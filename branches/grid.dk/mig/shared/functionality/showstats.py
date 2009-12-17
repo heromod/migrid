@@ -37,12 +37,15 @@ import re
 import sys
 import time
 
-import simplejson as json
+try:
+    from simplejson import loads
+except:
+    loads = eval # HACK
 
 import shared.returnvalues as returnvalues
 from shared.init import initialize_main_variables, find_entry
 from shared.functional import validate_input
-
+import shared.vgrid as vgrid
 
 # allowed parameters, first value is default
 displays = ['machine','user','summary']
@@ -65,12 +68,10 @@ def main(client_id, user_arguments_dict):
 
     (configuration, logger, output_objects, op_name) = \
         initialize_main_variables(op_header=False)
-    logger.debug('Starting showstats: %s' % user_arguments_dict)
 
     defaults = signature()[1]
     (validate_status, accepted) = validate_input(user_arguments_dict,
             defaults, output_objects, allow_rejects=False)
-    logger.debug('Accepted: %s' % accepted)
 
     if not validate_status:
         return (accepted, returnvalues.CLIENT_ERROR)
@@ -245,7 +246,7 @@ def main(client_id, user_arguments_dict):
     #  2. convert from json to dictionary, extract values we need
     # ...we do not really need json here...
     reply = jsonreply.replace('\r','')
-    data = eval(reply)['rows'] # :: list of dict with "key","value"
+    data = loads(reply)['rows'] # :: list of dict with "key","value"
 
     if not data:
         output_objects.append({'object_type': 'sectionheader', 'text' :
@@ -255,6 +256,9 @@ def main(client_id, user_arguments_dict):
 The query you have requested did not return any data.
                                '''})
         return (output_objects, returnvalues.OK)
+
+    # select the vgrids we are going to consider
+    my_vgrids = vgrid.user_allowed_vgrids(configuration, client_id)
 
     # process the received data:
 
@@ -327,8 +331,31 @@ The query you have requested did not return any data.
             else:
                 return key_part # nothing special
 
+        # we filter out data that we do not want to show
+        # for machines: show only machines participating in allowed vgrids
+        # for users: show only members of vgrids we are owning (?)
+        #      (not mere membership, since everybody is Generic-member)  
+        def key_to_show(key):
+            if display == 'machine':
+                # these are members of Generic, so show them (sum. see above)
+                if re.match("sandbox", key) or re.match("oneclick", key): 
+                    return True
+
+                # Problem: this function returned True for Generic! (bug)
+                is_res_list = [ vgrid.vgrid_is_resource(n, key, configuration) \
+                                for n in my_vgrids ]
+                # python 2.5: return any(is_res_list)
+                return (reduce( lambda x,y: x or y, is_res_list))
+
+            elif display == 'user':
+                return True
+            else: # 'summary'
+                return True
+
         # build data rows, fill in missing data...
         for k in keys:
+            if not key_to_show(k): continue
+            
             row = [short_key(k)]
             for d in dates:
                 if (d,k) in lookupdict:

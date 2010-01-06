@@ -93,14 +93,21 @@ for(var i=0;i<scripts.length;i++){scripts[i]=basedir+scripts[i];}\
                 if(this.readyState=='loaded'||this.readyState=='complete')
                     load(scripts, i+1);
             }
-        }else if(navigator.userAgent.indexOf('Firefox')>=0)
+        }
+        else if(navigator.userAgent.indexOf('Mozilla')>=0)
         {
             script.onload=function()
             {
                 load(scripts, i+1);
             }
         }
-          else { script.onload=function(){alert("Cannot detect browser type.");} }
+        else
+        {
+            script.onload=function()
+            {
+                alert("Unrecognised browser type: " + navigator.userAgent);
+            }
+        }
     }
     </script>
     </div>

@@ -131,7 +131,7 @@ def generate_confs(
         user_dict['__IF_SEPARATE_PORTS__'] = ''
 
     if same_fqdn and same_port:
-            print """
+        print """
 WARNING: you probably have to use either different fqdn or port settings for
 cert and sid based https!
 """
@@ -141,37 +141,31 @@ cert and sid based https!
     except OSError:
         pass
 
-    def fill((template,target)):
-        _in  = os.path.join(source,template)
-        _out = os.path.join(destination,target)
-        # to avoid generating a file, leave out the template
-        if os.path.exists(_in):
-            return fill_template( _in, _out, user_dict )
-        else:
-            return False
-
     # modify this list when adding/removing template->target  
     replacement_list = \
-        [("apache-envs-template.conf"   ,"envvars"),
-         ("apache-apache2-template.conf","apache2.conf"),
-         ("apache-httpd-template.conf"  ,"httpd.conf"),
-         ("apache-ports-template.conf"  ,"ports.conf"),
-         ("apache-MiG-template.conf"    ,"MiG.conf"),
-         ("apache-init.d-template"      ,"apache-%s" % user),
-         ("apache-MiG-template.conf"    ,"MiG.conf"),
-         ("MiGserver-template.conf"    ,"MiGserver.conf"),
-         # service script for MiG daemons
-         ("MiG-init.d-template"         ,"MiG"),
-         ]
-    
-    # generate from all templates in the list (if they exist):
-    results = map( fill, replacement_list )
-
-    # adjust permissions on service scripts
-    for file in ["apache-%s" % user, "MiG" ]:
-        if os.path.exists(file): os.chmod(file, 0755)
+                     [("apache-envs-template.conf", "envvars"),
+                      ("apache-apache2-template.conf", "apache2.conf"),
+                      ("apache-httpd-template.conf", "httpd.conf"),
+                      ("apache-ports-template.conf", "ports.conf"),
+                      ("apache-MiG-template.conf", "MiG.conf"),
+                      ("apache-init.d-template", "apache-%s" % user),
+                      ("apache-MiG-template.conf", "MiG.conf"),
+                      ("MiGserver-template.conf", "MiGserver.conf"),
+                      # service script for MiG daemons
+                      ("MiG-init.d-template", "MiG"),
+                      ]
+    for (in_name, out_name) in replacement_list:
+        in_path = os.path.join(source, in_name)
+        out_path = os.path.join(destination, out_name)
+        if os.path.exists(in_path):
+            fill_template(in_path, out_path, user_dict)
+            # Sync permissions
+            os.chmod(out_path, os.stat(in_path).st_mode)
+        else:
+            print "Skipping missing template: %s" % in_path
 
     return True
+
 
 if '__main__' == __name__:
 

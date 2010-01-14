@@ -641,20 +641,19 @@ def prepare_conf(configuration, input_args, resource_id):
     conf['NODECOUNT'] = total_nodes
 
     if conf.get('HOSTKEY', None):
-        try:
-            if len(conf['HOSTKEY'].split()) < 3:
-                host_key = ''
-                conf['HOSTIP'] = conf.get('HOSTIP',
-                                          socket.gethostbyname(conf['HOSTURL']))
-                host_key = conf['HOSTURL'] + ',' + conf['HOSTIP']
-                raw_key = conf['HOSTKEY'].strip()
-                if not raw_key.startswith('ssh-rsa'):
-                    raw_key = 'ssh-rsa ' + raw_key
-                host_key += ' ' + raw_key
-                conf['HOSTKEY'] = host_key
-        # might fail at gethostbyname for invalid urls
-        except: 
-            pass # no logger to write something...
+        if len(conf['HOSTKEY'].split()) < 3:
+            host_key = ''
+            try:
+                fallback_ip = socket.gethostbyname(conf['HOSTURL'])
+            except:
+                fallback_ip = '0.0.0.0'
+            conf['HOSTIP'] = conf.get('HOSTIP', fallback_ip)
+            host_key = conf['HOSTURL'] + ',' + conf['HOSTIP']
+            raw_key = conf['HOSTKEY'].strip()
+            if not raw_key.startswith('ssh-rsa'):
+                raw_key = 'ssh-rsa ' + raw_key
+            host_key += ' ' + raw_key
+            conf['HOSTKEY'] = host_key
 
     for exe in execution_nodes:
         execution_node = exe['execution_node']

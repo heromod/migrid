@@ -16,7 +16,7 @@ Shell.prototype.CheckBrowser=function ()
 {
     if(window.navigator.userAgent.indexOf("MSIE")>0)
         return 0;
-    else if(window.navigator.userAgent.indexOf("Firefox")>0)
+    else if(window.navigator.userAgent.indexOf("Mozilla")>0)
         return 1;
     else if(window.navigator.userAgent.indexOf("Safari")>0)
         return 2;
@@ -24,6 +24,8 @@ Shell.prototype.CheckBrowser=function ()
         return 3;
     else if(window.navigator.userAgent.indexOf("Chrome")>0)
         return 4;
+    else
+        return -1;
 }
 Shell.prototype.Init=function ()
 {

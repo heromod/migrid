@@ -3,7 +3,7 @@
 #
 # --- BEGIN_HEADER ---
 #
-# fm - Filemanager UI for browsing and manipulating files and folders.
+# jobman - Job manager, json based UI for browsing and manipulating jobs
 #
 # Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
 #
@@ -30,7 +30,7 @@ import cgi
 import cgitb
 cgitb.enable()
 
-from shared.functionality.fm import main
+from shared.functionality.jobman import main
 from shared.cgiscriptstub import run_cgi_script
 
 run_cgi_script(main)

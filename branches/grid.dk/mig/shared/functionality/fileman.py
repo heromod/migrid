@@ -3,7 +3,7 @@
 #
 # --- BEGIN_HEADER ---
 #
-# fm - Filemanager UI for browsing and manipulating files and folders.
+# fileman - File manager UI for browsing and manipulating files and folders
 #
 # Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
 #

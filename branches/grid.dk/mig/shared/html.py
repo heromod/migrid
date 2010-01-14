@@ -35,8 +35,8 @@ menu_items['dashboard'] = {'class': 'dashboard', 'url': 'dashboard.py',
                            'title': 'Dashboard'}
 menu_items['submitjob'] = {'class': 'submitjob', 'url': 'submitjob.py',
                            'title': 'Submit Job'}
-menu_items['files'] = {'class': 'files', 'url': 'fm.py', 'title': 'Files'}
-menu_items['jobs'] = {'class': 'jobs', 'url': 'jm.py', 'title': 'Jobs'}
+menu_items['files'] = {'class': 'files', 'url': 'fileman.py', 'title': 'Files'}
+menu_items['jobs'] = {'class': 'jobs', 'url': 'jobman.py', 'title': 'Jobs'}
 menu_items['vgrids'] = {'class': 'vgrids', 'url': 'vgridadmin.py',
                         'title': 'VGrids'}
 menu_items['resources'] = {'class': 'resources', 'url': 'resadmin.py',

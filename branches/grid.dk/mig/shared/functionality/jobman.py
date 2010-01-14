@@ -3,7 +3,7 @@
 #
 # --- BEGIN_HEADER ---
 #
-# fm - Filemanager UI for browsing and manipulating files and folders.
+# jobman - Job manager UI for browsing and manipulating files and folders
 #
 # Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
 #
@@ -315,7 +315,7 @@ def js_tmpl():
                     jsonWrapper(job_id, '#cmd_dialog', 'resubmit.py', {job_id: job_id})
                 },
                 statusfiles: function (job_id) {    
-                    document.location = '/cgi-bin/fm.py?path='+'job_output/'+job_id;
+                    document.location = '/cgi-bin/fileman.py?path='+'job_output/'+job_id;
                 },
                 liveoutput: function (job_id) {
                     jsonWrapper(job_id, '#cmd_dialog', 'liveoutput.py', {job_id: job_id})

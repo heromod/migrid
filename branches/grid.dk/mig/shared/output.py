@@ -956,8 +956,13 @@ Exit code: %s Description: %s<br>
 def soap_format(configuration, ret_val, ret_msg, out_obj):
     """Generate output in soap format"""
 
-    import SOAPpy
-    return SOAPpy.buildSOAP(out_obj)
+    try:
+        import SOAPpy
+        return SOAPpy.buildSOAP(out_obj)
+    except Exception, exc:
+        print 'SOAPpy not available on server! Defaulting to .txt output. (%s)'\
+             % exc
+        return None
 
 
 def pickle_helper(configuration, ret_val, ret_msg, out_obj, protocol=None):
@@ -990,8 +995,13 @@ def pickle2_format(configuration, ret_val, ret_msg, out_obj):
 def yaml_format(configuration, ret_val, ret_msg, out_obj):
     """Generate output in yaml format"""
 
-    import yaml
-    return yaml.dump(out_obj)
+    try:
+        import yaml
+        return yaml.dump(out_obj)
+    except Exception, exc:
+        print 'yaml not available on server! Defaulting to .txt output. (%s)'\
+             % exc
+        return None
 
 
 def xmlrpc_format(configuration, ret_val, ret_msg, out_obj):
@@ -1117,7 +1127,7 @@ def format_output(
     except Exception, err:
         msg = outputformat + \
               ' failed on server! Defaulting to .txt output. (%s)' % err
-        return (txt_format(ret_val, msg, out_obj))
+        return (txt_format(configuration, ret_val, msg, out_obj))
 
 def format_timedelta(timedelta):
     """Formats timedelta as '[Years,] [days,] HH:MM:SS'"""

@@ -65,7 +65,7 @@ def main(client_id, user_arguments_dict):
     (stat, list) = vgrid_list_vgrids(configuration)
     if not stat:
         output_objects.append({'object_type': 'error_text', 'text'
-                              : 'Error getting list of VOs.'})
+                              : 'Error getting list of virtual orgs.'})
 
     # Iterate through jobs and print details for each
 
@@ -111,43 +111,43 @@ def main(client_id, user_arguments_dict):
 
 
     title_entry = find_entry(output_objects, 'title')
-    title_entry['text'] = 'VO administration'
+    title_entry['text'] = 'Virtual Organization administration'
     output_objects.append({'object_type': 'header', 'text': 'Virtual Organisations'
                           })
     output_objects.append({'object_type': 'sectionheader', 'text'
-                          : 'VO Owner'})
+                          : 'Virtual Organization Owner'})
     output_objects.append({'object_type': 'text', 'text'
-                          : 'List of VOs where you are registered as owner:'
+                          : 'List of Virtual Organizations where you are registered as owner:'
                           })
 
     output_objects.append(owner_list)
     output_objects.append({'object_type': 'sectionheader', 'text'
-                          : 'VO member'})
+                          : 'Virtual Organization Member'})
     output_objects.append({'object_type': 'text', 'text'
-                          : 'List of VOs where you are registered as member:'
+                          : 'List of Virtual Organizations where you are registered as member:'
                           })
     output_objects.append(member_list)
 
     output_objects.append({'object_type': 'sectionheader', 'text'
-                          : 'VO Totals'})
+                          : 'Virtual Organization Totals'})
     output_objects.append({'object_type': 'link', 'text'
-                          : 'View a monitor page with all VOs/resources you can access'
+                          : 'View a monitor page with all Virtual Organizations/resources you can access'
                           , 'destination'
                           : 'showvgridmonitor.py?vgrid_name=ALL'})
 
     output_objects.append({'object_type': 'sectionheader', 'text'
-                          : 'VO request'})
+                          : 'Virtual Organization request'})
     output_objects.append({'object_type': 'link', 'text'
-                          : 'Request ownership or membership of an existing VO'
+                          : 'Request ownership or membership of an existing Virtual Organization'
                           , 'destination': 'vgridmemberrequest.py'})
 
     output_objects.append({'object_type': 'sectionheader', 'text'
-                          : 'Create a new virtual organisation'})
+                          : 'Create a new Virtual Organisation'})
     output_objects.append({'object_type': 'html_form', 'text'
                           : '''<form method="get" action="createvgrid.py">
     <input type="text" size=40 name="vgrid_name">
     <input type="hidden" name="output_format" value="html">
-    <input type="submit" value="Create VO">
+    <input type="submit" value="Create Virtual Organization">
     </form>
     <br>
     '''})

@@ -115,12 +115,6 @@ def vgrid_is_resource(vgrid_name, client_id, configuration):
     """Check if client_id is a resource in vgrid_name.
     The default VGrid is _not_ considered."""
 
-#    if vgrid_is_default(vgrid_name):
-#        return True
-# This is not true! (TODO: patch trunc) 
-# (This function is not used where it would harm..)
-# resources should not  be automatically members of Generic, resource
-# owners might want to restrict to a particular (not Generic) VGrid.
     return vgrid_is_cert_in_list(vgrid_name, client_id, 'resources',
                                  configuration)
 

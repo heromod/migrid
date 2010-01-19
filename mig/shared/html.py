@@ -53,6 +53,7 @@ menu_items['shell'] = {'class': 'shell', 'url': 'shell.py', 'title': 'Shell'}
 def html_print(formatted_text, html=True):
     print html_add(formatted_text, html)
 
+
 def html_add(formatted_text, html=True):
     """Convenience function to only append html formatting to a text
     string in html mode"""
@@ -120,32 +121,18 @@ def get_cgi_html_header(
 <link rel="stylesheet" type="text/css" href="%s" media="screen"/>
 <link rel="stylesheet" type="text/css" href="%s" media="screen"/>
 
-<link rel="stylesheet" type="text/css" href="/images/css/jquery.filemanager.css" media="screen"/>
-<link rel="stylesheet" type="text/css" href="/images/css/jquery.jobmanager.css" media="screen"/>
-<link rel="stylesheet" type="text/css" href="/images/css/jquery.contextmenu.css" media="screen"/>
-<link rel="stylesheet" type="text/css" href="/images/css/jquery-ui-1.7.2.custom.css" media="screen"/>
 <link rel="icon" type="image/vnd.microsoft.icon" href="%s">
 
-<script type="text/javascript" src="/images/js/jquery-1.3.2.min.js"></script>
-<script type="text/javascript" src="/images/js/jquery-ui-1.7.2.custom.min.js"></script>
-<script type="text/javascript" src="/images/js/jquery.form.js"></script>
-<script type="text/javascript" src="/images/js/jquery.prettyprint.js"></script>
-<script type="text/javascript" src="/images/js/jquery.filemanager.js"></script>
-<script type="text/javascript" src="/images/js/jquery.jobmanager.js"></script>
-<script type="text/javascript" src="/images/js/jquery.tablesorter.js"></script>
-<script type="text/javascript" src="/images/js/jquery.tablesorter.pager.js"></script>
-<script type="text/javascript" src="/images/js/jquery.contextmenu.js"></script>
-
+%s
 <title>
 %s
 </title>
-%s
 </head>
 <body %s>
 <div id="topspace">
 </div>
 <div id="toplogo">
-<!--<img src="%s" id="logoimage" alt="site logo"/>-->
+<img src="%s" id="logoimage" alt="site logo"/>
 <span id="logotitle">
 %s
 </span>
@@ -157,9 +144,10 @@ def get_cgi_html_header(
 <div id="content">
     '''\
          % (configuration.site_default_css, configuration.site_user_css,
-            configuration.site_fav_icon, title, scripts,
+            configuration.site_fav_icon, scripts, title,
             bodyfunctions, configuration.site_logo_image,
             configuration.site_logo_text, menu_lines, header)
+
 
 def get_cgi_html_footer(configuration, footer='', html=True):
     """Return the html tags to mark the end of a page. If a footer string
@@ -191,3 +179,4 @@ def html_encode(raw_string):
     result = raw_string.replace("'", '&#039;')
     result = result.replace('"', '&#034;')
     return result
+

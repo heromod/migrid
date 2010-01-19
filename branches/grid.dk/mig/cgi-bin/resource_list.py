@@ -55,7 +55,7 @@ print '''Content-type: text/html
 
 form = cgi.FieldStorage()
 
-print get_cgi_html_header('Grid Resource administration',
+print get_cgi_html_header(configuration, 'Grid Resource administration',
                           'Welcome to the Grid resource administration.')
 
 dir_list = os.listdir(configuration.resource_home)

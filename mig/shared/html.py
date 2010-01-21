@@ -48,6 +48,13 @@ menu_items['runtimeenvs'] = {'class': 'runtimeenvs', 'url': 'redb.py',
 menu_items['settings'] = {'class': 'settings', 'url': 'settings.py',
                           'title': 'Settings'}
 menu_items['shell'] = {'class': 'shell', 'url': 'shell.py', 'title': 'Shell'}
+menu_items['wshell'] = {'class': 'shell',
+    'url': 'javascript:\
+             window.open(\'shell.py?menu=no\',\'shellwindow\',\
+             \'dependent=yes,menubar=no,status=no,toolbar=no,\
+               height=650px,width=800px\');\
+             window.reload();',
+    'title': 'Shell(popup)'}
 
 
 def html_print(formatted_text, html=True):
@@ -84,7 +91,7 @@ def render_menu(configuration, menu_class='navmenu',
             continue
         selected = ''
         if spec['url'].find(current_element) > -1:
-            selected = ' class="selected" ' + current_element
+            selected = ' class="selected" ' # ??? + current_element
         menu_lines += '   <li %s class="%s"><a href="%s" %s>%s</a></li>\n'\
              % (spec.get('attr', ''), spec['class'], spec['url'], selected,
                 spec['title'])
@@ -121,7 +128,7 @@ def get_cgi_html_header(
 <link rel="stylesheet" type="text/css" href="%s" media="screen"/>
 <link rel="stylesheet" type="text/css" href="%s" media="screen"/>
 
-<link rel="icon" type="image/vnd.microsoft.icon" href="%s">
+<link rel="icon" type="image/vnd.microsoft.icon" href="%s"/>
 
 %s
 <title>
@@ -157,9 +164,8 @@ def get_cgi_html_footer(configuration, footer='', html=True):
     if not html:
         return ''
 
-    out = footer
+    out = "</div>\n" + footer
     out += '''
-</div>
 <div id="bottomlogo">
 <img src="%s" id="creditsimage" alt=""/>
 <span id="credits">

@@ -934,11 +934,11 @@ def html_format(configuration, ret_val, ret_msg, out_obj):
         else:
             lines.append('unknown object %s' % i)
     footer = \
-        """</div>
+        """
     <div id="exitcode">
-Exit code: %s Description: %s<br>
+Exit code: %s Description: %s<br/>
     </div>
-<br>    
+<br/>    
 """\
          % (ret_val, ret_msg)
 

@@ -34,8 +34,11 @@ Lib.prototype.Init=function ()
                      argument/default list, 
                      0(local) or 1(remote) ]   
      Semantics for an entry: when one of the names is entered on the cmd line,
-            1. check arguments 
-             
+			1. check arguments, reject if something wrong with arg.s
+            2. if local: call a local method "Shell<Name>" where <Name> is
+            			the first method names, with first letter capitalized
+               if remote: call the method (same name, from registering it
+               			with Probe) via XMLRPC
   */
     [['help','man'], "{'method': ['']}", 0],
     [['clear'], "", 0],

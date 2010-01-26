@@ -62,8 +62,12 @@ def main(client_id, user_arguments_dict):
     title_entry['text'] = 'Advanced Shell'
     if accepted['menu'][-1]=='no':
         title_entry['skipmenu']=True
+        title_entry['javascript'] = '''
+<style type="text/css">
+#content { margin: 10px }
+</style>'''
     # Please have href points to the CSS file and have basedir changed to the directory where JavaScripts are placed.
-    title_entry['javascript']='''
+    title_entry['javascript']+='''
 <link rel="stylesheet" type="text/css" href="/images/css/shell.css"/>
 <script type="text/javascript">
   var  basedir="/images/js/";

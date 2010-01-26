@@ -91,7 +91,7 @@ def render_menu(configuration, menu_class='navmenu',
             continue
         selected = ''
         if spec['url'].find(current_element) > -1:
-            selected = ' class="selected" ' # ??? + current_element
+            selected = ' class="selected" '
         menu_lines += '   <li %s class="%s"><a href="%s" %s>%s</a></li>\n'\
              % (spec.get('attr', ''), spec['class'], spec['url'], selected,
                 spec['title'])
@@ -124,7 +124,7 @@ def get_cgi_html_header(
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <link rel="stylesheet" type="text/css" href="%s" media="screen"/>
 <link rel="stylesheet" type="text/css" href="%s" media="screen"/>
 

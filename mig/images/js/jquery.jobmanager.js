@@ -1,3 +1,7 @@
+/* TODO this file is currently unused! Should take
+ * the code inside jobman.py.
+ */
+
 if (jQuery) (function($){
   
   $.fn.jobmanager = function(user_options) {

@@ -854,6 +854,7 @@ def guess_type(name):
     else:
 
     # TODO: extend to include all used variables here
+
         return valid_alphanumeric
 
 

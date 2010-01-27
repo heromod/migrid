@@ -93,9 +93,7 @@ html['english'] = \
 <tr><td><a href='ssslogin.py?language=english'>Back to Sandbox login page</a></td></tr>
 
 </table>
-<br>
-
-</table></form>
+<br />
 """
 
 html['danish'] = \
@@ -142,7 +140,7 @@ html['danish'] = \
 <tr><td><a href='ssslogin.py?language=danish'>Tilbage til sandkasse login siden</a></td></tr>
 
 </table>
-<br>
+<br />
 
 </table></form>
 """

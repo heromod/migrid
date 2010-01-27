@@ -145,11 +145,11 @@ def main(client_id, user_arguments_dict):
                           : 'Create a new Virtual Organisation'})
     output_objects.append({'object_type': 'html_form', 'text'
                           : '''<form method="get" action="createvgrid.py">
-    <input type="text" size=40 name="vgrid_name">
-    <input type="hidden" name="output_format" value="html">
-    <input type="submit" value="Create Virtual Organization">
+    <input type="text" size=40 name="vgrid_name" />
+    <input type="hidden" name="output_format" value="html" />
+    <input type="submit" value="Create Virtual Organization" />
     </form>
-    <br>
+    <br />
     '''})
 
     # print "DEBUG: %s" % output_objects

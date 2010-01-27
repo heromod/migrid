@@ -106,7 +106,7 @@ def print_os_selection():
     """Prints html section where a user chooses which OS he uses"""
 
     html = \
-        """<tr><td align='' colspan=''>Which operating system 
+        """<tr><td align='left' colspan='1'>Which operating system 
           are you using?</td>
     <td><select name='operating_system'>
     <option value='win'>Windows XP/Vista</option>
@@ -121,7 +121,7 @@ def print_windows_solution_selection():
 
     html = \
         """<tr><td>If Windows, do you want 
-          the screensaver <break> or the service model? If unsure, choose screensaver</td>
+          the screensaver <br /> or the service model? If unsure, choose screensaver</td>
     <td><select name='win_solution'>
     <option value='screensaver'>Screensaver</option>
     <option value='service'>Windows Service</option>
@@ -135,12 +135,12 @@ def print_expert_settings(display):
 
     if display:
         html = \
-            """<tr><td align='' colspan=''>Which kind of disk image would you like?</td>
+            """<tr><td align='center' colspan='1'>Which kind of disk image would you like?</td>
     <td><select name='image_format'>
     <option value='qcow'>qcow</option>
     <option value='raw'>raw</option>
     </select></td></tr>
-    <tr><td align='' colspan=''>Which VGrid do you want the sandbox to work for?</td>
+    <tr><td align='center' colspan='1'>Which VGrid do you want the sandbox to work for?</td>
     <td><select name='vgrid'>
     <option value='%(default_vgrid)s'>%(default_vgrid)s</option>
     </select></td></tr>
@@ -148,8 +148,8 @@ def print_expert_settings(display):
     else:
         html = \
             """
-             <input type=hidden name='image_format' value='qcow'>
-             <input type='hidden' name='vgrid' value='%(default_vgrid)s'>
+             <input type=hidden name='image_format' value='qcow' />
+             <input type='hidden' name='vgrid' value='%(default_vgrid)s' />
 """ % {'default_vgrid': default_vgrid}
 
     return html
@@ -182,7 +182,7 @@ def show_download(configuration, userdb, user, passwd, expert):
 
     html = \
         """<form action='ssscreateimg.py?MiG-SSS.zip' 
-          method='POST'>
+          method='post'>
     <table class=sandboxcreateimg>
     <tr class=title><td align='center' colspan='2'>
     Download new sandbox
@@ -197,29 +197,29 @@ def show_download(configuration, userdb, user, passwd, expert):
 
     html += \
         """<tr><td>
-    <input type='hidden' name='username' value='%s'>
-    <input type='hidden' name='password' value='%s'>
+    <input type='hidden' name='username' value='%s' />
+    <input type='hidden' name='password' value='%s' />
 """\
          % (user, passwd)
     html += """</td></tr>
         """
     html += \
         """<tr><td>Press 'Submit' to download - please note that it 
-          may<br> take up to 2 minutes to generate your sandbox</td>
-          <td align='center'><input type='SUBMIT' value='Submit'>
+          may<br /> take up to 2 minutes to generate your sandbox</td>
+          <td align='center'><input type='submit' value='Submit' />
           </form>
           </td></tr>
 
     </table>
-    <br>
+    <br />
     <table class=sandboxadmin>
     <tr><td align='center'>
     Advanced users may want to fine tune the sandbox to download by switching to expert mode:
-    <form action='sssadmin.py' method='POST'>
-    <input type='hidden' name='username' value='%s'>
-    <input type='hidden' name='password' value='%s'>
-    <input type='hidden' name='expert' value='%s'>
-    <input type='submit' value='Toggle expert mode'>
+    <form action='sssadmin.py' method='post'>
+    <input type='hidden' name='username' value='%s' />
+    <input type='hidden' name='password' value='%s' />
+    <input type='hidden' name='expert' value='%s' />
+    <input type='submit' value='Toggle expert mode' />
     </form>
     </td></tr>    
     </table> 
@@ -351,7 +351,7 @@ def main(client_id, user_arguments_dict):
         output_objects.append({'object_type': 'sandboxinfos', 'sandboxinfos'
                                    : sandboxinfos})
 
-        output_objects.append({'object_type': 'html_form', 'text': '<br>'})
+        output_objects.append({'object_type': 'html_form', 'text': '<br />'})
         output_objects.append({'object_type': 'html_form', 'text'
                                : show_download(configuration, userdb,
                                                username, password,

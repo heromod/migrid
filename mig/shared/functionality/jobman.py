@@ -162,7 +162,7 @@ def js_tmpl():
     jsonSettings,
     function(jsonRes, textStatus) {
     
-      var errors			= "";
+      var errors = "";
       var file_output = "";
       var dir_listings = "";
       var misc_output = "";
@@ -179,12 +179,9 @@ def js_tmpl():
           break;
           
           case "file_output":
-            
+            file_output += "<p>Contents:</p>";  
             for(j=0; j<jsonRes[i].lines.length; j++) {
-              file_output += jsonRes[i].lines[j]+"\\n";
-            }
-            if (file_output.length>0) {
-              file_output += "<p>File output:</p>"+file_output;  
+              file_output += jsonRes[i].lines[j];
             }
           break;
           
@@ -334,11 +331,11 @@ def js_tmpl():
                     jsonWrapper(job_id, "#cmd_dialog", "resubmit.py", {job_id: job_id})
                 },
                 statusfiles: function (job_id) {    
-                    document.location = "/cgi-bin/fileman.py?path="+"job_output/"+job_id;
+                    document.location = "fileman.py?path="+"job_output/"+job_id;
                 },
                 outputfiles: function (job_output) {    
                     // TODO: fileman does not support file paths and multi path - use old ls
-                    //document.location = "/cgi-bin/fileman.py?"+job_output.match(/^ls.py\?(.*)$/)[1];
+                    //document.location = "fileman.py?"+job_output.match(/^ls.py\?(.*)$/)[1];
                     document.location = job_output;
                 },
                 liveoutput: function (job_id) {

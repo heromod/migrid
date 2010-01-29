@@ -12,7 +12,7 @@ The user can stick with a web interface for this complete process or use one of 
 We will describe the details for the default case with full input and output handling here, but the explicit download and upload of input and output files is unnecessary when the _transparent remote on-demand file access_ model is applied.
 
 Most of the details are also available in 
-[http://www.migrid.org/MiG/Mig/egc_february_2005/The_Simple_Model.pdf The Simple Model] paper which describes the basic MiG architecture. Especially the figure on page 4 may be a helpful helper illustration of the events.
+[http://dk.migrid.org/public/doc/published_papers/ETN05-Simple.pdf The Simple Model] paper which describes the basic MiG architecture. Especially the figure on page 4 may be a helpful helper illustration of the events.
 
 In sandbox resources we use a pure pull model, which does not completely follow the steps described here. Please [ContactUs contact us] if you need further details about that model.
 

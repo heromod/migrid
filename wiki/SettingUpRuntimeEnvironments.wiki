@@ -15,12 +15,12 @@ Runtime environments are used by jobs to indicate their software dependencies an
 So when some of our users wanted to start running MPI jobs, we decided to create a runtime environment to help directing jobs to suitable resources.
 
 == Creating the Runtime Environment ==
-On my [https://mig-1.imada.sdu.dk/cgi-bin/redb.py MiG Runtime Envs] page I selected `Create a new runtime environment` and filled in the fields. The result can be seen by all MiG users on the [https://mig-1.imada.sdu.dk/cgi-bin/showre.py?re_name=OPENMPI OPENMPI runtime environment page]. This visibility is because runtime environments are Grid global entities that anyone can use as they see fit. 
+On my [https://dk.migrid.org/cgi-bin/redb.py MiG Runtime Envs] page I selected `Create a new runtime environment` and filled in the fields. The result can be seen by all MiG users on the [https://dk.migrid.org/cgi-bin/showre.py?re_name=OPENMPI OPENMPI runtime environment page]. This visibility is because runtime environments are Grid global entities that anyone can use as they see fit. 
 
 Open MPI applications only need to know the base directory holding the Open MPI binaries, eaders and libraries, so in this case the only necessary environment variable is MPI_HOME. Apart from the name, most of the other runtime environment settings are mostly for informational purposes. So I just picked the telling and general name OPENMPI. If the software version was important to jobs, it could have been reflected in the name (e.g. OPENMPI-1.2.6).
 
 == Configuring the Resources ==
-On the resources I had different Open MPI installations, so that one resource had it installed directly under /usr whereas another resource used /opt/openmpi-1.2.6 . Due to the use of a MPI_HOME environment, this can easily be made completely transparent to the jobs. I simply set MPI_HOME to the base dir in the individual resource configurations on my [https://mig-1.imada.sdu.dk/cgi-bin/resadmin.py MiG Resources page].
+On the resources I had different Open MPI installations, so that one resource had it installed directly under /usr whereas another resource used /opt/openmpi-1.2.6 . Due to the use of a MPI_HOME environment, this can easily be made completely transparent to the jobs. I simply set MPI_HOME to the base dir in the individual resource configurations on my [https://dk.migrid.org/cgi-bin/resadmin.py MiG Resources page].
 So in the configuration section for the first resource I defined the OPENMPI runtime environment to use `MPI_HOME=/usr` and on the other resource I set `MPI_HOME=/opt/openmpi-1.2.6` .
 
 == Running Jobs ==

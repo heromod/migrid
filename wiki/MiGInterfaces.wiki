@@ -2,7 +2,7 @@
 
 = Introduction =
 In line with the minimum intrusion philosophy we do not require users to install any software to access MiG. This does *not* mean that no tools to improve the user experience exists, however. The sections below describe some of the possibilities and alternative ways to access MiG.
-User tutorials for the most common use cases are available on the [http://www.migrid.org/MiG/Documents www.migrid.org Documents page].
+User tutorials for the most common use cases are available on the [http://sites.google.com/site/minimumintrusiongrid/tutorials-and-talks tutorials and talks] page.
 
 = Web Pages =
 The web pages are the simplest way to access MiG from basically anywhere with a browser. As long as you bring your MiG certificate files on e.g. a USB stick you will be able to use MiG from almost anywhere where you can find a computer with internet access.

@@ -2,7 +2,7 @@
 #labels Phase-Implementation,Phase-Deploy
 
 = Introduction =
-MiG features sandbox resources using virtual machines on `PC`s and live CDs on `PlayStation3`s as mentioned on the [http://code.google.com/p/migrid/wiki/GettingStarted#As_a_resource_owner Getting started page] and in the [http://www.migrid.org/MiG/Mig_english/sandboxes_html SSS sandbox intro]. These sandboxes provide a small Linux environment where all MiG users can run jobs.
+MiG features sandbox resources using virtual machines on `PC`s and live CDs on `PlayStation3`s as mentioned on the [http://code.google.com/p/migrid/wiki/GettingStarted#As_a_resource_owner Getting started page] and on the [http://sites.google.com/site/minimumintrusiongrid/getting-started/sandboxes MiG sandboxes] page. These sandboxes provide a small Linux environment where all MiG users can run jobs.
 This page only covers coding for those sandboxes whereas One-Click sandboxes are treated  on the [http://code.google.com/p/migrid/wiki/MiGOneClickCoding MiG One-Click Coding] page
 The sandbox resources are quite safe to use as they are difficult to tamper with, but they *are* less trusted than our dedicated resources, so we do not allow jobs to run there unless explicitly permitted by the user. Therefore you must actively mark your job for sandbox execution if that is what you want.
 
@@ -51,12 +51,12 @@ The same applies to the smallest PC sandboxes with only 100 MB of disk.
 The sandbox tool chain is available in the Sandbox VGrid.
 You can apply for membership on:
 
-https://mig-1.imada.sdu.dk/cgi-bin/vgridmemberrequest.py
+https://dk.migrid.org/cgi-bin/vgridmemberrequest.py
 
 Then you can download the development image from:
 
-https://mig-1.imada.sdu.dk/cgi-bin/ls.py?path=Sandbox/Images;flags=a;output_format=html
+https://dk.migrid.org/cgi-bin/ls.py?path=Sandbox/Images;flags=a;output_format=html
 
 and start building your own binaries to run on sandboxes.
 
-There are further instructions available in the [https://mig-1.imada.sdu.dk/cert_redirect/Sandbox/Images/README README].
+There are further instructions available in the [https://dk.migrid.org/cert_redirect/Sandbox/Images/README README].

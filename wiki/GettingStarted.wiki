@@ -7,13 +7,13 @@
 
 == As a user ==
 If You want to try out MiG as a user, all you need is a MiG certificate and a web browser.
-Please request a user certificate using the link on the [http://www.migrid.org/MiG/Actions/index_html MiG Actions page]
+Please request a user certificate using the link on the [http://sites.google.com/site/minimumintrusiongrid/getting-started MiG getting started] page.
 
 Depending on your supplied motivation for requesting the certificate we will try to provide you with access to a suitable subset of the available Grid resources. In case you just want to try it out, this will most likely be the least trusted resources. If on the other hand You have a scientific project to run on the Grid, there's good chances of getting access to more powerful resources.
 
 All users get full access to the storage and virtual organization features, so even if you are limited to running jobs on few and sandboxed resources you can still use MiG as e.g. a collaboration or project framework.
 
-When we have reviewed and verified your certificate request we will send you further instructions for getting started as a MiG user. For the impatient, some of these instructions are also available in the [http://www.migrid.org/MiG/Documents user tutorial] from the main MiG project page.
+When we have reviewed and verified your certificate request we will send you further instructions for getting started as a MiG user. For the impatient, some of these instructions are also available in the [http://sites.google.com/site/minimumintrusiongrid/tutorials-and-talks user tutorial] from the main MiG project page.
 
 
 == As a resource owner ==
@@ -33,7 +33,7 @@ With full scale resources you are able to decide even more closely which VGrids 
 
 
 === One-click resource ===
-One-click resources are the simplest to set up - it just takes a single [https://mig-1.imada.sdu.dk/cgi-sid/oneclick.py click] from your browser and your computer will start handling Grid jobs. Stopping again is just as simple - simply close the browser window/tab or navigate to another web page.
+One-click resources are the simplest to set up - it just takes a single [https://dk-sid.migrid.org/cgi-sid/oneclick.py click] from your browser and your computer will start handling Grid jobs. Stopping again is just as simple - simply close the browser window/tab or navigate to another web page.
 
 The cost of this extreme simplicity is limitations in the jobs that this kind of resource can execute and in the efficiency of such jobs.
 
@@ -53,7 +53,7 @@ Grid jobs running inside a qemu VM are additionally significantly less limited a
 Still, it should not scare you away from trying out the SSS model, as the efficiency advantages really makes such resources much more valuable than One-click resources.
 With MiG-SSS resources you additionally get more control over the exact resource settings including limiting the bandwidth to the sandbox. 
 
-You can install MiG-SSS on your computer by following the MiG-SSS link on the [http://www.migrid.org/MiG/Actions/index_html MiG Actions page].
+You can install MiG-SSS on your computer by following the MiG-SSS link on the [http://sites.google.com/site/minimumintrusiongrid/getting-started/sandboxes MiG Sandboxes] page.
 
 === Full scale resources ===
 The full scale resource model is mainly for dedicated Grid resources such as super computers or cluster computers. They require a Linux/UNIX based system with the _bash_ shell and inbound ssh access to at least one user account from the MiG servers. When those prerequisites are fulfilled, it takes no more installation or daemons to utilize the computer(s) as a MiG resource. Furthermore MiG is very firewall friendly so in most cases you do not need to add new firewall rules to run a MiG resource.

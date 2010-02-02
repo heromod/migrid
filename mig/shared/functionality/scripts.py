@@ -193,7 +193,7 @@ def main(client_id, user_arguments_dict):
         return (output_objects, returnvalues.CLIENT_ERROR)
 
     for flavor in flavors:
-        script_dir = 'MiG-%s-scripts-%s' % (flavor, timestamp)
+        script_dir = 'Grid-%s-scripts-%s' % (flavor, timestamp)
         dest_dir = '%s%s' % (base_dir, script_dir)
 
         if not os.path.isdir(dest_dir):
@@ -208,8 +208,8 @@ def main(client_id, user_arguments_dict):
 
         for (lang, _, _) in languages:
             output_objects.append({'object_type': 'text', 'text'
-                                  : 'Generating %s %s scripts in the %s subdirectory of your MiG home directory'
-                                   % (lang, flavor, script_dir)})
+                                  : 'Generating %s %s scripts in the %s subdirectory of your %s home directory'
+                                   % (lang, flavor, script_dir, configuration.short_title )})
 
         # Generate all scripts
 
@@ -242,8 +242,8 @@ def main(client_id, user_arguments_dict):
         output_objects.append({'object_type': 'text', 'text': '... Done'
                               })
         output_objects.append({'object_type': 'text', 'text'
-                              : 'MiG %s scripts are now available in your MiG home directory:'
-                               % flavor})
+                              : 'Grid %s scripts are now available in your %s home directory:'
+                               % (flavor, configuration.short_title)})
         output_objects.append({'object_type': 'link', 'text'
                               : 'View directory', 'destination'
                               : 'ls.py?path=%s' % script_dir})
@@ -251,7 +251,7 @@ def main(client_id, user_arguments_dict):
         # Create zip from generated dir
 
         output_objects.append({'object_type': 'text', 'text'
-                              : 'Generating zip archive of the MiG %s scripts'
+                              : 'Generating zip archive of the Grid %s scripts'
                                % flavor})
 
         script_zip = script_dir + '.zip'
@@ -287,8 +287,8 @@ def main(client_id, user_arguments_dict):
         output_objects.append({'object_type': 'text', 'text': '... Done'
                               })
         output_objects.append({'object_type': 'text', 'text'
-                              : 'Zip archive of the MiG %s scripts are now available in your MiG home directory'
-                               % flavor})
+                              : 'Zip archive of the Grid %s scripts are now available in your %s home directory'
+                               % (flavor, configuration.short_title) })
         output_objects.append({'object_type': 'link', 'text'
                               : 'Download zip archive', 'destination'
                               : os.path.join('..', client_dir,

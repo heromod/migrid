@@ -69,7 +69,7 @@ def main(client_id, user_arguments_dict):
     job_ids = accepted['job_id']
 
     title_entry = find_entry(output_objects, 'title')
-    title_entry['text'] = 'MiG live output'
+    title_entry['text'] = '%s live output' % configuration.short_title
     output_objects.append({'object_type': 'header', 'text'
                           : 'Requesting live output for %s'
                            % ', '.join(job_ids)})
@@ -83,8 +83,10 @@ def main(client_id, user_arguments_dict):
 
     if not os.path.isdir(base_dir):
         output_objects.append({'object_type': 'error_text', 'text'
-                              : 'You have not been created as a user on the MiG server!'
-                               + ' Please contact the MiG team.'})
+                              : 'You have not been created as a user on the %s server!' % \
+                                 configuration.short_title
+                               + ' Please contact the %s team.' % \
+                                 configuration.short_title })
         return (output_objects, returnvalues.USER_NOT_CREATED)
 
     filelist = []
@@ -275,7 +277,8 @@ def main(client_id, user_arguments_dict):
 
         if not os.path.exists(local_file):
             output_objects.append({'object_type': 'error_text', 'text'
-                                  : '.update file not available on MiG server'
+                                : '.update file not available on %s server' %\
+                                  configuration.short_title
                                   })
             continue
 

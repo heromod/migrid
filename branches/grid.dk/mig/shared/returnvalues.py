@@ -44,5 +44,5 @@ FILE_NOT_FOUND = (105, 'File not found')
 
 SYSTEM_ERROR = (200, 'SYSTEM_ERROR')
 USER_NOT_CREATED = (201, 'USER_NOT_CREATED')
-OUTPUT_VALIDATION_ERROR = (202, 'The output the MiG server '
+OUTPUT_VALIDATION_ERROR = (202, 'The output the server '
                             + 'has generated could not be validated')

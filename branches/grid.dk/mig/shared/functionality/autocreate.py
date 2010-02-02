@@ -120,7 +120,8 @@ def main(client_id, user_arguments_dict):
     logger.debug('Arguments: %s' % user_arguments_dict)
     
     output_objects.append({'object_type': 'header', 'text'
-                          : 'Automatic MiG sign up'})
+                          : 'Automatic %s sign up' % \
+                            configuration.short_title })
 
     defaults = signature()[1]
     (validate_status, accepted) = validate_input(user_arguments_dict,

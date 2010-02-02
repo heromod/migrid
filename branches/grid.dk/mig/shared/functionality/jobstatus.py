@@ -110,7 +110,8 @@ def main(client_id, user_arguments_dict):
                         client_dir)) + os.sep
 
     output_objects.append({'object_type': 'header', 'text'
-                          : 'MiG %s job status' % order})
+                          : '%s %s job status' % \
+                            (configuration.short_title, order)})
 
     if not patterns:
         output_objects.append({'object_type': 'error_text', 'text'
@@ -126,8 +127,10 @@ def main(client_id, user_arguments_dict):
     if not os.path.isdir(base_dir):
         output_objects.append({'object_type': 'error_text', 'text'
                               : 'You have not been created'
-                               + ' as a user on the MiG server!'
-                               + ' Please contact the MiG team.'})
+                               + ' as a user on the %s server!' % \
+                                 configuration.short_title
+                               + ' Please contact the %s team.' % \
+                                 configuration.short_title })
         return (output_objects, returnvalues.CLIENT_ERROR)
 
     filelist = []

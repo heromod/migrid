@@ -453,6 +453,10 @@ class Configuration:
             self.site_title = config.get('SITE', 'title')
         else:
             self.site_title = "Minimum intrusion Grid"
+        if config.has_option('SITE', 'short_title'):
+            self.short_title = config.get('SITE', 'short_title')
+        else:
+            self.short_title = "MiG"
         if config.has_option('SITE', 'default_menu'):
             self.site_default_menu = config.get('SITE', 'default_menu').split()
         else:
@@ -591,7 +595,7 @@ class Configuration:
 
             # Show exception details
 
-            logger.error('%s: %s', sys.exc_type, sys.exc_value)
+            logger.error('%s: %s', sys.exc_info()[0], sys.exc_info()[1])
 
         logger.info('Added %d peer(s) from %s', len(peers_dict.keys()),
                     peerfile)

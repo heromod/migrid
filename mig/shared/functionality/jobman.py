@@ -30,17 +30,9 @@
 their home directories.
 """
 
-import os
-import time
-import glob
-import stat
-
-from shared.parseflags import all, long_list, recursive
-from shared.validstring import valid_user_path
 from shared.init import initialize_main_variables, find_entry
 from shared.functional import validate_input_and_cert
 import shared.returnvalues as returnvalues
-from shared.settings import load_settings
 from shared.useradm import client_id_dir
 
 def html_tmpl():
@@ -57,15 +49,23 @@ def html_tmpl():
         <img class="next" src="/images/icons/arrow_right.png"/>
         <img class="last" src="/images/icons/arrow_right.png"/>
         <select class="pagesize">
-          <option value="10">10</option>
-          <option value="15" selected>15</option>
-          <option value="20">20</option>
-          <option value="25">25</option>
-          <option value="40">40</option>
-          <option value="50">50</option>
-          <option value="60">60</option>
-          <option value="80">80</option>
-          <option value="100">100</option>
+          <option value="10">10 jobs per page</option>
+          <option value="15" selected>15 jobs per page</option>
+          <option value="20">20 jobs per page</option>
+          <option value="25">25 jobs per page</option>
+          <option value="40">40 jobs per page</option>
+          <option value="50">50 jobs per page</option>
+          <option value="75">75 jobs per page</option>
+          <option value="100">100 jobs per page</option>
+        </select>
+        <select class="maxjobs">
+          <option value="100">load 100 last jobs</option>
+          <option value="200" selected>load 200 last jobs</option>
+          <option value="500">load 500 last jobs</option>
+          <option value="1000">load 1000 last jobs</option>
+          <option value="5000">load 5000 last jobs</option>
+          <option value="10000">load 10000 last jobs</option>
+          <option value="-1">load all jobs (slow)</option>
         </select>
       </form>
       <div id="append"  style="display: inline;"><img src="/images/icons/arrow_refresh.png" /></div>
@@ -144,8 +144,7 @@ def js_tmpl():
 <script type="text/javascript" src="/images/js/jquery.tablesorter.pager.js"></script>
 <script type="text/javascript" src="/images/js/jquery.contextmenu.js"></script>
 <script type="text/javascript" src="/images/js/jquery.jobmanager.js"></script>
-  
-  '''
+'''
   return js
 
 def signature():

@@ -378,15 +378,16 @@ def main(client_id, user_arguments_dict):
 
     # Use cgi-bin links to sandboxes here to preserve menu
 
-    output_objects.append({'object_type': 'link', 'text'
-                          : 'Administrate %s sandbox resources' % \
-                            configuration.short_title,
-                          'destination': 'ssslogin.py'})
-    output_objects.append({'object_type': 'sectionheader', 'text': ''})
-    output_objects.append({'object_type': 'link', 'text'
-                          : 'Use this computer as One-click %s resource' % \
-                            configuration.short_title
-                          , 'destination': 'oneclick.py'})
+    if configuration.site_enable_sandboxes:
+        output_objects.append({'object_type': 'link', 'text'
+                               : 'Administrate %s sandbox resources' % \
+                               configuration.short_title,
+                               'destination': 'ssslogin.py'})
+        output_objects.append({'object_type': 'sectionheader', 'text': ''})
+        output_objects.append({'object_type': 'link', 'text'
+                               : 'Use this computer as One-click %s resource' % \
+                               configuration.short_title
+                               , 'destination': 'oneclick.py'})
 
     quick_links = [{'object_type': 'sectionheader', 'text'
                    : 'Quick links to existing resources:'}]

@@ -94,7 +94,7 @@ def main(client_id, user_arguments_dict):
         """ % configuration.site_title
     keywords_dict = get_keywords_dict()
     for (keyword, val) in keywords_dict.items():
-        if 'notify' == val['context'] and keyword not in configuration.notify_protocols:
+        if 'notify' == val['context'] and keyword.lower() not in configuration.notify_protocols:
             continue
         html += \
             """

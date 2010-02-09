@@ -277,9 +277,16 @@ if (jQuery) (function($){
         var job_count = 0;
         var sched_hint = '';
         var output_url = '';
-        
+        var max_jobs = -1;
+        var limit_opts = "max_jobs=100";
+
+        // Read out current max jobs setting from selector
+        max_jobs = parseInt($(".maxjobs", config.container).val());
+        if (max_jobs > 0) {
+            limit_opts = "flags=s;max_jobs=" + max_jobs;
+        }
         // add some html      
-        $.getJSON("jobstatus.py?output_format=json", {}, function(jsonRes, textStatus) {
+        $.getJSON("jobstatus.py?output_format=json;"+limit_opts, {}, function(jsonRes, textStatus) {
         
             var jobList = new Array();
             var i = 0;

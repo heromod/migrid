@@ -124,7 +124,7 @@ Please enter your information in at least the <span class=mandatory>mandatory</s
         'valid_password_chars': valid_password_chars,
         'password_min_len': password_min_len,
         'password_max_len': password_max_len,
-        'site'            : configuration.short_title
+        'site': configuration.short_title
         }})
 
     return (output_objects, returnvalues.OK)

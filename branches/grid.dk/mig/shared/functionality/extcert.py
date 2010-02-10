@@ -125,7 +125,7 @@ Please enter any missing information below and press the Send button to submit t
         'email': new_user.get('email', ''),
         'state': new_user.get('state', ''),
         'country': new_user.get('country', ''),
-        'site' : configuration.short_title,
+        'site': configuration.short_title,
         }})
 
     return (output_objects, returnvalues.OK)

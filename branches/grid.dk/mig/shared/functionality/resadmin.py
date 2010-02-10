@@ -376,8 +376,6 @@ def main(client_id, user_arguments_dict):
                            'destination' : 'resedit.py'})
     output_objects.append({'object_type': 'sectionheader', 'text': ''})
 
-    # Use cgi-bin links to sandboxes here to preserve menu
-
     if configuration.site_enable_sandboxes:
         output_objects.append({'object_type': 'link', 'text'
                                : 'Administrate %s sandbox resources' % \

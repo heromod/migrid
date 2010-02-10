@@ -193,7 +193,7 @@ def main(client_id, user_arguments_dict):
         return (output_objects, returnvalues.CLIENT_ERROR)
 
     for flavor in flavors:
-        script_dir = 'Grid-%s-scripts-%s' % (flavor, timestamp)
+        script_dir = '%s-%s-scripts-%s' % (configuration.short_title, flavor, timestamp)
         dest_dir = '%s%s' % (base_dir, script_dir)
 
         if not os.path.isdir(dest_dir):
@@ -242,8 +242,8 @@ def main(client_id, user_arguments_dict):
         output_objects.append({'object_type': 'text', 'text': '... Done'
                               })
         output_objects.append({'object_type': 'text', 'text'
-                              : 'Grid %s scripts are now available in your %s home directory:'
-                               % (flavor, configuration.short_title)})
+                              : '%s %s scripts are now available in your %s home directory:'
+                               % (configuration.short_title, flavor, configuration.short_title)})
         output_objects.append({'object_type': 'link', 'text'
                               : 'View directory', 'destination'
                               : 'fileman.py?path=%s/' % script_dir})
@@ -251,8 +251,8 @@ def main(client_id, user_arguments_dict):
         # Create zip from generated dir
 
         output_objects.append({'object_type': 'text', 'text'
-                              : 'Generating zip archive of the Grid %s scripts'
-                               % flavor})
+                              : 'Generating zip archive of the %s %s scripts'
+                               % (configuration.short_title, flavor)})
 
         script_zip = script_dir + '.zip'
         dest_zip = '%s%s' % (base_dir, script_zip)
@@ -287,8 +287,8 @@ def main(client_id, user_arguments_dict):
         output_objects.append({'object_type': 'text', 'text': '... Done'
                               })
         output_objects.append({'object_type': 'text', 'text'
-                              : 'Zip archive of the Grid %s scripts are now available in your %s home directory'
-                               % (flavor, configuration.short_title) })
+                              : 'Zip archive of the %s %s scripts are now available in your %s home directory'
+                               % (configuration.short_title, flavor, configuration.short_title)})
         output_objects.append({'object_type': 'link', 'text'
                               : 'Download zip archive', 'destination'
                               : os.path.join('..', client_dir,

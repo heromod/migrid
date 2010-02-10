@@ -42,7 +42,7 @@ menu_items['files'] = {'class': 'files', 'url': 'fileman.py', 'title': 'Files',
 menu_items['jobs'] = {'class': 'jobs', 'url': 'jobman.py', 'title': 'Job monitor', 
                            'hover': 'view status of all your jobs'}
 menu_items['vgrids'] = {'class': 'vgrids', 'url': 'vgridadmin.py',
-                        'title': 'Virtual Org.s', 
+                        'title': 'Virtual Orgs', 
                            'hover': 'virtual organisations sharing some resources and files'}
 menu_items['resources'] = {'class': 'resources', 'url': 'resadmin.py',
                            'title': 'Resources',

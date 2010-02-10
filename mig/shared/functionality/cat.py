@@ -78,7 +78,7 @@ def main(client_id, user_arguments_dict):
             output_objects.append({'object_type': 'text', 'text'
                                   : '%s using flag: %s' % (op_name,
                                   flag)})
-    
+
     for pattern in patterns:
 
         # Check directory traversal attempts before actual handling
@@ -137,7 +137,8 @@ def main(client_id, user_arguments_dict):
             if verbose(flags):
                 entry['path'] = relative_path
             output_objects.append(entry)
-            
+
+            # TODO: rip this hack out into real download handler?
             # Force download of files when output_format == 'file_format'
             # This will only work for the first file matching a glob when using file_format.
             # And it is supposed to only work for one file.

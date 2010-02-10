@@ -244,5 +244,5 @@ Command to delete user again on %(site)s server:
 
     output_objects.append({'object_type': 'text', 'text'
                           : "Request sent to grid administrators: Your request for a %s user account with your existing certificate will be verified and handled as soon as possible, so please be patient. In case of inquiries about this request, please email the grid administrators (%s) and include the session ID: %s"
-                           % (configuration.short_title,admin_email,tmp_id)})
+                           % (configuration.short_title, admin_email, tmp_id)})
     return (output_objects, returnvalues.OK)

@@ -83,7 +83,7 @@ Supports the same variable expansion as described in the EXECUTE field documenta
 somefile
 another_file another_file_renamed
 
-Copies somefile and another_file from your server  home to the resource, but another_file is renamed to another_file_renamed on the resource.
+Copies somefile and another_file from your server home to the resource, but another_file is renamed to another_file_renamed on the resource.
 
 ::INPUTFILES::
 some_url some_file

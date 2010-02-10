@@ -145,7 +145,7 @@ on the resource frontend. %s
 <br />
 <a href='resadmin.py'>View existing resources</a> where your new resource will also eventually
 show up.
-        """  % (configuration.short_title, configuration.short_title, 
+        """ % (configuration.short_title, configuration.short_title, 
                 configuration.short_title, public_key_info)
 
     output_objects.append({'object_type': 'html_form', 'text': output})

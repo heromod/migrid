@@ -51,6 +51,7 @@ from shared.upload import handle_package_upload
 from shared.settings import parse_and_save_settings
 from shared.useradm import client_id_dir
 
+
 block_size = 1024 * 1024
 
 
@@ -180,8 +181,6 @@ if not client_id:
     # normal jobs: clean up when *.status is uploaded
     elif str_suffix == '.status':
         o.internal('.status file received|')
-
-        # TODO: check if prefix is a job id
 
         # open .mRSL file containing all info about the job
 

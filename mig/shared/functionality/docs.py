@@ -139,6 +139,30 @@ def valid_outputformats(output_objects):
     output_objects.append({'object_type': 'list', 'list': entries})
 
 
+def runtime_environments(output_objects):
+
+    output_objects.append({'object_type': 'header', 'text'
+                          : 'Runtime Environments'})
+
+    output_objects.append({'object_type': 'text', 'text'
+                          : """Runtime environments work as a kind of contract
+between users and resources. The user can not as such expect a given resource
+to provide any particular software or execution environment. However, jobs can
+request one or more runtime environments listed here in order to only get
+scheduled to resources advertising that environment."""})
+    output_objects.append({'object_type': 'text', 'text'
+                           : """Anyone can create new runtime environments but
+it is up to the resource owners to actually advertise the environments that
+their resources provide.
+For example a resource with the Python interpreter installed could advertise a
+corresponding python runtime environment, so that all jobs that depend on
+python to run can request that runtime environment and only end up on resources
+with python."""})
+    output_objects.append({'object_type': 'text', 'text'
+                           : """Runtime environments can be quite flexible in
+order to support many kinds of software or hardware environments."""})
+
+
 def main(client_id, user_arguments_dict):
     """Main function used by front end"""
 
@@ -161,7 +185,9 @@ def main(client_id, user_arguments_dict):
 
     all_docs = {'Job description: mRSL': (mrsl_keywords, (configuration, output_objects, )),
                 'Resource configuration': (config_keywords, (configuration, output_objects, )),
-                'Valid outputformats': (valid_outputformats, (output_objects, ))}
+                'Valid outputformats': (valid_outputformats, (output_objects, )),
+                'Runtime Environments': (runtime_environments, (output_objects, )),
+                }
 
     output_objects.append({'object_type': 'header', 'text'
                           : '%s On-demand Documentation' % \

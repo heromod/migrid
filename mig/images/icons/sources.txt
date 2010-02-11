@@ -1,0 +1,4 @@
+Icons in this directory:
+statistics-icon.png 		http://pixel-mixer.com/
+
+All icons not mentioned are considered public-domain.

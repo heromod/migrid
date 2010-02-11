@@ -37,9 +37,13 @@ import genjobscriptjava
 from shared.ssh import copy_file_to_resource
 from shared.fileio import write_file, pickle, make_symlink
 from shared.useradm import client_id_dir
-import shared.mrsltoxrsl as mrsltoxrsl
 
-import shared.arcwrapper as arc
+try:
+    import shared.mrsltoxrsl as mrsltoxrsl
+    import shared.arcwrapper as arc
+except Exception, exc:
+    # Ignore errors and let it crash if ARC is enabled without the lib
+    pass
 
 
 def create_empty_job(
@@ -396,6 +400,8 @@ def create_arc_job(
     Returns message (ARC job ID if no error) and sessionid (None if error)
     """
 
+    if not configuration.arc_clusters:
+        return ('No ARC support!', None)
     if not job['JOBTYPE'] == 'arc':
         return ('Error. This is not an ARC job', None)
     

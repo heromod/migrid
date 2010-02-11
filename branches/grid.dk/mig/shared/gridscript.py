@@ -36,7 +36,11 @@ from shared.fileio import send_message_to_grid_script
 from shared.job import output_dir
 from shared.notification import notify_user_thread
 from shared.useradm import client_id_dir
-import shared.arcwrapper as arc
+try:
+    import shared.arcwrapper as arc
+except Exception, exc:
+    # Ignore errors and let it crash if ARC is enabled without the lib
+    pass
 
 def clean_grid_stdin(stdin):
     """Deletes all content from the pipe (used when grid-script is
@@ -524,8 +528,8 @@ def clean_arc_job(
                      (status, job_dict))
         return
 
-# done by the caller...
-#    executing_queue.dequeue_job_by_id(job_dict['JOB_ID'])
+    # done by the caller...
+    # executing_queue.dequeue_job_by_id(job_dict['JOB_ID'])
 
     if not timestamp:
         timestamp = time.gmtime()
@@ -547,7 +551,7 @@ def clean_arc_job(
         else:
             arcsession.clean(job_dict['EXE'])
 
-# Clean up associated server files of the job
+    # Clean up associated server files of the job
 
     if 'SESSIONID' in job_dict:
         sessionid = job_dict['SESSIONID']

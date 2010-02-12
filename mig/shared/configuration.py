@@ -107,7 +107,7 @@ def fix_missing(config_file, verbose=True):
                        'sleep_update_totals': '600',
                        'slackperiod': '600'}
     settings_section = {'language': 'English', 'submitui': ['fields',
-                        'textarea'], 'filesui': ['basic', 'full']}
+                        'textarea', 'files'], 'filesui': ['basic', 'full']}
 
     defaults = {
         'GLOBAL': global_section,
@@ -219,7 +219,7 @@ class Configuration:
 
     expire_peer = 600
     language = ['English']
-    submitui = ['fields', 'textarea']
+    submitui = ['fields', 'textarea', 'files']
     filesui = ['basic', 'full']
 
     # directory for usage records, initially None (means: do not generate)

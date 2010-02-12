@@ -162,6 +162,59 @@ with python."""})
                            : """Runtime environments can be quite flexible in
 order to support many kinds of software or hardware environments."""})
 
+def license_information(output_objects, configuration):
+
+    output_objects.append({'object_type': 'html_form', 'text'
+                          : """
+%s is based on the Grid middleware MiG. You can read about MiG at 
+<a href="http://code.google.com/p/migrid/">its web site</a>.
+""" % configuration.site_title })
+
+    output_objects.append({'object_type': 'header', 'text'
+                          : 'License'})
+
+    output_objects.append({'object_type': 'text', 'text'
+                           : 'Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter'
+                           })
+
+    output_objects.append({'object_type': 'text', 'text' :"""
+MiG is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+"""})
+
+    output_objects.append({'object_type': 'text', 'text' :"""
+MiG is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+"""})
+
+    output_objects.append({'object_type': 'text', 'text' :"""
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+"""})
+
+    output_objects.append({'object_type': 'header', 'text'
+                          : 'Acknowledgements' })
+
+    output_objects.append({'object_type': 'text', 'text' : """
+This software uses icons from the following sources:""" })
+
+    output_objects.append({'object_type': 'link', 
+                           'destination' : 'http://pixel-mixer.com/',
+                           'text': 'http://pixel-mixer.com/ (free to use, acknowledgement required)<br>' })
+
+    output_objects.append({'object_type': 'link', 
+                           'destination' : 'http://www.famfamfam.com/lab/icons/silk/',
+                           'text': 'famfamfam.com silk icons (Creative Commons 2.5 license)<br>'})
+
+    output_objects.append({'object_type': 'link', 
+                           'destination' : 'http://www.kde-look.org/content/show.php/Crystal+SVG?content=8341',
+                           'text': 'KDE Crystal Icons, LGPL<br>'})
+
 
 def main(client_id, user_arguments_dict):
     """Main function used by front end"""
@@ -187,6 +240,8 @@ def main(client_id, user_arguments_dict):
                 'Resource configuration': (config_keywords, (configuration, output_objects, )),
                 'Valid outputformats': (valid_outputformats, (output_objects, )),
                 'Runtime Environments': (runtime_environments, (output_objects, )),
+                'License and Acknowledgements': 
+                (license_information, (output_objects, configuration, )),
                 }
 
     output_objects.append({'object_type': 'header', 'text'

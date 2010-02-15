@@ -258,6 +258,20 @@ def vgrid_list(vgrid_name, group, configuration):
     return (True, output)
 
 
+def vgrid_match_resources(vgrid_name, resources, configuration):
+    """Return a list of resources filtered to only those allowed in
+    the provided vgrid.
+    """
+
+    match = []
+    for entry in resources:
+        if entry in match:
+            continue
+        if vgrid_is_resource(vgrid_name, entry, configuration):
+            match.append(entry)
+    return match
+    
+
 def job_fits_res_vgrid(job_vgrid_list, res_vgrid_list):
     """Used by job_fits_resource() in scheduler.
     Return fit status and name of first vgrid from
@@ -326,5 +340,3 @@ def res_allowed_vgrids(configuration, client_id):
         if vgrid_is_resource(vgrid, client_id, configuration):
             allowed.append(vgrid)
     return allowed
-
-

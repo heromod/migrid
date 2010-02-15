@@ -35,7 +35,9 @@ import os
 import shared.returnvalues as returnvalues
 from shared.functional import validate_input_and_cert
 from shared.init import initialize_main_variables
+from shared.fileio import disk_stats
 from shared.useradm import client_id_dir
+from shared.vgridaccess import user_allowed_resources
 
 
 def signature():
@@ -61,6 +63,12 @@ def main(client_id, user_arguments_dict):
         )
     if not validate_status:
         return (accepted, returnvalues.CLIENT_ERROR)
+
+    # Please note that base_dir must end in slash to avoid access to other
+    # user dirs when own name is a prefix of another user name
+
+    base_dir = os.path.abspath(os.path.join(configuration.user_home,
+                               client_dir)) + os.sep
 
     output_objects.append({'object_type': 'header', 'text'
                           : 'Dashboard'})
@@ -131,6 +139,16 @@ can ease file and job handling or even completely redecorate your interface.
 You have submitted a total of %d jobs.
 """ % job_count
     output_objects.append({'object_type': 'text', 'text': job_info})
+    resource_count = len(user_allowed_resources(configuration, client_id))
+    resource_info = """
+%d resources allow execution of your jobs.
+""" % resource_count
+    output_objects.append({'object_type': 'text', 'text': resource_info})
+    disk_used = disk_stats(base_dir)
+    disk_info = """
+Your %(files)d files and %(directories)d directories take up %(megabytes).1f MB in total.
+""" % disk_used
+    output_objects.append({'object_type': 'text', 'text': disk_info})
     cert_info = """
 Your user certificate expires on %s .
 """ % os.environ['SSL_CLIENT_V_END']

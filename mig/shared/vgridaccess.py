@@ -29,6 +29,7 @@
 
 import os
 import fcntl
+import time
 
 from shared.conf import get_all_exe_vgrids
 from shared.resource import list_resources
@@ -58,6 +59,10 @@ def refresh_vgrid_map(configuration):
     
     all_resources = list_resources(configuration.resource_home)
     for res in all_resources:
+        # Sandboxes do not change their vgrid participation
+        if vgrid_map.has_key(res) and (res.startswith('sandbox.') or \
+                                       res.startswith('oneclick.')):
+            continue
         conf_path = os.path.join(configuration.resource_home, res, "config")
         if not os.path.isfile(conf_path):
             continue

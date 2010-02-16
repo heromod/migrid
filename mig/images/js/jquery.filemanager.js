@@ -403,9 +403,7 @@ if (jQuery) (function($){
 				// Refix the root
 				
         $(folder_pane).addClass('wait');
-        $(".jqueryFileTree.start").remove();
-				$('.fm_files div').remove();
-				
+
         $.getJSON(options.connector,
 									{	path: t,
 										output_format: 'json',
@@ -437,16 +435,19 @@ if (jQuery) (function($){
 					// Regular nodes from here on after
 					folders += '<ul class="jqueryFileTree">';          
           var files = '<ul class="jqueryFileList">';
-					$('table tbody').html('');
-          
+
           var total_file_size = 0;
           var file_count = 0.0;          
           var is_dir = false;
           var base_css_style = 'file';
           var entry_title = '';
 
-					var dir_prefix = '';
-					var path = '';
+          var dir_prefix = '';
+          var path = '';
+          
+          $(".jqueryFileTree.start").remove();
+          $('.fm_files div').remove();
+          $('table tbody').html('');
           
           for (i=0;i<listing.length;i++) {
             
@@ -487,7 +488,6 @@ if (jQuery) (function($){
 							
             }
 						
-						$('table tbody').html = '';						
 						$('table tbody').append($('<tr></tr>')
 													.attr('rel_path', path)
 													.addClass(base_css_style)
@@ -677,7 +677,6 @@ if (jQuery) (function($){
 			$('.fm_files table', obj).tablesorter({widgets: ['zebra'],
 																						textExtraction: myTextExtraction,
 																						sortColumn: 'Name'});
-			
 			// Loading message
       $('.fm_folders', obj).html('<ul class="jqueryFileTree start"><li class="wait">' + options.loadMessage + '<li></ul>');
 			

@@ -59,9 +59,6 @@ def main(client_id, user_arguments_dict):
     if not validate_status:
         return (accepted, returnvalues.CLIENT_ERROR)
 
-    owner_of_a_vgrid = False
-    member_of_a_vgrid = False
-
     (stat, list) = vgrid_list_vgrids(configuration)
     if not stat:
         output_objects.append({'object_type': 'error_text', 'text'
@@ -69,7 +66,6 @@ def main(client_id, user_arguments_dict):
 
     # Iterate through jobs and print details for each
 
-    owner_list = {'object_type': 'vgrid_list', 'vgrids': []}
     member_list = {'object_type': 'vgrid_list', 'vgrids': []}
     for vgrid_name in list:
         
@@ -135,8 +131,10 @@ def main(client_id, user_arguments_dict):
 
             vgrid_obj['memberlink'] = {'object_type': 'link',
                 'destination':
-                 'rmvgridmember.py?vgrid_name=%s&client_id=%s'\
-                 % (vgrid_name,client_id),
+                "javascript:confirmLeave('%s','%s');" % \
+                  (vgrid_name, 
+                   'rmvgridmember.py?vgrid_name=%s&cert_id=%s'\
+                   % (vgrid_name,client_id)),
                 'text': "<img src='/images/icons/cancel.png' title='Leave this Virtual Organization'>"}
 
         # owners are allowed to edit pages and administrate
@@ -146,8 +144,10 @@ def main(client_id, user_arguments_dict):
             # correct the link to leave the VGrid
 
             vgrid_obj['memberlink']['destination'] = \
-                 'rmvgridowner.py?vgrid_name=%s&client_id=%s'\
-                 % (vgrid_name,client_id)
+                "javascript:confirmLeave('%s','%s');" % \
+                  (vgrid_name, 
+                   'rmvgridowner.py?vgrid_name=%s&cert_id=%s'\
+                   % (vgrid_name,client_id))
 
             # add more links: administrate and edit pages
 
@@ -168,7 +168,7 @@ def main(client_id, user_arguments_dict):
     title_entry = find_entry(output_objects, 'title')
     title_entry['text'] = 'Virtual Organization administration'
 
-    # quickly hacked in jquery tablesorter support:
+    # jquery support for tablesorter and confirmation on "leave":
 
     title_entry['javascript'] = '''
 <link rel="stylesheet" type="text/css" href="/images/css/jquery.managers.css" media="screen"/>
@@ -177,6 +177,14 @@ def main(client_id, user_arguments_dict):
 <script type="text/javascript" src="/images/js/jquery.tablesorter.js"></script>
 
 <script type="text/javascript" >
+
+var confirmLeave = function(name, link) {
+    var yes = confirm("Really leave the Virtual Org. " + name + " ?");
+    if (yes) {
+         window.location=link;
+    }
+}
+
 $(document).ready(function() {
 
           // table initially sorted by col. 2 (admin), then 1 (member), then 0
@@ -200,20 +208,16 @@ $(document).ready(function() {
 </script>
 '''
 
-    output_objects.append({'object_type': 'header', 'text': 'Virtual Organisations'
+    output_objects.append({'object_type': 'header', 'text': 'Virtual Organizations'
                           })
-#    output_objects.append({'object_type': 'sectionheader', 'text'
-#                          : 'Virtual Organization Owner'})
-#    output_objects.append({'object_type': 'text', 'text'
-#                          : 'List of Virtual Organizations where you are registered as owner:'
-#                          })
-#
-#    output_objects.append(owner_list)
-    output_objects.append({'object_type': 'sectionheader', 'text'
-                          : 'Virtual Organization Member'})
     output_objects.append({'object_type': 'text', 'text'
-                          : 'List of Virtual Organizations on this server:'
-                          })
+                          : '''
+Virtual Organizations (sometimes called VGrids on this server) share files
+and resources. Members can access web pages, files and resources, owners can also edit pages, as well as add and remove members or resources.
+'''                       })
+
+    output_objects.append({'object_type': 'sectionheader', 'text'
+                          : 'Virtual Organizations managed on this server'})
     output_objects.append(member_list)
 
     output_objects.append({'object_type': 'sectionheader', 'text'
@@ -230,7 +234,7 @@ $(document).ready(function() {
                           , 'destination': 'vgridmemberrequest.py'})
 
     output_objects.append({'object_type': 'sectionheader', 'text'
-                          : 'Create a new Virtual Organisation'})
+                          : 'Create a new Virtual Organization'})
     output_objects.append({'object_type': 'html_form', 'text'
                           : '''<form method="get" action="createvgrid.py">
     <input type="text" size=40 name="vgrid_name" />

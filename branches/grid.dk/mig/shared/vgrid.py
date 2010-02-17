@@ -57,6 +57,17 @@ def vgrid_is_owner_or_member(vgrid_name, client_id, configuration):
     else:
         return False
 
+def vgrid_allowed(client_id, allowed_pattern):
+    """Helper function to check if client_id is allowed using
+    allowed_pattern list.
+    """
+    for pattern in allowed_pattern:
+
+        # Use fnmatch to accept direct hits as well as wild card matches
+
+        if fnmatch.fnmatch(client_id, pattern):
+            return True
+    return False
 
 def vgrid_is_cert_in_list(
     vgrid_name,
@@ -79,13 +90,7 @@ def vgrid_is_cert_in_list(
                                     % entries)
         return False
 
-    for entry in entries:
-
-        # Use fnmatch to accept direct hits as well as wild card matches
-
-        if fnmatch.fnmatch(client_id, entry):
-            return True
-    return False
+    return vgrid_allowed(client_id, entries)
 
 
 def vgrid_is_owner(vgrid_name, client_id, configuration):
@@ -158,6 +163,8 @@ def vgrid_list_vgrids(configuration):
                     '', 1)
 
             vgrids_list.append(vgrid_name_without_location)
+    if not default_vgrid in vgrids_list:
+        vgrids_list.append(default_vgrid)
     return (True, vgrids_list)
 
 
@@ -266,6 +273,17 @@ def vgrid_list(vgrid_name, group, configuration):
             return (False, msg)
     return (True, output)
 
+def vgrid_owners(vgrid_name, configuration):
+    """Extract owners list for a vgrid"""
+    return vgrid_list(vgrid_name, 'owners', configuration)
+
+def vgrid_member(vgrid_name, configuration):
+    """Extract members list for a vgrid"""
+    return vgrid_list(vgrid_name, 'members', configuration)
+
+def vgrid_resources(vgrid_name, configuration):
+    """Extract resources list for a vgrid"""
+    return vgrid_list(vgrid_name, 'resources', configuration)
 
 def vgrid_match_resources(vgrid_name, resources, configuration):
     """Return a list of resources filtered to only those allowed in
@@ -282,9 +300,9 @@ def vgrid_match_resources(vgrid_name, resources, configuration):
     
 
 def job_fits_res_vgrid(job_vgrid_list, res_vgrid_list):
-    """Used by job_fits_resource() in scheduler.
+    """Used to find match between job and resource vgrids.
     Return fit status and name of first vgrid from
-    res_vgrid_listthat is compatible with a vgrid
+    res_vgrid_list that is compatible with a vgrid
     in job_vgrid_list. The returned name is None if
     no compatible match was found.
     """
@@ -319,7 +337,6 @@ def vgrid_request_and_job_match(resource_vgrid, job_vgrid):
             return False
     return True
 
-
 def user_allowed_vgrids(configuration, client_id):
     """Return a list of all VGrids that the user with
     client_id is allowed to access. I.e. the VGrids
@@ -339,6 +356,7 @@ def res_allowed_vgrids(configuration, client_id):
     """Return a list of all VGrids that the resource with
     client_id is allowed to access. I.e. the VGrids
     that the resource is member of.
+    Please note that the private (non-anonymized) ID is expected here.
     """
 
     allowed = []
@@ -349,3 +367,33 @@ def res_allowed_vgrids(configuration, client_id):
         if vgrid_is_resource(vgrid, client_id, configuration):
             allowed.append(vgrid)
     return allowed
+
+def vgrid_access_match(configuration, job_owner, job, res_id, res):
+    """Match job and resource vgrids and include access control.
+    The job_owner and res_id are used directly in vgrid access checks
+    so it is important that res_id is on the private (not anonymized)
+    form.
+    """
+    # Keep trying with job_fits_res_vgrid until a valid vgrid is found
+    # or it gives up. In the common case with many correctly configured
+    # vgrids, this lazy strategy is far more efficient than checking all
+    # vgrids requested every time.
+    job_req = [i for i in job.get('VGRID', [])]
+    res_req = [i for i in res.get('VGRID', [])]
+    while True:
+        answer = (found, best) = job_fits_res_vgrid(job_req, res_req)
+        if not found:
+            configuration.logger.info('no valid vgrid found!')
+            break
+        configuration.logger.info('testing if best vgrid %s is valid' % best)
+        if not vgrid_is_owner_or_member(best, job_owner, configuration):
+            configuration.logger.info('del invalid vgrid %s from job (%s)' % \
+                                      (best, job_owner))
+            job_req = [i for i in job_req if not i == best]
+        if not vgrid_is_resource(best, res_id, configuration):
+            configuration.logger.info('del invalid vgrid %s from res (%s)' \
+                                      % (best, res_id))
+            res_req = [i for i in res_req if not i == best]
+        else:
+            break
+    return answer

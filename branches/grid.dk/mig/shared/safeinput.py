@@ -862,8 +862,11 @@ def guess_type(name):
     # autocreate.py: proxy_upload and proxy_uploadfilename, contain cert/key
     elif name.lower().find('proxy_upload') != -1:
         return valid_printable
+    # shell:menu or settings:site_user_menu
     elif name.lower().find('menu') != -1:
-        return lambda x:__valid_contents(x, "yesno")
+        return valid_ascii
+
+
     else:
 
     # TODO: extend to include all used variables here

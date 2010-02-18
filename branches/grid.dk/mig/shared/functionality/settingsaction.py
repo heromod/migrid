@@ -63,6 +63,7 @@ def main(client_id, user_arguments_dict):
         allow_rejects=False,
         )
     if not validate_status:
+
         return (accepted, returnvalues.CLIENT_ERROR)
 
     settings_mrsl = ''

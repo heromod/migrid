@@ -90,7 +90,7 @@ def vgrid_add_remove_table(vgrid_name,
         'vgrid': vgrid_name }
 
         for elem in msg:
-            if elem != '': # ooops? why this? kept it from old version
+            if elem:
                 form += \
 "          <tr><td><input type=radio name='cert_id' value='%s' /></td><td>%s</td></tr>"\
                      % (elem, elem)
@@ -109,7 +109,7 @@ def vgrid_add_remove_table(vgrid_name,
       <form method="get" action="add%(script)s.py">
           <input type="hidden" name="vgrid_name" value="%(vgrid)s" />
           <input type="text" size=70 name="cert_id" />
-          <input type="submit" value="Add vgrid %(item)s" />
+          <input type="submit" value="Add %(item)s" />
       </form>
 ''' % {'vgrid': vgrid_name, 'item': item_string, 'script': script_suffix}
                 }) 
@@ -211,5 +211,4 @@ def main(client_id, user_arguments_dict):
                                    'text': '</div>' })
             
     return (output_objects, returnvalues.OK)
-
 

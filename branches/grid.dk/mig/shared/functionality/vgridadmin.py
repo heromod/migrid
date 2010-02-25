@@ -147,7 +147,7 @@ def main(client_id, user_arguments_dict):
                 "javascript:confirmLeave('%s','%s');" % \
                   (vgrid_name, 
                    'rmvgridowner.py?vgrid_name=%s&cert_id=%s'\
-                   % (vgrid_name,client_id))
+                 % (vgrid_name, client_id))
 
             # add more links: administrate and edit pages
 
@@ -247,5 +247,3 @@ and resources. Members can access web pages, files and resources, owners can als
     # print "DEBUG: %s" % output_objects
 
     return (output_objects, status)
-
-

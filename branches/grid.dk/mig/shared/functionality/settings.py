@@ -112,7 +112,6 @@ def main(client_id, user_arguments_dict):
         """\
              % (keyword, val['Description'])
         if val['Type'] == 'multiplestrings':
-
             try:
                 
                 # get valid choices from conf. multiple selections

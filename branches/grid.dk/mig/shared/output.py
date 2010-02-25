@@ -383,7 +383,8 @@ Exit code: %s Description: %s<br />
                 True,
                 javascript,
                 bodyfunctions,
-                include_menu, user_menu
+                include_menu, 
+                user_menu
                 ))
         elif i['object_type'] == 'text':
             lines.append('<p>%s</p>' % html_escape(i['text']))
@@ -887,7 +888,6 @@ Exit code: %s Description: %s<br />
 '''
                              )
                 for obj in vgrids:
-
                     lines.append('<tr>')
                     lines.append('<td>%s</td>' % obj['name'])
                     lines.append('<td>')

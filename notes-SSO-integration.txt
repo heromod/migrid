@@ -1,6 +1,0 @@
-safeinput::name_extras  '@'
-
-extcertaction.copy.py: 
-no REJECT_UNSET on some fields, 
-proxy upload with extra field (optional)
-

@@ -151,6 +151,10 @@ def valid_dir_input(base, variable):
     # dirs when variable is a prefix of another dir in base
 
     path = os.path.abspath(base) + os.sep + variable
+
+    # cut trailing slash for directories (as os.path.abspath will do so)
+    if path[-1] == os.sep:
+        path=path[:-1]
     if os.path.abspath(path) != path:
 
         # out of bounds

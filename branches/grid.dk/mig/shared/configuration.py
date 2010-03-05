@@ -482,6 +482,10 @@ class Configuration:
             self.site_enable_sandboxes = config.getboolean('SITE', 'enable_sandboxes')
         else:
             self.site_enable_sandboxes = True
+        if config.has_option('SITE', 'swrepo_url'):
+            self.site_swrepo_url = config.get('SITE', 'swrepo_url')
+        else:
+            self.site_swrepo_url = ''
         if config.has_option('SITE', 'default_css'):
             self.site_default_css = config.get('SITE', 'default_css')
         else:
@@ -505,7 +509,7 @@ class Configuration:
         if config.has_option('SITE', 'credits_text'):
             self.site_credits_text = config.get('SITE', 'credits_text')
         else:
-            self.site_credits_text = '2009, <a href="http://www.migrid.org">The MiG Project</a>'
+            self.site_credits_text = '2003-2010, <a href="http://www.migrid.org">The MiG Project</a>'
         if config.has_option('SITE', 'credits_image'):
             self.site_credits_image = config.get('SITE', 'credits_image')
         else:

@@ -4,7 +4,7 @@
 # --- BEGIN_HEADER ---
 #
 # html - html helper functions
-# Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
+# Copyright (C) 2003-2010  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
 #
@@ -44,7 +44,7 @@ menu_items['jobs'] = {'class': 'jobs', 'url': 'jobman.py', 'title': 'Job monitor
 menu_items['vgrids'] = {'class': 'vgrids', 'url': 'vgridadmin.py',
                         'title': 'Virtual Orgs', 
                            'hover': 'virtual organisations sharing some resources and files'}
-menu_items['resources'] = {'class': 'resources', 'url': 'resadmin.py',
+menu_items['resources'] = {'class': 'resources', 'url': 'resman.py',
                            'title': 'Resources',
                            'hover': 'Resources available in the system'}
 menu_items['downloads'] = {'class': 'downloads', 'url': 'downloads.py',

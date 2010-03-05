@@ -163,8 +163,14 @@ linklist = {'object_type': 'linklist', 'required_list': [('links',
             'link')]}
 multilinkline = {'object_type': 'multilinkline',
                  'required_list': [('links', 'link')]}
+resource_list = {'object_type': 'resource_list', 'required_list': [('resources',
+              'resource')]}
 vgrid_list = {'object_type': 'vgrid_list', 'required_list': [('vgrids',
               'vgrid')]}
+user_stats = {'object_type': 'user_stats', 'required': ['disk', 'jobs',
+                                                        'resources',
+                                                        'certificate'],
+              'optional': []}
 object_types = {'object_type': 'object_types',
                 'required_list': [('object_types', 'objects')]}
 
@@ -216,7 +222,9 @@ valid_types_list = [
     object_types,
     objects,
     jobobj,
+    resource_list,
     vgrid_list,
+    user_stats,
     ]
 
 # valid_types_dict = {"title":title, "link":link, "header":header}

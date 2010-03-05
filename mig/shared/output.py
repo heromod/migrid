@@ -4,7 +4,7 @@
 # --- BEGIN_HEADER ---
 #
 # output - General formatting of backend output objects
-# Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
+# Copyright (C) 2003-2010  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
 #
@@ -310,6 +310,27 @@ ctime\t%(ctime)s
         elif i['object_type'] == 'list':
             for list_item in i['list']:
                 lines.append('%s\n' % list_item)
+        elif i['object_type'] == 'user_stats':
+            if i.get('disk', None):
+                disk_info = '== Disk stats ==\n'
+                for (key, val) in i['disk'].items():
+                    disk_info += '%s: %s\n' % (key, val)
+                lines.append(disk_info)
+            if i.get('jobs', None):
+                jobs_info = '== Job stats ==\n'
+                for (key, val) in i['jobs'].items():
+                    jobs_info += '%s: %s\n' % (key, val)
+                lines.append(jobs_info)
+            if i.get('resources', None):
+                resources_info = '== Resource stats ==\n'
+                for (key, val) in i['resources'].items():
+                    resources_info += '%s: %s\n' % (key, val)
+                lines.append(resources_info)
+            if i.get('certificate', None):
+                certificate_info = '== Certificate stats ==\n'
+                for (key, val) in i['certificate'].items():
+                    certificate_info += '%s: %s\n' % (key, val)
+                lines.append(certificate_info)
         elif i['object_type'] == 'script_status':
             status_line = i.get('text')
         elif i['object_type'] == 'end':
@@ -870,6 +891,50 @@ Exit code: %s Description: %s<br />
             lines.append('<tr><td>Resource count</td><td>%s</td></tr>'
                           % i['resource_count'])
             lines.append('</table>')
+        elif i['object_type'] == 'resource_list':
+            if len(i['resources']) > 0:
+                res_fields = ['PUBLICNAME', 'NODECOUNT', 'CPUCOUNT', 'MEMORY', 'DISK',
+                              'ARCHITECTURE', 'SANDBOX']
+                resources = i['resources']
+                lines.append("<table class='resources' id='resourcetable'>")
+                lines.append('''
+<thead class="title">
+  <th>Name</th>
+  <th width="8"><!-- Admin --></th>
+  <th width="8"><!-- Remove owner --></th>
+  <th class=centertext>Alias</th>
+  <th class=centertext>Nodes</th>
+  <th class=centertext>CPUs</th>
+  <th class=centertext>Memory (MB)</th>
+  <th class=centertext>Disk (GB)</th>
+  <th class=centertext>Architecture</th>
+  <th class=centertext>Sandbox</th>
+</thead>
+<tbody>
+'''
+                             )
+                for obj in resources:
+                    lines.append('<tr>')
+                    lines.append('<td>%s</td>' % obj['name'])
+                    # possibly empty admin link fields should always be there
+                    lines.append('<td>')
+                    if obj.has_key('resadminlink'):
+                        lines.append('%s'
+                                 % html_link(obj['resadminlink']))
+                    lines.append('</td>')
+                    lines.append('<td>')
+                    if obj.has_key('rmresownerlink'):
+                        lines.append('%s'
+                                 % html_link(obj['rmresownerlink']))
+                    lines.append('</td>')
+                    for name in res_fields:
+                        lines.append('<td class=centertext>')
+                        lines.append('%s' % obj.get(name, ''))
+                        lines.append('</td>')
+                    lines.append('</tr>')
+                lines.append('</tbody></table>')
+            else:
+                lines.append('No matching Resources found')
         elif i['object_type'] == 'vgrid_list':
             if len(i['vgrids']) > 0:
                 vgrids = i['vgrids']
@@ -961,6 +1026,27 @@ Exit code: %s Description: %s<br />
                 lines.append('</tbody></table>')
             else:
                 lines.append('No matching VGrids found')
+        elif i['object_type'] == 'user_stats':
+            if i.get('disk', None):
+                disk_info = '<h2>Disk stats</h2>'
+                for (key, val) in i['disk'].items():
+                    disk_info += '%s: %s<br />' % (key, val)
+                lines.append(disk_info)
+            if i.get('jobs', None):
+                jobs_info = '<h2>Job stats</h2>'
+                for (key, val) in i['jobs'].items():
+                    jobs_info += '%s: %s<br />' % (key, val)
+                lines.append(jobs_info)
+            if i.get('resources', None):
+                resources_info = '<h2>Resource stats</h2>'
+                for (key, val) in i['resources'].items():
+                    resources_info += '%s: %s<br />' % (key, val)
+                lines.append(resources_info)
+            if i.get('certificate', None):
+                certificate_info = '<h2>Certificate stats</h2>'
+                for (key, val) in i['certificate'].items():
+                    certificate_info += '%s: %s<br />' % (key, val)
+                lines.append(certificate_info)
         elif i['object_type'] == 'script_status':
             status_line = i.get('text')
         elif i['object_type'] == 'end':

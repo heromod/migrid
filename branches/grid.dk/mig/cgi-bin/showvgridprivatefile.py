@@ -265,9 +265,7 @@ try:
     (out,err) = file_p.communicate()
 
     if err:
-        # raise Exception(str(err))
-        # default to html (behaviour before this change)
-        out = 'text/html\n'
+        raise Exception(str(err))
 
     # mangle output in case of ascii text (file outputs "ascii english
     # text", "utf-8 unicode text" and such instead of a mime string)
@@ -276,6 +274,11 @@ try:
 
         out = 'text/plain\n' # ignore charset, automatic in most browsers
 
+except:
+        # default to html (behaviour before this change)
+        out = 'text/html\n'
+
+try:
     # returned value already contains the newlines we need
     print "Content-Type: " + out
 

@@ -265,7 +265,9 @@ try:
     (out,err) = file_p.communicate()
 
     if err:
-        raise Exception(str(err))
+        # raise Exception(str(err))
+        # default to html (behaviour before this change)
+        out = 'text/html\n'
 
     # mangle output in case of ascii text (file outputs "ascii english
     # text", "utf-8 unicode text" and such instead of a mime string)
@@ -278,9 +280,6 @@ try:
     print "Content-Type: " + out
 
     file = open(filename, 'r')
-
-    # TODO: the html header used in this script will cause clients (browsers) to
-    #       ignore newlines in the file - is that a feature or a bug?
 
     print str(file.read())
     file.close()

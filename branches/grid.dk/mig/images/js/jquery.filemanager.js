@@ -40,6 +40,8 @@ if (jQuery) (function($){
 		return reloadPath;
 	}
 
+
+
 	$.fn.reload = function reload(path) {
 		var reloadPath = path;
 		
@@ -57,8 +59,14 @@ if (jQuery) (function($){
 		$('.fm_folders li [rel_path='+reloadPath+']').click();
 
 	}
-	
-  $.fn.filemanager = function(user_options) {
+
+
+
+
+/* extended this by the "clickaction" callback, which can remain undefined...
+ * the provided callback will be executed on doubleclick
+ */
+  $.fn.filemanager = function(user_options, clickaction ) {
 	
 		var pathAttribute = 'rel_path';
 		var clipboard = new Array({'is_dir':false, 'path':''});
@@ -71,12 +79,17 @@ if (jQuery) (function($){
 		var closeDialog		= { buttons: {Close: function() {$(this).dialog('close');} }, width: '800px', autoOpen: false, closeOnEscape: true, modal: true}
 
 		function doubleClickEvent(el) {
-			if($(el).hasClass('directory')) {
-				$('#fm_filemanager').reload($(el).attr(pathAttribute));
-			} else {
-				// Do stuff with files.
-				callbacks['edit']('action', el, null);				
-			}
+		    if (clickaction != undefined) {
+			clickaction(el);
+			return;
+		    } 
+		    // if no clickaction is provided, default to opening and editing
+		    if($(el).hasClass('directory')) {
+			$('.fm_files').parent().reload($(el).attr(pathAttribute));
+		    } else {
+			// Do stuff with files.
+			callbacks['edit']('action', el, null);				
+		    }
 		}
 
 		function toTimestamp(strDate){
@@ -118,7 +131,7 @@ if (jQuery) (function($){
 									} else {
 										// Only reload if destination is current folder
 										if ($('.fm_addressbar input[name=fm_current_path]').val().substr(1) == dst.substring(0,dst.lastIndexOf('/'))+'/')
-											$('#fm_filemanager').reload($('.fm_addressbar input[name=fm_current_path]').val().substr(1));
+										    $('.fm_files').parent().reload($('.fm_addressbar input[name=fm_current_path]').val().substr(1));
 										$('#cmd_dialog').dialog('close');
 									}
 								}
@@ -173,7 +186,7 @@ if (jQuery) (function($){
 										$(dialog).html(errors+file_output+misc_output);
 									} else {
 										
-										$('#fm_filemanager').reload($(this).parentPath($(el).attr(pathAttribute)));	
+									    $('.fm_files').parent().reload($(this).parentPath($(el).attr(pathAttribute)));	
 									}
 																		
 								}
@@ -387,6 +400,13 @@ if (jQuery) (function($){
 				subPath: '/'
     };
     var options = $.extend(defaults, user_options);
+    
+    // reestablish defaults for undefined actions:
+    $.each(callbacks, function(name, fct) {
+               if (options['actions'][name] == undefined) {
+		   options['actions'][name] = callbacks[name];
+	       } // else { alert(name + " overloaded");}
+	   });
 
     return this.each(function() {
       obj = $(this);
@@ -447,7 +467,7 @@ if (jQuery) (function($){
           
           $(".jqueryFileTree.start").remove();
           $('.fm_files div').remove();
-          $('table tbody').html('');
+          $('.fm_files table tbody').html('');
           
           for (i=0;i<listing.length;i++) {
             
@@ -488,7 +508,7 @@ if (jQuery) (function($){
 							
             }
 						
-						$('table tbody').append($('<tr></tr>')
+						$('.fm_files table tbody').append($('<tr></tr>')
 													.attr('rel_path', path)
 													.addClass(base_css_style)
 													.addClass('ext_'+listing[i]['ext'])
@@ -504,7 +524,8 @@ if (jQuery) (function($){
 						emptyDir = false;
 										
           }
-					
+
+
           folders, files += '</ul>';
 					
 					// End the root node
@@ -523,9 +544,9 @@ if (jQuery) (function($){
 					
 					// Inform tablesorter of new data
 					var sorting = [[0,0]]; 
-					$("table").trigger("update");
+					$(".fm_files table").trigger("update");
 					if (!emptyDir)  { // Don't try and sort an empty table, this causes error!
-						$("table").trigger("sorton",[sorting]);
+						$(".fm_files table").trigger("sorton",[sorting]);
 					}
 					
 					// Update statusbar
@@ -537,7 +558,8 @@ if (jQuery) (function($){
           } else {
             folder_pane.find('UL:hidden').slideDown({ duration: options.expandSpeed, easing: options.expandEasing });
           }
-          
+
+
 					/* UI stuff: contextmenu, drag'n'drop. */
 					
 					// Create an element for the whitespace below the list of files in the file pane
@@ -701,7 +723,7 @@ if (jQuery) (function($){
 																		if (errors.length > 0) {
 																			$('#upload_output').html(errors);
 																		}	else {
-																			$('#fm_filemanager').reload($('#upload_form input[name=remotefilename_0]').val().substr(2));																																					
+																		    $('.fm_files').parent().reload($('#upload_form input[name=remotefilename_0]').val().substr(2));																																					
 																			$('#upload_dialog').dialog('close');																			
 																		}
 																		
@@ -717,7 +739,7 @@ if (jQuery) (function($){
 																			$('#mkdir_output').html(errors);
 																		}	else {
 																			$('#mkdir_dialog').dialog('close');
-																			$('#fm_filemanager').reload('');
+																			$('.fm_files').parent().reload('');
 																		}
 																		
 																	}
@@ -733,7 +755,7 @@ if (jQuery) (function($){
 						 $('#rename_output').html(errors);
 					 }	else {
 						 $('#rename_dialog').dialog('close');
-						 $('#fm_filemanager').reload('');
+						 $('.fm_files').parent().reload('');
 					 }
 					 
 				 },
@@ -797,7 +819,7 @@ if (jQuery) (function($){
 																			
 																		}
 																		$('#editor_output').html(stuff);
-																		$('#fm_filemanager').reload('');
+																		$('.fm_files').parent().reload('');
 																		
 																	}
 																});
@@ -807,3 +829,67 @@ if (jQuery) (function($){
 	};
  
 })(jQuery);
+
+
+
+/*  MiG-Special: initialize a filechooser dialog, installing the
+ *  callback for doubleclick or "select" selection
+ *  if files_only is set, directories cannot be chosen
+ */
+function mig_filechooser_init(name, callback, files_only) {
+
+    $( "#" + name ).dialog(
+        // see http://jqueryui.com/docs/dialog/ for options
+          {autoOpen: false,
+           modal: true,
+           height:400, width: 800,
+           buttons: {"Cancel": function() { $( "#" + name ).dialog("close"); }
+		    }
+          });
+
+    var do_d = function(text, action, files) {
+	// save and restore original callback and files-mode
+	var c = callback;
+	var f = files_only; 
+
+        $( "#" + name ).dialog("option", "title", text);
+
+	if (files != undefined) {
+	    files_only = files;
+	}
+	if (action == undefined) {
+	    action = c;
+	}
+
+	callback = function(i) { action(i); 
+				 files_only = f; 
+				 callback = c; 
+	};
+
+        $( "#" + name ).dialog("open");
+    };
+    // code entangled with specific filemanager naming
+    var pathAttribute = "rel_path";
+    var select_action = function (action, el, pos) {
+                var p = $(el).attr(pathAttribute);
+                if (files_only && $(el).hasClass("directory") ) {
+                    $("#" + name ).reload($(el).attr(pathAttribute));
+                    return;
+                }
+                callback(p);
+                $( "#" + name ).dialog("close");
+    };
+    
+    $( "#" + name ).filemanager(
+         {root: "/",
+          connector: "ls.py", params: "path",
+          expandSpeed: 0, collapseSpeed: 0, multiFolder: false,
+          subPath: "",
+          actions: {select: select_action}
+         },
+         // doubleclick callback action
+         function(el) { select_action(undefined,el,undefined); }
+    );
+    return do_d;
+};
+

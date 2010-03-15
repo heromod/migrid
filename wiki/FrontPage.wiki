@@ -11,7 +11,7 @@ The following sections provide links to pages ordered by topic, but you can also
 
 = General Topics =
  * [GettingStarted Getting started with MiG]
- * [MiGTerminolgy MiG Terminology]
+ * [MiGTerminology MiG Terminology]
  * [MiGDays MiG Days]
  * [ContactUs Contact Information]
 

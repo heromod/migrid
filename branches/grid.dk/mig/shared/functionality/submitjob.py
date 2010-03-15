@@ -71,6 +71,123 @@ def available_choices(configuration, client_id, field, spec):
         choices = [default] + [i for i in choices if not default == i]
     return choices
 
+# html pieces for the file chooser
+fm_layout =  '''
+  <div id="debug"></div>
+  <div id="fm_filechooser">
+    <div class="fm_folders">
+      <ul class="jqueryFileTree">
+        <li class="directory expanded">
+          <a href="#">...</a>
+        </li>
+      </ul>
+    </div>
+    <div class="fm_files">
+      <table id="fm_filelisting" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th style="width: 80px;">Size</th>
+          <th style="width: 50px;">Type</th>
+          <th style="width: 120px;">Date Modified</th>
+        </tr>        
+      </thead>
+      <tbody>
+      <!-- this is a placeholder for contents: do not remove! -->
+      </tbody>
+      </table>            
+    </div>        
+    <div class="fm_statusbar">&nbsp;</div>    
+  </div>
+'''
+fm_menus =  '''
+<ul id="folder_context" class="contextMenu">
+    <li class="select separator">
+      <a href="#select">Select</a>
+    </li>
+    <li class="rename">
+      <a href="#rename">Rename...</a>
+    </li>
+    <li class="mkdir">
+      <a href="#mkdir">Create Folder</a>
+    </li>
+    <li class="upload">
+      <a href="#upload">Upload File</a>
+    </li>
+  </ul>
+
+  <ul id="file_context" class="contextMenu">        
+    <li class="select separator">
+      <a href="#select">Select</a>
+    </li>
+    <li class="rename">
+      <a href="#rename">Rename...</a>
+    </li>
+  </ul>
+'''
+fm_dialogs =  '''
+  <div id="cmd_dialog" title="Command output" style="display: none;"></div>
+
+  <div id="upload_dialog" title="Upload File" style="display: none;">
+  
+    <form id="upload_form" enctype="multipart/form-data" method="post" action="textarea.py">
+    <fieldset>
+      <input type="hidden" name="output_format" value="json"/>
+      <input type="hidden" name="max_file_size" value="100000"/>
+      
+      <label for="submitmrsl_0">Submit mRSL files (also .mRSL files included in packages):</label>
+      <input type="checkbox" checked="" name="submitmrsl_0"/>
+      <br />
+      
+      <label for="remotefilename_0">Optional remote filename (extra useful in windows):</label>
+      <input type="text" value="./" size="50" name="remotefilename_0" />
+      <br />
+      
+      <label for="extract_0">Extract package files (.zip, .tar.gz, .tar.bz2)</label>
+      <input type="checkbox" name="extract_0"/>
+      <br />
+      
+      <label for="fileupload_0_0_0">File:</label>
+      <input type="file" name="fileupload_0_0_0"/>
+
+    </fieldset>
+    </form>
+
+    <div id="upload_output"></div>
+
+  </div>
+      
+  <div id="mkdir_dialog" title="Create New Folder" style="display: none;">
+  
+    <form id="mkdir_form" action="mkdir.py">
+    <fieldset>
+      <input type="hidden" name="output_format" value="json" />
+      <input type="hidden" name="current_dir" value="./" />
+      <label for="path">Enter the new name:</label>
+      <input type="text" name="path"/>
+      
+    </fieldset>
+    </form>
+    <div id="mkdir_output"></div>
+  </div>
+  
+  <div id="rename_dialog" title="Rename" style="display: none;">
+  <form id="rename_form" action="mv.py">
+  <fieldset>
+  
+    <input type="hidden" name="output_format" value="json" />
+    <input type="hidden" name="flags" value="r" />
+    <input type="hidden" name="src" value="" />
+    <input type="hidden" name="dst" value="" />
+    
+    <label for="name">Enter the new name:</label>
+    <input type="text" name="name" value="" />
+    
+  </fieldset>
+  </form>
+  <div id="rename_output"></div>
+  </div>  
+'''
 
 def main(client_id, user_arguments_dict):
     """Main function used by front end"""
@@ -122,36 +239,61 @@ def main(client_id, user_arguments_dict):
     submit_options = ['fields_form', 'textarea_form', 'files_form']
 
     title_entry['javascript'] = '''
+<link rel="stylesheet" type="text/css" href="/images/css/jquery.managers.css" media="screen"/>
+<link rel="stylesheet" type="text/css" href="/images/css/jquery.contextmenu.css" media="screen"/>
+<link rel="stylesheet" type="text/css" href="/images/css/jquery-ui-1.7.2.custom.css" media="screen"/>
+
 <script type="text/javascript" src="/images/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="/images/js/jquery-ui-1.7.2.custom.min.js"></script>
+<script type="text/javascript" src="/images/js/jquery.form.js"></script>
+<script type="text/javascript" src="/images/js/jquery.prettyprint.js"></script>
+<script type="text/javascript" src="/images/js/jquery.filemanager.js"></script>
+<script type="text/javascript" src="/images/js/jquery.tablesorter.js"></script>
+<script type="text/javascript" src="/images/js/jquery.tablesorter.pager.js"></script>
+<script type="text/javascript" src="/images/js/jquery.contextmenu.js"></script>
 
-<script type="text/javascript" >
+<script type="text/javascript">
+  
+    $.ui.dialog.defaults.bgiframe = true;
 
-    options = %s;
+    // global var for opening the dialog
+    var open_chooser = function() {alert("Error: no handler installed");}
 
-    function setDisplay(this_id,new_d) {
-        el = document.getElementById(this_id)
-        if ( el == undefined || el.style == undefined ) {
-            return; // avoid js null ref errors
-        }
-        el.style.display=new_d;
-    }
+    // for switching between different submit options:
+    var options = %s;
 
     function switchTo(name) {
+
         for (o=0; o < options.length; o++) {
             if (name == options[o]) {
-                setDisplay(options[o],"block");
+                $( "#" + name ).show();
             } else {
-                setDisplay(options[o],"none");
+                $( "#" + options[o] ).hide();
             }
         }
     }
 
-    $(document).ready( function() {
-         switchTo("%s");
-    });
+    // support code for file chooser dialog:
 
+    $(document).ready( function() {
+         // submit style display
+         switchTo("%s");
+
+         // file chooser initialisation and bindings:
+
+         open_chooser = mig_filechooser_init(
+              "fm_filechooser", function(file) { return; }, true );
+         // we add specific callbacks/handlers in more scripts below
+    });
 </script>
 ''' % (submit_options, submit_style + "_form")
+
+    # file chooser dialog elements, will be hidden by document.ready handler
+
+    output_objects.append({'object_type': 'html_form',
+                           'text': fm_layout + fm_menus + fm_dialogs })
+
+    # visible content starts here
 
     output_objects.append({'object_type': 'text',
                            'text': 'This page is used to submit jobs to the grid.'})
@@ -246,11 +388,47 @@ accompanied by a help link providing further details about the field."""})
                                })
         
         if 'input' == spec['Editor']:
+
+# ####
+            if -1 != title.find('Files'):
+                # create file chooser dialog for it
+                # all dialogs: append to textarea, prohibit directories 
+
+#         $( "#choose_ NAMEOFFIELD" ).click( function() {
+#                open_chooser("Choose TITLE"
+#                             , function(file) {
+#                              $( "#FIELD" ).append(file + "\\n");
+#                              }, false);
+#         });
+
+                output_objects.append({'object_type': 'html_form',
+                                   'text': '''
+<script type="text/javascript">
+     $( document ).ready( function() {
+          $( "#%(field)s_chooser" ).click( function() {
+                open_chooser("Select %(title)s",
+                             function(path) {
+                                $( "#%(field)s" ).append(path + "\\n");
+                         // as an option: extract basename if in subdirectory
+                         //       var match = path.match("^(.*/)([^/]+)$")
+                         //                   || [path,"",""];
+                         //       $( "#%(field)s" ).append(match[0] + " "
+                         //                                + match[2] + "\\n");
+                             }, false);
+          });
+     });
+</script>
+<a id="%(field)s_chooser" >
+   (Browse and select)</a><br/>
+''' % { "field": field, "title": title }
+                                   })
+# ####
+
             if field_type.startswith('multiple'):
                 output_objects.append({'object_type': 'html_form', 'text'
                                        : """
-<textarea name='%s' cols='%d' rows='%d'>%s</textarea><br />
-""" % (field, area_cols, area_rows, '\n'.join(default))
+<textarea id='%s' name='%s' cols='%d' rows='%d'>%s</textarea><br />
+""" % (field, field, area_cols, area_rows, '\n'.join(default))
                                })
             else:
                 output_objects.append({'object_type': 'html_form', 'text'

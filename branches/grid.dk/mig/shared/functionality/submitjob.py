@@ -389,17 +389,9 @@ accompanied by a help link providing further details about the field."""})
         
         if 'input' == spec['Editor']:
 
-# ####
             if -1 != title.find('Files'):
                 # create file chooser dialog for it
                 # all dialogs: append to textarea, prohibit directories 
-
-#         $( "#choose_ NAMEOFFIELD" ).click( function() {
-#                open_chooser("Choose TITLE"
-#                             , function(file) {
-#                              $( "#FIELD" ).append(file + "\\n");
-#                              }, false);
-#         });
 
                 output_objects.append({'object_type': 'html_form',
                                    'text': '''
@@ -422,7 +414,6 @@ accompanied by a help link providing further details about the field."""})
    (Browse and select)</a><br/>
 ''' % { "field": field, "title": title }
                                    })
-# ####
 
             if field_type.startswith('multiple'):
                 output_objects.append({'object_type': 'html_form', 'text'

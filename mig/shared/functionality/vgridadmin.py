@@ -90,10 +90,13 @@ def main(client_id, user_arguments_dict):
 
         # links for everyone: public pages and membership request
 
+        # remark (Jost): public wiki pages are currently broken, 
+        # will be filtered out by output.py
         vgrid_obj['publicwikilink'] = {'object_type': 'link',
                 'destination': '%s/vgridpublicwiki/%s'\
                  % (configuration.migserver_http_url, vgrid_name),
                 'text': 'Public Wiki'}
+
         vgrid_obj['enterpubliclink'] = {'object_type': 'link',
                 'destination': '%s/vgrid/%s/'\
                  % (configuration.migserver_http_url, vgrid_name),
@@ -122,10 +125,10 @@ def main(client_id, user_arguments_dict):
                 'text': 'Enter'}
             vgrid_obj['privatewikilink'] = {'object_type': 'link',
                 'destination': '/vgridwiki/%s' % vgrid_name,
-                'text': 'Private Wiki'}
+                'text': 'Wiki'}
             vgrid_obj['privatemonitorlink'] = {'object_type': 'link',
                 'destination': 'showvgridmonitor.py?vgrid_name=%s'\
-                 % vgrid_name, 'text': 'Private'}
+                 % vgrid_name, 'text': 'Monitor'}
 
             # to leave this VGrid (remove ourselves). Note that we are
             # going to overwrite the link later for owners.

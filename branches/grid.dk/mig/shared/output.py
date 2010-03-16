@@ -946,11 +946,13 @@ Exit code: %s Description: %s<br />
   <th width="8"><!-- Owner --></th>
   <th class=centertext colspan="2">Private pages</th>
   <th class=centertext colspan="2">Public pages</th>
-  <th class=centertext colspan="2">Wiki</th>
-  <th class=centertext colspan="2">Monitor</th>
+  <th class=centertext>Wiki</th>
+  <th class=centertext>Monitor</th>
 </thead>
 <tbody>
 '''
+                # public wiki and public monitor are disabled, 
+                #otherwise should add colspan="2" for these as well
                              )
                 for obj in vgrids:
                     lines.append('<tr>')
@@ -1001,13 +1003,16 @@ Exit code: %s Description: %s<br />
                     else:
                         lines.append('---')
                     lines.append('</td>')
-                    lines.append('<td class=centertext>')
-                    if obj.has_key('publicwikilink'):
-                        lines.append('%s '
-                                 % html_link(obj['publicwikilink']))
-                    else:
-                        lines.append('---')
-                    lines.append('</td>')
+
+                    # public wiki: disabled
+                    #lines.append('<td class=centertext>')
+                    #if obj.has_key('publicwikilink'):
+                    #    lines.append('%s '
+                    #             % html_link(obj['publicwikilink']))
+                    #else:
+                    #    lines.append('---')
+                    #lines.append('</td>')
+
                     lines.append('<td class=centertext>')
                     if obj.has_key('privatemonitorlink'):
                         lines.append('%s '
@@ -1015,13 +1020,16 @@ Exit code: %s Description: %s<br />
                     else:
                         lines.append('---')
                     lines.append('</td>')
-                    lines.append('<td class=centertext>')
-                    if obj.has_key('publicmonitorlink'):
-                        lines.append('%s '
-                                 % html_link(obj['publicmonitorlink']))
-                    else:
-                        lines.append('---')
-                    lines.append('</td>')
+                    
+                    # public monitor: disabled
+                    #lines.append('<td class=centertext>')
+                    #if obj.has_key('publicmonitorlink'):
+                    #    lines.append('%s '
+                    #             % html_link(obj['publicmonitorlink']))
+                    #else:
+                    #    lines.append('---')
+                    #lines.append('</td>')
+
                     lines.append('</tr>')
                 lines.append('</tbody></table>')
             else:

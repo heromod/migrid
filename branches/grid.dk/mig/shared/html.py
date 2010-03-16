@@ -70,7 +70,7 @@ menu_items['statistics'] = {'class': 'statistics', 'url': 'showstats.py',
                           'title': 'Statistics',
                            'hover': 'usage overview for resources and users on this server'}
 menu_items['docs'] = {'class': 'docs', 'url': 'docs.py',
-                          'title': 'Docs',
+                          'title': 'Help',
                           'hover': 'some online documentation for immediate use'}
 
 

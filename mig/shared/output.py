@@ -345,9 +345,17 @@ ctime\t%(ctime)s
 
 def html_link(obj):
     """html format link"""
-
-    return '<a href="%s">%s</a>' % (obj['destination'], obj['text'])
-
+    
+    extra_fields = ['id', 'class', 'title']
+    extra_params = []
+    # Set parameter in link
+    for name in extra_fields:
+        value = obj.get(name, '')
+        if value:
+            extra_params.append('%s="%s"' % (name, value))
+    link = '<a href="%s" %s>%s</a>' % (obj['destination'],
+                                       ' '.join(extra_params), obj['text'])
+    return link
 
 def html_table_if_have_keys(dictionary, keywordlist):
     """create html table contents based on keys in a dictionary"""
@@ -609,9 +617,7 @@ Exit code: %s Description: %s<br />
         elif i['object_type'] == 'dir_listings':
             if len(i['dir_listings']) == 0:
                 continue
-            columns = 6
-            if 'full' == i['style']:
-                columns += 1
+            columns = 7
             if i.get('show_dest', False):
                 columns += 1
             lines.append("<table class='files'>")
@@ -619,16 +625,15 @@ Exit code: %s Description: %s<br />
             cols = 0
             lines.append('<td>Info</td>')
             cols += 1
-            if 'full' == i['style']:
-                lines.append("<td><input type='checkbox' name='allbox' value='allbox' onclick='un_check()' /></td>"
-                             )
-                cols += 1
+            lines.append("<td><input type='checkbox' name='allbox' value='allbox' onclick='un_check()' /></td>"
+                         )
+            cols += 1
 
-                # lines.append("<td><br /></td>"
-                # cols += 1
+            # lines.append("<td><br /></td>"
+            # cols += 1
 
-                lines.append('<td colspan=%d>Select/deselect all files</td>'
-                              % (columns - cols))
+            lines.append('<td colspan=%d>Select/deselect all files</td>'
+                         % (columns - cols))
             lines.append('</tr>')
             lines.append('<tr>')
             cols = 0
@@ -657,10 +662,9 @@ Exit code: %s Description: %s<br />
                         cols = 0
                         lines.append('<td><br /></td>')
                         cols += 1
-                        if 'full' == i['style']:
-                            lines.append("<td><input type='checkbox' name='path' value='%s' /></td>"
+                        lines.append("<td><input type='checkbox' name='path' value='%s' /></td>"
                                      % directory['dirname_with_dir'])
-                            cols += 1
+                        cols += 1
                         if directory.has_key('actual_dir'):
                             lines.append('<td>%s</td>'
                                      % directory['actual_dir'])
@@ -686,10 +690,9 @@ Exit code: %s Description: %s<br />
                         cols = 0
                         lines.append('<td><br /></td>')
                         cols += 1
-                        if 'full' == i['style']:
-                            lines.append("<td><input type='checkbox' name='path' value='%s' /></td>"
+                        lines.append("<td><input type='checkbox' name='path' value='%s' /></td>"
                                      % this_file['file_with_dir'])
-                            cols += 1
+                        cols += 1
                         if this_file.has_key('long_format'):
                             lines.append('<td>%s</td>'
                                      % this_file['long_format'])
@@ -822,7 +825,7 @@ Exit code: %s Description: %s<br />
                 row_number = 1
                 for single_re in runtimeenvironments:
                     row_class = row_name[row_number % 2]
-                    lines.append('<tr class=%s><td>%s</td><td>%s</td><td><a href="showre.py?re_name=%s">View</a></td><td>%s</td></tr>'
+                    lines.append('<tr class=%s><td>%s</td><td>%s</td><td><a class="viewlink" href="showre.py?re_name=%s">View</a></td><td>%s</td></tr>'
                                   % (row_class, single_re['name'],
                                  single_re['description'],
                                  single_re['name'], single_re['creator'
@@ -840,7 +843,7 @@ Exit code: %s Description: %s<br />
                 software_html += '<tr><td>Name:</td><td>%s</td></tr>'\
                      % software['name']
                 software_html += \
-                    '<tr><td>Url:</td><td><a href="%s">%s</a></td></tr>'\
+                    '<tr><td>Url:</td><td><a class="urllink" href="%s">%s</a></td></tr>'\
                      % (software['url'], software['url'])
                 software_html += \
                     '<tr><td>Description:</td><td>%s</td></tr>'\
@@ -894,7 +897,7 @@ Exit code: %s Description: %s<br />
         elif i['object_type'] == 'resource_list':
             if len(i['resources']) > 0:
                 res_fields = ['PUBLICNAME', 'NODECOUNT', 'CPUCOUNT', 'MEMORY', 'DISK',
-                              'ARCHITECTURE', 'SANDBOX']
+                              'ARCHITECTURE']
                 resources = i['resources']
                 lines.append("<table class='resources' id='resourcetable'>")
                 lines.append('''
@@ -902,20 +905,24 @@ Exit code: %s Description: %s<br />
   <th>Name</th>
   <th width="8"><!-- Admin --></th>
   <th width="8"><!-- Remove owner --></th>
+  <th class=centertext>Runtime envs</th>
   <th class=centertext>Alias</th>
   <th class=centertext>Nodes</th>
   <th class=centertext>CPUs</th>
-  <th class=centertext>Memory (MB)</th>
+  <th class=centertext>Mem (MB)</th>
   <th class=centertext>Disk (GB)</th>
-  <th class=centertext>Architecture</th>
-  <th class=centertext>Sandbox</th>
+  <th class=centertext>Arch</th>
 </thead>
 <tbody>
 '''
                              )
                 for obj in resources:
                     lines.append('<tr>')
-                    lines.append('<td>%s</td>' % obj['name'])
+                    res_type = 'real'
+                    if obj.get('SANDBOX', False):
+                        res_type = 'sandbox'
+                    lines.append('<td class="%sres" title="%s resource">%s</td>' % \
+                                 (res_type, res_type, obj['name']))
                     # possibly empty admin link fields should always be there
                     lines.append('<td>')
                     if obj.has_key('resadminlink'):
@@ -927,6 +934,14 @@ Exit code: %s Description: %s<br />
                         lines.append('%s'
                                  % html_link(obj['rmresownerlink']))
                     lines.append('</td>')
+                    # List number of runtime environments in field and add
+                    # actual names as mouse-over
+                    rte_list = obj.get('RUNTIMEENVIRONMENT', [])
+                    lines.append('<td class=centertext title="%s">' % \
+                                 ', '.join(rte_list))
+                    lines.append('%d' % len(rte_list))
+                    lines.append('</td>')
+                    # Remaining fields
                     for name in res_fields:
                         lines.append('<td class=centertext>')
                         lines.append('%s' % obj.get(name, ''))
@@ -939,20 +954,23 @@ Exit code: %s Description: %s<br />
             if len(i['vgrids']) > 0:
                 vgrids = i['vgrids']
                 lines.append("<table class='vgrids' id='vgridtable'>")
+                # Hide public wiki column as it is disabled
+                #public_wiki = '<th class=centertext colspan="1">Public Wiki</th>'
+                public_wiki = ''
                 lines.append('''
 <thead class="title">
   <th>Name</th>
-  <th width="8"><!-- member --></th>
+  <th width="8"><!-- Member --></th>
   <th width="8"><!-- Owner --></th>
-  <th class=centertext colspan="2">Private pages</th>
-  <th class=centertext colspan="2">Public pages</th>
-  <th class=centertext>Wiki</th>
-  <th class=centertext>Monitor</th>
+  <th class=centertext colspan="2">Private web pages</th>
+  <th class=centertext colspan="2">Public web pages</th>
+  <th class=centertext colspan="1">Owner Wiki</th>
+  <th class=centertext colspan="1">Member Wiki</th>
+  %s
+  <th class=centertext colspan="1">Monitor</th>
 </thead>
 <tbody>
-'''
-                # public wiki and public monitor are disabled, 
-                #otherwise should add colspan="2" for these as well
+''' % public_wiki
                              )
                 for obj in vgrids:
                     lines.append('<tr>')
@@ -997,14 +1015,20 @@ Exit code: %s Description: %s<br />
                         lines.append('---')
                     lines.append('</td>')
                     lines.append('<td class=centertext>')
-                    if obj.has_key('privatewikilink'):
+                    if obj.has_key('ownerwikilink'):
                         lines.append('%s '
-                                 % html_link(obj['privatewikilink']))
+                                 % html_link(obj['ownerwikilink']))
                     else:
                         lines.append('---')
                     lines.append('</td>')
-
-                    # public wiki: disabled
+                    lines.append('<td class=centertext>')
+                    if obj.has_key('memberwikilink'):
+                        lines.append('%s '
+                                 % html_link(obj['memberwikilink']))
+                    else:
+                        lines.append('---')
+                    lines.append('</td>')
+                    # hide link to public wiki which is disabled in apache
                     #lines.append('<td class=centertext>')
                     #if obj.has_key('publicwikilink'):
                     #    lines.append('%s '
@@ -1012,7 +1036,6 @@ Exit code: %s Description: %s<br />
                     #else:
                     #    lines.append('---')
                     #lines.append('</td>')
-
                     lines.append('<td class=centertext>')
                     if obj.has_key('privatemonitorlink'):
                         lines.append('%s '
@@ -1020,8 +1043,7 @@ Exit code: %s Description: %s<br />
                     else:
                         lines.append('---')
                     lines.append('</td>')
-                    
-                    # public monitor: disabled
+                    # All monitors are private for now
                     #lines.append('<td class=centertext>')
                     #if obj.has_key('publicmonitorlink'):
                     #    lines.append('%s '
@@ -1029,7 +1051,6 @@ Exit code: %s Description: %s<br />
                     #else:
                     #    lines.append('---')
                     #lines.append('</td>')
-
                     lines.append('</tr>')
                 lines.append('</tbody></table>')
             else:

@@ -305,10 +305,12 @@ There are %s interface styles available that you can choose among:''' % \
 
     links = []
     for opt in submit_options:
+        name = opt.split('_',2)[0] 
         links.append({'object_type': 'link', 
                       'destination': "javascript:switchTo('%s')" % opt,
-                      'text' : '%s style' % \
-                      opt.split('_',2)[0] 
+                      'class': 'submit%slink' % name,
+                      'title': 'Switch to %s submit interface' % name,
+                      'text' : '%s style' % name,
                       })
     output_objects.append({'object_type': 'multilinkline', 'links': links})
 
@@ -319,14 +321,14 @@ transferred if you switch style.'''})
     output_objects.append({'object_type': 'html_form', 
                            'text': '<div id="fields_form" style="display:none;">\n'})
     
-#    if 'fields' == submit_style:
+    # Fields
     output_objects.append({'object_type': 'sectionheader', 'text'
                           : 'Please fill in your job description in the fields below:'
                           })
     output_objects.append({'object_type': 'text', 'text'
                           : """
-Please fill in one or more fields below to define your job before hitting Submit Job
-at the bottom of the page.
+Please fill in one or more fields below to define your job before hitting
+Submit Job at the bottom of the page.
 Empty fields will simply result in the default value being used and each field is
 accompanied by a help link providing further details about the field."""})
     output_objects.append({'object_type': 'html_form', 'text'
@@ -377,13 +379,16 @@ accompanied by a help link providing further details about the field."""})
                 default = saved
         else:
             default = spec['Value']
+        # Hide sandbox field if sandboxes are disabled
+        if field == 'SANDBOX' and not configuration.site_enable_sandboxes:
+            continue
         if 'invisible' == spec['Editor']:
             continue
         if 'custom' == spec['Editor']:
             continue
         output_objects.append({'object_type': 'html_form', 'text'
                                    : """
-<b>%s:</b>&nbsp;<a href='docs.py?show=job#%s'>help</a><br />
+<b>%s:</b>&nbsp;<a class='infolink' href='docs.py?show=job#%s'>help</a><br />
 %s""" % (title, field, description)
                                })
         
@@ -454,6 +459,7 @@ accompanied by a help link providing further details about the field."""})
 <td><br /></td>
 <td class=centertext>
 <input type="submit" value="Submit Job" />
+<input type="checkbox" name="save_as_default"> Save as default job template
 </td>
 <td><br /></td>
 </tr>
@@ -466,8 +472,8 @@ accompanied by a help link providing further details about the field."""})
 </div><!-- fields_form-->
 <div id="textarea_form" style="display:none;">
 '''})
-
-#    else:
+    
+    # Textarea
     output_objects.append({'object_type': 'sectionheader', 'text'
                           : 'Please enter your mRSL job description below:'
                           })
@@ -505,6 +511,7 @@ are supplied: thus we simply send a bogus jobname which does nothing
 </td></tr>
 <tr><td>
 <center><input type="submit" value="Submit Job" /></center>
+<input type="checkbox" name="save_as_default" >Save as default job template
 </form>
 </td></tr>
 </table>

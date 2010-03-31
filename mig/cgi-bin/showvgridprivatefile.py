@@ -40,7 +40,7 @@ import time
 
 from shared.validstring import valid_dir_input
 from shared.cgishared import init_cgi_script_with_cert
-from shared.vgrid import vgrid_is_owner_or_member
+from shared.vgrid import vgrid_is_owner_or_member, vgrid_list_vgrids
 
 
 def scale_bytes(bytes):
@@ -78,7 +78,31 @@ if not fieldstorage.getfirst('vgrid_name', '') == '':
 
     vgrid_name = fieldstorage.getfirst('vgrid_name', '')
 
-specified_filename = fieldstorage.getfirst('file', 'index.html')
+specified_filename = fieldstorage.getfirst('file', '')
+
+# Rewriting in MiG.conf has been changed to account for sub-vgrids.
+# Problem: members or owners of sub-vgrids could not access web pages
+#          through the link; rewriting only picked the top vgrid.
+#  /vgrid/NAME/MORE/NAMES/filename => vgrid_name=NAME&file=MORE/NAMES/filename
+# Now we put the full path into vgrid_name:
+#  /vgrid/NAME/MORE/NAMES/filename => vgrid_name=NAME/MORE/NAMES&file=filename
+# If vgrid_name is not a vgrid or sub-vgrid, we correct it in the
+# following loop, which selects the most significant sub-vgrid
+# (owners/members of a parent will be inherited).
+
+(status, vgrids) = vgrid_list_vgrids(configuration)
+if not status:
+    o.out('System error getting VGrid names')
+    logger.error('System error getting VGrid names')
+    print 'Content-type: text/plain\n'
+    o.reply_and_exit(o.ERROR)
+
+if vgrid_name in vgrids and not specified_filename:
+    specified_filename = 'index.html'
+else:
+    while not vgrid_name in vgrids and '/' in vgrid_name:
+        [vgrid_name, last_part] = vgrid_name.rsplit('/',1)
+        specified_filename = last_part + os.sep + specified_filename
 
 # No owner check here so we need to specifically check for illegal
 # directory traversals

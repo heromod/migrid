@@ -838,7 +838,7 @@ if (jQuery) (function($){
  *  callback for doubleclick or "select" selection
  *  if files_only is set, directories cannot be chosen
  */
-function mig_filechooser_init(name, callback, files_only) {
+function mig_filechooser_init(name, callback, files_only, start_path) {
 
     $( "#" + name ).dialog(
         // see http://jqueryui.com/docs/dialog/ for options
@@ -887,7 +887,7 @@ function mig_filechooser_init(name, callback, files_only) {
          {root: "/",
           connector: "ls.py", params: "path",
           expandSpeed: 0, collapseSpeed: 0, multiFolder: false,
-          subPath: "",
+          subPath: ( start_path || "/" ),
           actions: {select: select_action}
          },
          // doubleclick callback action

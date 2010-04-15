@@ -210,7 +210,7 @@ of the numbers are cached for a while to keep server load down.
     output_objects.append({'object_type': 'text', 'text': online_help})
     output_objects.append({'object_type': 'link', 'destination': 'docs.py',
                            'class': 'infolink', 'title': 'built-in documentation',
-                           'text': 'Documentation page'})
+                           'text': 'Help page'})
     project_info = """
 but additional help, background information and tutorials are available in the
 """

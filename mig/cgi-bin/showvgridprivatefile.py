@@ -78,14 +78,14 @@ if not fieldstorage.getfirst('vgrid_name', '') == '':
 
     vgrid_name = fieldstorage.getfirst('vgrid_name', '')
 
-specified_filename = fieldstorage.getfirst('file', '')
+specified_filename = fieldstorage.getfirst('path', '')
 
 # Rewriting in MiG.conf has been changed to account for sub-vgrids.
 # Problem: members or owners of sub-vgrids could not access web pages
 #          through the link; rewriting only picked the top vgrid.
-#  /vgrid/NAME/MORE/NAMES/filename => vgrid_name=NAME&file=MORE/NAMES/filename
+#  /vgrid/NAME/MORE/NAMES/filename => vgrid_name=NAME&path=MORE/NAMES/filename
 # Now we put the full path into vgrid_name:
-#  /vgrid/NAME/MORE/NAMES/filename => vgrid_name=NAME/MORE/NAMES&file=filename
+#  /vgrid/NAME/MORE/NAMES/filename => vgrid_name=NAME/MORE/NAMES&path=filename
 # If vgrid_name is not a vgrid or sub-vgrid, we correct it in the
 # following loop, which selects the most significant sub-vgrid
 # (owners/members of a parent will be inherited).
@@ -223,7 +223,7 @@ $(document).ready(function() {
     # always there: link to upper level
     print '''
       <tr><td><img src="/images/icons/arrow_redo.png">
-          <td><a href="%s?vgrid_name=%s&file=%s">
+          <td><a href="%s?vgrid_name=%s&path=%s">
                  Up to higher level directory</a>
           <td><td></tr><tr/>
 ''' % (os.path.basename(sys.argv[0]),
@@ -241,7 +241,7 @@ $(document).ready(function() {
     for f in contents:
         # for file in dir: get info, print it...
         path = os.path.join(filename, f)
-        link = "%s?vgrid_name=%s&file=%s" % \
+        link = "%s?vgrid_name=%s&path=%s" % \
                (os.path.basename(sys.argv[0]),
                 vgrid_name, os.path.join(specified_filename,f))
         info = os.stat(path)

@@ -179,7 +179,7 @@ if (jQuery) (function($){
 
                               $(dialog).dialog(okDialog);
                               $(dialog).dialog('open');
-                                        
+
                               if (file_output.length>0) {
                                   file_output = '<pre>'+file_output+'</pre>'; 
                               }
@@ -238,10 +238,10 @@ if (jQuery) (function($){
 				      }
 				  }
 			      }
-			      
+
 			      $("#editor_dialog textarea[name=editarea]").val(file_output);
 			      $("#editor_dialog div.spinner").hide();
-                    
+
 			  });
                 
             },
@@ -458,7 +458,7 @@ if (jQuery) (function($){
           // Root node                    
           if (t=='/') {
              folders +=  '<ul class="jqueryFileTree">'+
-                  '<li class="directory collapsed" rel_path="" title=""><div>/</div>';
+                  '<li class="directory collapsed userhome" rel_path="" title=""><div>/</div>';
           }
 
           // Regular nodes from here on after
@@ -469,6 +469,7 @@ if (jQuery) (function($){
           var file_count = 0.0;          
           var is_dir = false;
           var base_css_style = 'file';
+          var extra_css_style = '';
           var entry_title = '';
 
           var dir_prefix = '';
@@ -476,7 +477,6 @@ if (jQuery) (function($){
           
           $(".jqueryFileTree.start").remove();
           $('.fm_files div').remove();
-			// ???
           $('.fm_files table tbody').html('');
           
           for (i=0;i<listing.length;i++) {
@@ -499,13 +499,14 @@ if (jQuery) (function($){
               if (t != '/') { // Do not prepend the fake-root.
                   path = t+path;  
               }
-              
+
               entry_title = path + ' ' + listing[i]['special'];
               if (is_dir) {
 		  base_css_style = 'directory';
+                  extra_css_style = listing[i]['extra_class'];
 
                   path += '/';
-                  folders +=  '<li class="'+base_css_style+' collapsed" rel_path="'+path+'" title="'+entry_title+'"><div>'
+                  folders +=  '<li class="'+base_css_style+' ' +extra_css_style+' collapsed" rel_path="'+path+'" title="'+entry_title+'"><div>'
                       + listing[i]['name']
                       +'</div></li>\n';
                   dir_prefix = '##';
@@ -520,6 +521,8 @@ if (jQuery) (function($){
               $('.fm_files table tbody').append($('<tr></tr>')
                                                 .attr('rel_path', path)
                                                 .addClass(base_css_style)
+                                                .addClass(extra_css_style)
+                                                .attr('title',entry_title)
                                                 .addClass('ext_'+listing[i]['ext'])
                                                 .dblclick( function() { doubleClickEvent(this); } )
                                                 .append(
@@ -531,9 +534,9 @@ if (jQuery) (function($){
                                                 ));
               emptyDir = false;
           }
-            
+
             folders, files += '</ul>';
-                    
+
             // End the root node
             if (t=='/') {
                 folders += '</li></ul>';
@@ -566,7 +569,7 @@ if (jQuery) (function($){
 		    { duration: options.expandSpeed, 
 		      easing: options.expandEasing });
             }
-          
+
             /* UI stuff: contextmenu, drag'n'drop. */
             
             // Create an element for the whitespace below the list of files in the file pane
@@ -578,7 +581,7 @@ if (jQuery) (function($){
                 } else {
                     $('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;" rel_path="" title=""></div>');  
                 }
-                
+
                 $("div.filespacer").contextMenu(
 		    { menu: 'folder_context'},
 		    function(action, el, pos) {
@@ -616,7 +619,7 @@ if (jQuery) (function($){
                  }
                 }
             );
-            
+
             $('tr.directory, li.directory').droppable(
 		{ greedy: true,
                   drop: function(event, ui) {
@@ -651,6 +654,7 @@ if (jQuery) (function($){
                         break;
                     }
                 }
+
                 if ((hit == false) && (options.subPath!='')) {
                     // Inform the user
                     $('#cmd_dialog').html('Path does not exist! '
@@ -658,7 +662,7 @@ if (jQuery) (function($){
 					  +options.subPath);
                     $('#cmd_dialog').dialog(okDialog);
                     $('#cmd_dialog').dialog('open');
-                    
+
                     // Stop trying to find it.
                     options.subPath = '';
                 }
@@ -732,7 +736,7 @@ if (jQuery) (function($){
      showBranch( $('.fm_folders', obj), escape(options.root) );            
             
      /**
-      * Bind handlers for forms. This is redicoulous and tedious repetitive code.
+      * Bind handlers for forms. This is ridiculous and tedious repetitive code.
       *
       */
      $('#upload_form').ajaxForm(
@@ -793,7 +797,7 @@ if (jQuery) (function($){
                   }
                   if (formData[i].name == 'name') {
                       formData[i].value = ''; 
-		      // Remove the field value othervise the backend pukes.
+		      // Remove the field value otherwise the backend pukes.
                   }
               }
               return true;

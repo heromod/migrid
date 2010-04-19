@@ -11,7 +11,36 @@ On a previous MiG Working Day, we discussed the future collaboration possibiliti
 
 However, there is no requirement whatsoever that you participate at all even if you are a core member of the MiG team, and the participation can be limited or full time as you see fit.
 
-We currently haven't found a date for the next MiG Day, but it will probably be in May.
+We are planning the next MiG Day to take place on the 7th of May, in order to finish the day at the beer festival (http://www.beerfestival.dk/).
+
+== Friday the 7th of May 2010 at the E-Science Center / DIKU ==
+
+=== Topics ===
+
+Meeting Topics (at 10):
+ # Welcome and coffee
+ # Short presentation of each participant and active projects
+ # Presentations of active or related projects (see below)
+ # Google Summer of Code projects next year?
+ # Other topics that may come up
+ # Planning for the future
+
+_Proposed presentations:_
+ * Distributed File System for failover MiG servers (Jan Wiberg, unconfirmed)
+ * ESS Portal using VGrid (Jost Berthold, unconfirmed)
+ * Grid.dk activities and plans (Benjamin Sedoc, unconfirmed)
+ * Software repository and runtime envs with Zero Install (Jonas Bardino)
+ * VGrid SCMs with Mercurial (Jonas Bardino)
+ * Remote Swap (Martin Rehr, unconfirmed)
+ * JQuery interfaces? (?)
+ * ...
+
+Working groups (e.g. at 14)
+ * Transparent Remote On-demand File Access integration
+ * Document VGrids including nesting and access
+ * Integrate other finished subprojects
+ * Other topics?
+ * Release new version of the code on Google Code Project
 
 
 = Previous MiG working Days =

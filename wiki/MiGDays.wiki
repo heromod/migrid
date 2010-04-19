@@ -35,6 +35,7 @@ _Proposed presentations:_
  * Software repository and runtime envs with Zero Install (Jonas Bardino)
  * VGrid SCMs with Mercurial (Jonas Bardino)
  * Remote Swap (Martin Rehr, unconfirmed)
+ * Sandboxed User scheduling with PyPy (Søren Laursen)
  * JQuery interfaces? (?)
  * ...
 

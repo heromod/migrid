@@ -53,7 +53,7 @@ def display_topic(output_objects, subject, all_docs):
         output_objects.append({'object_type': 'link',
                                'destination': './docs.py?show=%s' % subject,
                                'class': 'urllink',
-                               'title': '%s Documentation' % subject,
+                               'title': '%s Help' % subject,
                                'text': subject,
                                })
     else:
@@ -324,7 +324,7 @@ official site support pages:''' })
                 search_patterns.append(topic)
 
         output_objects.append({'object_type': 'header', 'text'
-                              : 'Documentation topics:'})
+                              : 'Help topics:'})
         for pattern in search_patterns:
             display_topic(output_objects, pattern, all_docs)
         if not search_patterns:

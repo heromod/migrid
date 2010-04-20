@@ -32,7 +32,7 @@ Meeting Topics (at 10):
 
 _Proposed presentations:_
  * Distributed File System for failover MiG servers (Jan Wiberg, unconfirmed)
- * ESS Portal using VGrid (Jost Berthold, unconfirmed)
+ * ESS Portal using VGrid (Jost Berthold)
  * Grid.dk activities and plans (Benjamin Sedoc, unconfirmed)
  * Software repository and runtime envs with Zero Install (Jonas Bardino)
  * Remote Swap (Martin Rehr)

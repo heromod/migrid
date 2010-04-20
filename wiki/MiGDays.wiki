@@ -33,9 +33,9 @@ _Proposed presentations:_
  * ESS Portal using VGrid (Jost Berthold, unconfirmed)
  * Grid.dk activities and plans (Benjamin Sedoc, unconfirmed)
  * Software repository and runtime envs with Zero Install (Jonas Bardino)
- * VGrid SCMs with Mercurial (Jonas Bardino)
- * Remote Swap (Martin Rehr, unconfirmed)
+ * Remote Swap (Martin Rehr)
  * Sandboxed User scheduling with PyPy (Søren Laursen)
+ * VGrid SCMs with Mercurial (Jonas Bardino)
  * JQuery interfaces? (?)
  * ...
 

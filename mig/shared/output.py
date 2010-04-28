@@ -828,7 +828,8 @@ Exit code: %s Description: %s<br />
                     lines.append('<tr class=%s><td>%s</td><td>%s</td><td><a class="viewlink" href="showre.py?re_name=%s">View</a></td><td>%s</td></tr>'
                                   % (row_class, single_re['name'],
                                  single_re['description'],
-                                 single_re['name'], single_re['creator'
+                                 single_re['name'], single_re['name'],
+                                     single_re['creator'
                                  ]))
                     row_number += 1
                 lines.append('</table>')

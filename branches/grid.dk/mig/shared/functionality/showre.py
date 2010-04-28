@@ -152,4 +152,12 @@ def main(client_id, user_arguments_dict):
         return (output_objects, returnvalues.SYSTEM_ERROR)
 
     output_objects.append(build_reitem_object_from_re_dict(re_dict))
-    return (output_objects, returnvalues.OK)
+
+    if client_id ==  re_dict['CREATOR']:
+        output_objects.append({'object_type': 'link', 'destination': 'deletere.py?re_name=' + re_name,
+                           'class': 'removelink', 'title': 'Delete RTE',
+                           'text': 'Delete'})
+
+    
+    return (output_objects, returnvalues.OK) 
+ 

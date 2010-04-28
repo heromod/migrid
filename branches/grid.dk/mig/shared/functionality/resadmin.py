@@ -403,7 +403,15 @@ def main(client_id, user_arguments_dict):
                  'class': 'infolink',
                  'title': 'View %s' % unique_resource_name,
                  'text': 'View %s' % unique_resource_name,
+                 },
+                {'object_type': 'link',
+                 'destination': 'delres.py?unique_resource_name=%s' % \
+                 visible_res_name,
+                 'class': 'removelink',
+                 'title': 'Delete %s' % unique_resource_name,
+                 'text': 'Delete %s' % unique_resource_name,
                  }
+                
                 ]
                                              }
 

@@ -987,7 +987,7 @@ Failure:
         return (False, msg)
 
     (status, conf_msg, config_dict) = \
-        get_resource_config_dict(pending_file)
+       get_resource_config_dict(pending_file)
     if not status:
         msg += '\n%s' % conf_msg
         return (False, msg)

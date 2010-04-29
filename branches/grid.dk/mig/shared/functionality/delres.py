@@ -102,12 +102,28 @@ def main(client_id, user_arguments_dict):
     last_req_file = os.path.join(configuration.resource_home,
                                  res_name,
                                  'last_request.%s' % exe)
+    
+
+    if not os.path.isfile(last_req_file):
+        output_objects.append({'object_type': 'text', 'text'
+                               : 'Could not determine wheter the resource %s is busy.'% res_name })
+
+        output_objects.append({'object_type': 'link', 'destination': 'resman.py',
+                               'class': 'infolink', 'title': 'Show resources',
+                               'text': 'Show resources'})
+         
+        status = returnvalues.CLIENT_ERROR
+        lock_handle_vgrid.close()
+        lock_handle_res.close()
+        return (output_objects, status)
+        
 
 
     last_request = load(last_req_file)
     last_status = last_request['STATUS']
 
-    if not last_status == "down?":
+    if not (last_status == "No jobs in queue can be executed by resource" or \
+           last_status == 'No jobs in queue'):
         output_objects.append({'object_type': 'text', 'text'
                                : 'You must take down the resource before deleting it!'})
 

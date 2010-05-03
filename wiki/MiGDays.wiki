@@ -34,7 +34,7 @@ _Proposed presentations:_
  * Short status on current and future MiG projects (Brian Vinter)
  * Distributed File System for failover MiG servers (Jan Wiberg)
  * ESS Portal using VGrid (Jost Berthold)
- * Grid.dk activities and plans (Benjamin Sedoc, unconfirmed)
+ * Grid.dk activities and plans (Benjamin Sedoc)
  * Software repository and runtime envs with Zero Install (Jonas Bardino)
  * Remote Swap (Martin Rehr)
  * Sandboxed User scheduling with PyPy (Søren Laursen, unconfirmed)

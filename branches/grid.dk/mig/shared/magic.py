@@ -33,7 +33,9 @@ magic.py
  All Rights Reserved
 
  This version: obtained from http://www.jsnp.net/code/magic.py,
-               customised for MiG (simplified magic file data)
+               with additional written permission from the author to 
+               use with any OSI compatible license.
+               Customised for MiG (simplified magic file data).
 
  Command Line Usage: running as `python magic.py file` will print
                      a description of what 'file' is.

@@ -38,7 +38,7 @@ _Proposed presentations:_
  * Grid.dk activities and plans (Benjamin Sedoc)
  * Software repository and runtime envs with Zero Install (Jonas Bardino)
  * Remote Swap (Martin Rehr)
- * Sandboxed User scheduling with PyPy (Søren Laursen, unconfirmed)
+ * Sandboxed User scheduling with PyPy (Søren Laursen)
  * VGrid SCMs with Mercurial (Jonas Bardino)
 
 

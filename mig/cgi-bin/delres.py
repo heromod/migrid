@@ -3,7 +3,7 @@
 #
 # --- BEGIN_HEADER ---
 #
-# viewres - [insert a few words of module description on this line]
+# delres - Deletes a resource
 # Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.

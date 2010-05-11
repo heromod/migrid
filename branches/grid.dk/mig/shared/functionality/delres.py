@@ -3,7 +3,7 @@
 #
 # --- BEGIN_HEADER ---
 #
-# viewres - Display public details about a resource
+# delres - Deletes a resource
 # Copyright (C) 2003-2010  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
@@ -25,7 +25,7 @@
 # -- END_HEADER ---
 #
 
-"""Get info about a resource"""
+"""Deletion of a resource"""
 
 import shared.returnvalues as returnvalues
 from shared.conf import get_resource_configuration

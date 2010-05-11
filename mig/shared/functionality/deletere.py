@@ -3,7 +3,7 @@
 #
 # --- BEGIN_HEADER ---
 #
-# showre - Display a runtime environment
+# deletere - Deletes a runtimeenvironment
 # Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
@@ -25,7 +25,7 @@
 # -- END_HEADER ---
 #
 
-"""Get info about a runtime environtment"""
+"""Deletes a runtimeenvironment"""
 
 import time
 import base64

@@ -57,10 +57,7 @@ def main(client_id, user_arguments_dict):
     (configuration, logger, output_objects, op_name) = \
         initialize_main_variables(client_id, op_header=False)
 
-    title_entry = find_entry(output_objects, 'title')
-    title_entry['text'] = 'Resource Deletion'
-    output_objects.append({'object_type': 'header', 'text'
-                          : 'Deleting resource'})
+   
 
     defaults = signature()[1]
     (validate_status, accepted) = validate_input_and_cert(
@@ -92,74 +89,40 @@ def main(client_id, user_arguments_dict):
     fcntl.flock(lock_handle_res.fileno(), fcntl.LOCK_EX)
 
 
-    #Check to verify that a resource is down.
-    #On resources that are down may be deleted.
 
-    resource_config_file = os.path.join(res_dir, 'config')
-    resource_config = load(resource_config_file)
-    exe = resource_config['EXECONFIG'][0]['name']
+    #Check whether the resource is a member of a vgrid.
+    #If so, the resource can't be deleted.
+    res_active = False
+    vgrids = []
     
-    last_req_file = os.path.join(configuration.resource_home,
-                                 res_name,
-                                 'last_request.%s' % exe)
-    
-
-    if not os.path.isfile(last_req_file):
-        output_objects.append({'object_type': 'text', 'text'
-                               : 'Could not determine wheter the resource %s is busy.'% res_name })
-
-        output_objects.append({'object_type': 'link', 'destination': 'resman.py',
-                               'class': 'infolink', 'title': 'Show resources',
-                               'text': 'Show resources'})
-         
-        status = returnvalues.CLIENT_ERROR
-        lock_handle_vgrid.close()
-        lock_handle_res.close()
-        return (output_objects, status)
-        
-
-
-    last_request = load(last_req_file)
-    last_status = last_request['STATUS']
-
-    if not (last_status == "No jobs in queue can be executed by resource" or \
-           last_status == 'No jobs in queue'):
-        output_objects.append({'object_type': 'text', 'text'
-                               : 'You must take down the resource before deleting it!'})
-
-        output_objects.append({'object_type': 'link', 'destination': 'resman.py',
-                               'class': 'infolink', 'title': 'Show resources',
-                               'text': 'Show resources'})
-         
-        status = returnvalues.CLIENT_ERROR
-        lock_handle_vgrid.close()
-        lock_handle_res.close()
-        return (output_objects, status)
-        
-    
-
- 
-
-    #The resource is removed from all vgrids, the resource is a member of:    
-    #Iterate through all vgrids, removing the resource res_name from the vgrids
-    #that has an entry for res_name
     for vgrid in vgrid_map['__vgrids__']:
-        if not vgrid == "Generic":
-             if res_name in vgrid_map['__vgrids__'][vgrid]:
-                 vgrid_map['__vgrids__'][vgrid].remove(res_name)
-                 conf_path = os.path.join(configuration.vgrid_home, vgrid, "resources")
-                 dump(vgrid_map['__vgrids__'][vgrid], conf_path)
+        if res_name in vgrid_map['__vgrids__'][vgrid]:
+           vgrids.append(vgrid)
+           res_active = True
+        
 
 
+    if res_active:
+        title_entry = find_entry(output_objects, 'title')
+        title_entry['text'] = 'Resource deletion failed.'
+        output_objects.append({'object_type': 'header', 'text'
+                           : 'Failed to delete resource ' + res_name})
+
+        output_objects.append({'object_type': 'text', 'text'
+                           : "Could not delete resource " + res_name
+                               + "because it is still member of:"})
+
+        output_objects.append({'object_type': 'list', 'list'
+                           : vgrids})
+
+        output_objects.append({'object_type': 'link', 'destination': 'resman.py',
+                               'class': 'infolink', 'title': 'Show resources',
+                               'text': 'Show resources'})
+                
+        return (output_objects, returnvalues.OK)
 
 
-
-    #Deleting the reosurce files, including vgrid.map and resource.map
-    #shutil.rmtree is used, because a resource consists of multiple
-    #files in a directory.
-    
-    
-    
+    #If the reource is not a member of a vgrid, it is deleted.
     try:
          shutil.rmtree(res_dir)
     except Exception, err:
@@ -178,6 +141,10 @@ def main(client_id, user_arguments_dict):
             
     #Deleting vgrid.map and resource.map, so that new maps will be generated
     #on the next listing of resources.
+    title_entry = find_entry(output_objects, 'title')
+    title_entry['text'] = 'Resource Deletion'
+    output_objects.append({'object_type': 'header', 'text'
+                          : 'Deleting resource'})
     try:
         if os.path.exists(os.path.join(configuration.resource_home, 'vgrid.map')):
             os.remove(os.path.join(configuration.resource_home ,'vgrid.map'))

@@ -3,6 +3,9 @@
 #
 # --- BEGIN_HEADER ---
 #
+
+# deletere - Deletes a runtime environment
+
 # deletere - Deletes a runtimeenvironment
 # Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
 #
@@ -25,7 +28,11 @@
 # -- END_HEADER ---
 #
 
-"""Deletes a runtimeenvironment"""
+
+"""Deletion of  runtimeenvironments"""
+
+
+
 
 import time
 import base64
@@ -35,7 +42,7 @@ import os
 import shared.returnvalues as returnvalues
 from shared.functional import validate_input_and_cert, REJECT_UNSET
 from shared.init import initialize_main_variables, find_entry
-from shared.refunctions import is_runtime_environment, get_re_dict, del_re, del_re_from_resources
+from shared.refunctions import is_runtime_environment, get_re_dict, del_re, del_re_from_resources, is_re_active
 from shared.vgridaccess import user_visible_resources, get_resource_map,get_vgrid_map, OWNERS, CONF
 
 
@@ -78,25 +85,35 @@ def main(client_id, user_arguments_dict):
     #getting a map of all resources
     res_map = get_resource_map(configuration)
 
-    #The RTE re_name is removed from all reources that has an entry for re_name
-    (status, msg) = del_re_from_resources(res_map, re_name, configuration)
 
-    #If something goes wrong when removing re_name form reources, an error is displayed.
-    if not status:
+    #Check if the RTE is used by resources. If so, it can not be deleted.
+    (status, actives) = is_re_active(res_map, re_name, configuration)
+
+    #If the RTE is active, an error message is printet, and a list of the
+    #resorces that uses the RTE is printet.
+    if status:
         title_entry = find_entry(output_objects, 'title')
         title_entry['text'] = 'Runtimeenviroment deletion failed.'
         output_objects.append({'object_type': 'header', 'text'
                            : 'Failed to delete runtimeenvironment ' + re_name})
-        output_objects.append({'object_type': 'error_text', 'text'
-                               : "Resources lists of RTE's maybe inconsistent: %s" % msg})
-        
-        return (output_objects, returnvalues.SYSTEM_ERROR)
+
+        output_objects.append({'object_type': 'text', 'text'
+                           : "Could not delete runtimeenvironment " + re_name
+                               + "because it is still used by resources:"})
+
+        output_objects.append({'object_type': 'list', 'list'
+                           : actives})
+
+        output_objects.append({'object_type': 'link', 'destination': 'redb.py',
+                               'class': 'infolink', 'title': 'Show runtime enviroments',
+                               'text': 'Show runtime enviroments'})
+                
+        return (output_objects, returnvalues.OK)
         
 
 
     #The RTE re_name is deleted.
     (status, msg) = del_re(re_name, configuration)
-
     
     #If something goes wrong when trying to delete RTE re_name,
     #an error is displayed.

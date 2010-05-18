@@ -36,7 +36,7 @@ import shared.parser as parser
 import shared.rekeywords as rekeywords
 from shared.fileio import pickle, unpickle
 from shared.validstring import valid_dir_input
-from shared.parser import parse #Skriv om
+#from shared.parser import parse 
 from shared.shared.serial import load, dump
 
 def list_runtime_environments(configuration):
@@ -90,6 +90,44 @@ def get_re_dict(name, configuration):
         return (dict, '')
 
 
+#Function for determining whether or not a runtimeenvironment is active:
+def is_re_active(res_map, re_name, configuration):
+    #Lock down access to resources, ensuring exclusive access during deletion
+    lock_path = os.path.join(configuration.resource_home, "resource.lock")
+    lock_handle = open(lock_path, 'a')
+    fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX)
+
+    actives = []
+
+    for res in res_map:
+        for rte in res_map[res]['__conf__']['RUNTIMEENVIRONMENT']:
+            if rte[0] == re_name:
+
+                #Building the path to relevant config files
+                path = configuration.resource_home + str(res)
+                config_file = path + "/" + "config"
+
+                #Check if the rte is in the resource under investigation.
+                if rte in res_map[res]['__conf__']['RUNTIMEENVIRONMENT']:
+                    actives.append(res)
+
+    #Release the lock on the resources.
+    lock_handle.close()
+ 
+    #If the RTE was found in any resource, (true, actives) is returned.
+    #Otherwise (False, actives), as to indicate whether the RTE is active or not
+    if len(actives) > 0:
+        return (True, actives)
+    else:
+        return (False, actives)
+
+                
+
+                
+        
+
+
+
 #Function for removing an RTE from all resources.
 def del_re_from_resources(res_map, re_name, configuration):
     #Lock down access to resources, ensuring exclusive access during deletion
@@ -112,7 +150,7 @@ def del_re_from_resources(res_map, re_name, configuration):
                 dump(res_map[res]['__conf__'],config_file)
                 
                 #Load and parse the MRSL file for the resource
-                mrsldata = parse(config_file + ".MiG")
+                mrsldata = parser.parse(config_file + ".MiG")
 
                 #Iterate through the parse tree for the MRSL file,
                 #removing any entry of RTE re_name

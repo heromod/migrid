@@ -1,0 +1,143 @@
+#summary Developer notes by Jost and Benjamin about integrating zero-install with MiG
+
+= NOTES to integrate zero-install as RTE provider =
+
+== Goal ==
+  * select RTEs which are provided by a zero-install (ZI) machinery
+  * Data from the swrepo is digested to a presentation of available RTEs in .job submission page and .RTE page
+
+When submitting a job:
+  * detect RTEs which are provided by ZI 
+  * if any such env. has been specified, add ZI to RTE requirements
+  * replace the RTE by suitable definitions of env. variables (see below for details)
+  * then, submit job as usual
+
+== Work Items ==
+  * modify/extend Zero-install XML format (Jost, started)
+  * RTE database page
+  * Job submission page
+  * Job submission handler + modifications for actual execution
+  * Preparations: Software repository on portal, MiG resources, ARC resources
+
+=== Zero-install XML format ===
+
+    XML should indicate executable binaries in a zero-install package
+
+A ZI feed does not yet provide information which binaries are included inside it.
+
+For information about the ZI feed format see http://0install.net/interface-spec.html
+Any extension with namespace should not harm 0install. Our extension defines the following elements:
+{{{
+<binaries xmlns="http://portal.grid.dk/0install/namespace">
+  <binary name="bl2seq"/>
+  <binary name="blast2"/>
+  ...
+</binaries>
+}}}
+as a child element of `<interface>`. 
+
+A ZI feed may provide binary names or leave this feature out.
+
+The derived MiG-RTE uses the binaries' names, capitalised, as variable names
+
+  If no binary names are provided, we default to only the package name
+  QUESTION: what to do about duplicate definitions (native + 0install)
+   When conflicting with an existing RTE definition, this should correspond.
+
+Corresponding env.var.s will be added to the env. when submitting
+
+  (a native RTE implementation on the resource will take precedence by
+  overwriting these variables)
+
+TODO: the swrepo management code should be modified to use the griddk namespace. 
+
+The interface.xsl file already contains pieces for it, and the new binary fields will be in the other namespace anyway.
+
+While we are at it, prettify the page using XML stylesheets. http://en.wikipedia.org/wiki/XSLT
+
+TODO LATER: integrate in the MiG style pages (menu etc).
+
+=== RTE lib ("db") page with ZI provided entries ===
+   local path to repo.conf should be in MiGserver.conf in order to parse information.
+   we generate RTE entry from the XML feeds (enhanced as above)
+  * using an XML parser
+  * accessing the XML via HTTP (to allow remote packages, for instance official ZI packages)
+  * RTE entry construction (and check), possibly a cache file (but no RE files!)
+
+=== submission pages enhanced with ZI RTEs ===
+  * using a configurable local file path (to repo.conf) as above
+  * Define a method `list_0install_rtes()` to pull ZI RTE names from the system
+  * Needs to be separate: later, we need to determine whether or not a RTE is a ZI RTE. 
+
+==== submission handler enhanced with 0install additions ====
+
+  * add env.var. for every binary in a ZI feed 
+  * (hardwired name) "ZEROINSTALL" RTE to add instead of the selected one
+  * to avoid showing the user what we do: 
+    *  add extra fields ENVIRONMENT_ZEROINSTALL and ZEROINSTALL (flag) (when submitting, see mrslparser::parse where checking for RTEs)
+    * "enrich" the job definition when actually submitting (see jobscriptgenerator::create_job_script and create_arc_job)
+
+=== SW Repo should serve feeds from portal.grid.dk ===
+  * need to generate server's gpg key (store it in MiG-certificates dir)
+  * need to relocate and re-sign existing ZI feeds with this server's key 
+cascading to their dependencies. Needs a `zeroinstall-injector` installation on portal.grid.dk. http://0install.net/install-linux.html (use centos rpm!)
+  * need to put packages on the server, accessible through plain http (aliasing a respective directory for the swrepo)
+
+=== MiG resources: need to deploy key of our server ===
+  * (can do it manually by using one of the packages once manually)
+  * This is for all resources providing the ZEROINSTALL (native) RTE
+
+=== ARC resources: ===
+  * need to make 0install work! (problems on benedict when run inside ARC jobs, no other cluster available for tests)
+  * need to set 'XDG_CONFIG_HOME' (+friends) for ZERO_INSTALL RTE
+  * send a request for this RTE definition (to whom?? Who helps?)
+  * need to deploy our server key
+
+-------
+
+== OLD: Misc notes ==
+
+=== Authentication problem with zero-install: ===
+
+Software has to be approved by trusting the signing key for a
+downloaded package.
+
+When a new software is downloaded and used for the first time, a
+message will pop up asking the user to trust the author (unless
+already known with this site). Trusted keys are stored per-URL.
+
+When submitting a job through ARC, the trust database (an XML file)
+cannot be located (HOME is set to be the session directory)
+
+Hack around: The following variables (not documented) influence where 0install searches for keystore and package cache:
+
+'XDG_DATA_HOME',
+'XDG_CACHE_HOME' ( os.path.join(home, '.cache'))
+
+'XDG_CONFIG_HOME'
+
+Solutions
+  # Set these variables for the grid user when using ARC-RTE ZERO-INSTALL
+  Effect: global package cache (OK) and global keys (bad, need deployment)
+  # Include server key to accept as an input file in session
+  Effect: key acceptance control per-job (good), no package cache (bad)
+
+=== Notes Benjamin, May 03 ===
+{{{
+- runtime environment page:
+    - add info about binaries/alias(es) defined by the package
+    - present information by pulling xml from .conf file
+    - another table with 0-install apps
+    - sort table using table sorter
+    - remove sw catalog link
+- job submit:
+    - create new page / rewrite page
+    - make detail levels or field groups
+    - filter RTEs (when enabling arc, architecture?, ) (this will catch mismatching RTE<->resource)
+    - make "arc" check box
+- arc
+    - get an arc resource with zero install for testing
+    - modify mrsl file in mrslparser.py before submitting
+    -
+- job script should implement the requested RTE by additional environment vars
+}}}

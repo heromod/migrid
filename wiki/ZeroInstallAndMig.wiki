@@ -63,6 +63,7 @@ TODO LATER: integrate in the MiG style pages (menu etc).
   * using an XML parser
   * accessing the XML via HTTP (to allow remote packages, for instance official ZI packages)
   * RE entry construction (and check), possibly a cache file (but no RE files!)
+  * Consider using REST interface instead of repo.conf
 
 === submission pages enhanced with ZI REs ===
   * using a configurable local file path (to repo.conf) as above
@@ -78,6 +79,7 @@ TODO LATER: integrate in the MiG style pages (menu etc).
     * "enrich" the job definition when actually submitting (see jobscriptgenerator::create_job_script and create_arc_job)
     * RE requirements have to be kept for resubmission. We have to additionally save non-ZI REs somewhere for the job script generation.
     * The scheduler needs to see/consider these _real_ RE requirements. Can be done by modifying the job in the job queue (not in the file)?
+  * Better solution: keep mRSL untouched until actual submit to resource (jobscriptgenerator). Only when resource specs are known do we expand to native or ZI implementation of RE.
 
 === SW Repo should serve feeds from portal.grid.dk ===
   * need to generate server's gpg key (store it in MiG-certificates dir)

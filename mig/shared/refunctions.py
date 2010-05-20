@@ -96,14 +96,14 @@ def list_0install_res(configuration):
 def is_0install_re(name, configuration):
     """Simple check, inefficient if called many times"""
     list = list_0install_res(configuration)
-    return (name in list)
+    return (name in [ x.upper() for x in list])
 
 def get_0install_re_dict(name, configuration):
     """ http get and parse the 0install feed xml, extracting required information"""
 
     # read the URL from the repo.conf (make sure method fails later if name is invalid)
     res = list_0install_res(configuration)
-    url = res.get(name,"(undefined)")
+    url = res.get(name.lower(), "(undefined)")
 
     # read in the XML using http
     try:
@@ -131,13 +131,18 @@ def get_0install_re_dict(name, configuration):
                 return getText(ns[0].childNodes[0:])
 
         # empty fields:
-        empty  = [ 'TESTPROCEDURE', 'VERIFYSTDOUT', 'VERIFYSTDERR', 'VERIFYSTATUS']
+        empty  = [ 'TESTPROCEDURE', 'VERIFYSTDOUT',
+                   'VERIFYSTDERR', 'VERIFYSTATUS',
+                   'CREATOR']
         re_dict.update([ (e,'') for e in empty])
 
         # Directly mapped fields between XML and RE keywords:
-        re_dict['NAME'] = textFrom('name').upper()
+        re_dict['RENAME'] = textFrom('name').upper()
         re_dict['DESCRIPTION'] = textFrom('summary')
-            
+
+        # timestamp is needed
+        re_dict['CREATED_TIMESTAMP'] = datetime.datetime(2010,05,20)
+
         # one SOFTWARE field, containing a dictionary with 
         # 'name', 'version', 'url', 'description', 'icon'
         software = {}
@@ -159,7 +164,7 @@ def get_0install_re_dict(name, configuration):
                         for b in binaries ]
         else:
             # not defined. Use package name as the only definition
-            env_vars = [{'name': software['name'], 
+            env_vars = [{'name': software['name'].upper(), 
                          'example': '(none)', 
                          'description': 'An executable binary'}]
 
@@ -170,7 +175,7 @@ def get_0install_re_dict(name, configuration):
         configuration.logger.error('Error parsing xml for %s: %s.\n XML dump: %s' % (name, err, feed))
         return (False, 'Could not parse runtime environment %s' % (name))
 
-    return re_dict
+    return (re_dict,'')
 
 def getText(nodelist):
     """concatenate all CData found in nodelist, convert to ASCII"""
@@ -181,6 +186,9 @@ def getText(nodelist):
     return rc.__str__()
 
 def get_re_dict(name, configuration):
+    if is_0install_re(name, configuration):
+        return get_0install_re_dict(name, configuration)
+
     dict = unpickle(configuration.re_home + name, configuration.logger)
     if not dict:
         return (False, 'Could not open runtimeenvironment %s' % name)

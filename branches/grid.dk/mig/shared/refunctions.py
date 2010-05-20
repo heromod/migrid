@@ -30,7 +30,8 @@
 import os
 import datetime
 import fcntl
-
+import urllib
+import xml.dom.minidom as xml
 
 import shared.parser as parser
 import shared.rekeywords as rekeywords
@@ -81,6 +82,103 @@ def is_runtime_environment(re_name, configuration):
     else:
         return False
 
+def list_0install_res(configuration):
+    """Reads repo.conf of the software repository (location configurable),
+    returns dictionary of ( RE-name, URL of 0install feed xml )"""
+
+    # this is a dummy definition, remove when merging with the real code
+    if not configuration.site_swrepo_url:
+        return []
+
+    return {'flac':'http://localhost:10080/0install/flac.xml',
+            'blast2':'http://localhost:10080/0install/blast2.xml'}
+
+def is_0install_re(name, configuration):
+    """Simple check, inefficient if called many times"""
+    list = list_0install_res(configuration)
+    return (name in list)
+
+def get_0install_re_dict(name, configuration):
+    """ http get and parse the 0install feed xml, extracting required information"""
+
+    # read the URL from the repo.conf (make sure method fails later if name is invalid)
+    res = list_0install_res(configuration)
+    url = res.get(name,"(undefined)")
+
+    # read in the XML using http
+    try:
+        h    = urllib.urlopen(url)
+        feed = h.read() # FIXME make sure all contents are read (not guaranteed with urllib2)
+        h.close()
+    except Exception, err:
+        configuration.logger.error('Error opening required URL' + \
+                                    ' %s for %s: %s.' % (url, name, err))
+        return (False, 'Could not open required URL ' + \
+                       '%s for runtime environment %s' % (url,name))
+    
+    re_dict = {}
+    # parse the xml feed, fill the keywords (see rekeywords.py)
+    try:
+        feeddoc = xml.parseString(feed)
+
+        def textFrom(name):
+            """ extract text from first node with given 
+            tag name, otherwise empty"""
+            ns = feeddoc.getElementsByTagName(name)
+            if not ns: 
+                return ''
+            else:
+                return getText(ns[0].childNodes[0:])
+
+        # empty fields:
+        empty  = [ 'TESTPROCEDURE', 'VERIFYSTDOUT', 'VERIFYSTDERR', 'VERIFYSTATUS']
+        re_dict.update([ (e,'') for e in empty])
+
+        # Directly mapped fields between XML and RE keywords:
+        re_dict['NAME'] = textFrom('name').upper()
+        re_dict['DESCRIPTION'] = textFrom('summary')
+            
+        # one SOFTWARE field, containing a dictionary with 
+        # 'name', 'version', 'url', 'description', 'icon'
+        software = {}
+        software['version'] = 'can be provided by zero-install'
+        software['name']        = textFrom('name')
+        software['url']         = textFrom('homepage')
+        software['description'] = textFrom('description')
+        software['icon']        = textFrom('icon')
+        
+        re_dict['SOFTWARE'] = [software]
+
+        # build ENVIRONMENTVARIABLE definitions, each containing a dictionary
+        # of 'name', 'example', 'description'
+        binaries = feeddoc.getElementsByTagName('binary')
+        if binaries:
+            env_vars = [ {'name':b.getAttribute('name').__str__().upper(), 
+                          'example':'(none)',
+                          'description':'An executable binary in the package'}
+                        for b in binaries ]
+        else:
+            # not defined. Use package name as the only definition
+            env_vars = [{'name': software['name'], 
+                         'example': '(none)', 
+                         'description': 'An executable binary'}]
+
+        re_dict['ENVIRONMENTVARIABLE'] = env_vars
+
+    except Exception, err:
+        raise err
+        configuration.logger.error('Error parsing xml for %s: %s.\n XML dump: %s' % (name, err, feed))
+        return (False, 'Could not parse runtime environment %s' % (name))
+
+    return re_dict
+
+def getText(nodelist):
+    """concatenate all CData found in nodelist, convert to ASCII"""
+    rc = ""
+    for node in nodelist:
+        if node.nodeType == node.TEXT_NODE:
+            rc = rc + node.data
+    return rc.__str__()
 
 def get_re_dict(name, configuration):
     dict = unpickle(configuration.re_home + name, configuration.logger)
@@ -88,7 +186,6 @@ def get_re_dict(name, configuration):
         return (False, 'Could not open runtimeenvironment %s' % name)
     else:
         return (dict, '')
-
 
 #Function for determining whether or not a runtimeenvironment is active:
 def is_re_active(res_map, re_name, configuration):

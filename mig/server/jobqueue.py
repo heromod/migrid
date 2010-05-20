@@ -114,7 +114,7 @@ class JobQueue:
             self.logger.error("NEW JOB! failed to enqueue job - index %d \
             out of range! (qlen %d)"
                               , index, self.queue_length())
-        success = False
+            success = False
         self.mutex.release()
 
         return success

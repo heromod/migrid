@@ -1,20 +1,20 @@
 #summary Developer notes by Jost and Benjamin about integrating zero-install with MiG
 
-= NOTES to integrate zero-install as RTE provider =
+= NOTES to integrate zero-install as RE provider =
 
 == Goal ==
-  * select RTEs which are provided by a zero-install (ZI) machinery
-  * Data from the swrepo is digested to a presentation of available RTEs in .job submission page and .RTE page
+  * select REs which are provided by a zero-install (ZI) machinery
+  * Data from the swrepo is digested to a presentation of available REs in .job submission page and .RE page
 
 When submitting a job:
-  * detect RTEs which are provided by ZI 
-  * if any such env. has been specified, add ZI to RTE requirements
-  * replace the RTE by suitable definitions of env. variables (see below for details)
+  * detect REs which are provided by ZI 
+  * if any such env. has been specified, add ZI to RE requirements
+  * replace the RE by suitable definitions of env. variables (see below for details)
   * then, submit job as usual
 
 == Work Items ==
   * modify/extend Zero-install XML format (Jost, started)
-  * RTE database page
+  * RE database page
   * Job submission page
   * Job submission handler + modifications for actual execution
   * Preparations: Software repository on portal, MiG resources, ARC resources
@@ -38,15 +38,15 @@ as a child element of `<interface>`.
 
 A ZI feed may provide binary names or leave this feature out.
 
-The derived MiG-RTE uses the binaries' names, capitalised, as variable names
+The derived MiG-RE uses the binaries' names, capitalised, as variable names
 
   If no binary names are provided, we default to only the package name
   QUESTION: what to do about duplicate definitions (native + 0install)
-   When conflicting with an existing RTE definition, this should correspond.
+   When conflicting with an existing RE definition, this should correspond.
 
 Corresponding env.var.s will be added to the env. when submitting
 
-  (a native RTE implementation on the resource will take precedence by
+  (a native RE implementation on the resource will take precedence by
   overwriting these variables)
 
 TODO: the swrepo management code should be modified to use the griddk namespace. 
@@ -57,25 +57,27 @@ While we are at it, prettify the page using XML stylesheets. http://en.wikipedia
 
 TODO LATER: integrate in the MiG style pages (menu etc).
 
-=== RTE lib ("db") page with ZI provided entries ===
+=== RE lib ("db") page with ZI provided entries ===
    local path to repo.conf should be in MiGserver.conf in order to parse information.
-   we generate RTE entry from the XML feeds (enhanced as above)
+   we generate RE entry from the XML feeds (enhanced as above)
   * using an XML parser
   * accessing the XML via HTTP (to allow remote packages, for instance official ZI packages)
-  * RTE entry construction (and check), possibly a cache file (but no RE files!)
+  * RE entry construction (and check), possibly a cache file (but no RE files!)
 
-=== submission pages enhanced with ZI RTEs ===
+=== submission pages enhanced with ZI REs ===
   * using a configurable local file path (to repo.conf) as above
-  * Define a method `list_0install_rtes()` to pull ZI RTE names from the system
-  * Needs to be separate: later, we need to determine whether or not a RTE is a ZI RTE. 
+  * Define a method `list_0install_res()` to pull ZI RE names from the system
+  * Needs to be separate: later, we need to determine whether or not a RE is a ZI RE. 
 
 ==== submission handler enhanced with 0install additions ====
 
   * add env.var. for every binary in a ZI feed 
-  * (hardwired name) "ZEROINSTALL" RTE to add instead of the selected one
+  * (hardwired name) "ZEROINSTALL" RE to add instead of the selected one
   * to avoid showing the user what we do: 
-    *  add extra fields ENVIRONMENT_ZEROINSTALL and ZEROINSTALL (flag) (when submitting, see mrslparser::parse where checking for RTEs)
+    *  add extra fields ENVIRONMENT_ZEROINSTALL (containing definitions for binaries) and ZEROINSTALL (when submitting, see mrslparser::parse where checking for REs)
     * "enrich" the job definition when actually submitting (see jobscriptgenerator::create_job_script and create_arc_job)
+    * RE requirements have to be kept for resubmission. We have to additionally save non-ZI REs somewhere for the job script generation.
+    * The scheduler needs to see/consider these _real_ RE requirements. Can be done by modifying the job in the job queue (not in the file)?
 
 === SW Repo should serve feeds from portal.grid.dk ===
   * need to generate server's gpg key (store it in MiG-certificates dir)
@@ -85,12 +87,12 @@ cascading to their dependencies. Needs a `zeroinstall-injector` installation on 
 
 === MiG resources: need to deploy key of our server ===
   * (can do it manually by using one of the packages once manually)
-  * This is for all resources providing the ZEROINSTALL (native) RTE
+  * This is for all resources providing the ZEROINSTALL (native) RE
 
 === ARC resources: ===
   * need to make 0install work! (problems on benedict when run inside ARC jobs, no other cluster available for tests)
-  * need to set 'XDG_CONFIG_HOME' (+friends) for ZERO_INSTALL RTE
-  * send a request for this RTE definition (to whom?? Who helps?)
+  * need to set 'XDG_CONFIG_HOME' (+friends) for ZERO_INSTALL RE
+  * send a request for this RE definition (to whom?? Who helps?)
   * need to deploy our server key
 
 -------
@@ -117,7 +119,7 @@ Hack around: The following variables (not documented) influence where 0install s
 'XDG_CONFIG_HOME'
 
 Solutions
-  # Set these variables for the grid user when using ARC-RTE ZERO-INSTALL
+  # Set these variables for the grid user when using ARC-RE ZERO-INSTALL
   Effect: global package cache (OK) and global keys (bad, need deployment)
   # Include server key to accept as an input file in session
   Effect: key acceptance control per-job (good), no package cache (bad)
@@ -133,11 +135,11 @@ Solutions
 - job submit:
     - create new page / rewrite page
     - make detail levels or field groups
-    - filter RTEs (when enabling arc, architecture?, ) (this will catch mismatching RTE<->resource)
+    - filter REs (when enabling arc, architecture?, ) (this will catch mismatching RE<->resource)
     - make "arc" check box
 - arc
     - get an arc resource with zero install for testing
     - modify mrsl file in mrslparser.py before submitting
     -
-- job script should implement the requested RTE by additional environment vars
+- job script should implement the requested RE by additional environment vars
 }}}

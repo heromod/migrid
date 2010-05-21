@@ -33,12 +33,15 @@ import fcntl
 import urllib
 import xml.dom.minidom as xml
 
+
 import shared.parser as parser
 import shared.rekeywords as rekeywords
 from shared.fileio import pickle, unpickle
 from shared.validstring import valid_dir_input
 #from shared.parser import parse 
 from shared.serial import load, dump
+from ConfigParser import SafeConfigParser
+
 
 def list_runtime_environments(configuration):
     re_list = []
@@ -88,12 +91,21 @@ def list_0install_res(configuration):
     
        Convention: RE names are upper case"""
 
-    # this is a dummy definition, remove when merging with the real code
-    if not configuration.site_swrepo_url:
-        return []
-
-    return {'FLAC':'http://localhost:10080/0install/flac.xml',
-            'BLAST2':'http://localhost:10080/0install/blast2.xml'}
+    repo_conf = SafeConfigParser()
+    conf_fd = open(configuration.repo_conf_path, 'r')
+    fcntl.flock(conf_fd, fcntl.LOCK_SH)
+    repo_conf.readfp(conf_fd)
+    fcntl.flock(conf_fd, fcntl.LOCK_UN)
+    conf_fd.close()
+    all_packages = {}
+    for package in repo_conf.sections():
+        entry = {}
+        for (key, val) in repo_conf.items(package):
+            entry[key] = val
+        
+        all_packages[package.upper()] = entry["source"]
+        
+    return all_packages
 
 def is_0install_re(name, configuration):
     """Simple check, inefficient if called many times"""
@@ -418,5 +430,4 @@ def get_active_re_list(re_home):
                  % str(err), [])
 
     return (True, 'Active RE list retrieved with success.', result)
-
 

@@ -423,6 +423,8 @@ The query you have requested did not return any data.
         w = None
     if w: bar_default += ',width:"%s"' % w
 
+    height = (len(datarows) * 13) + 70
+
     # predefine 30 colours ( lazy way )
     seq = [0,9,12,2,11,4,6,13,15,1,8,10,14,3,5,7]
     colours = [ ('#%1X0%1X0%1X0' % (x,y,z))
@@ -451,8 +453,17 @@ The query you have requested did not return any data.
         include_viz += "$('.stats').visualize({" + v + "});"
     include_viz +="""
                  });
-         </script>
+         </script>         
 """
+
+
+    include_viz += """
+    <style>
+    .visualize {padding: 70px 40px %(height)spx;}
+    </style>
+    """%{'height': height}
+    
+    
     title_entry['javascript'] = include_viz
 
     # and done

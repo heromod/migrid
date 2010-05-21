@@ -58,8 +58,13 @@ While we are at it, prettify the page using XML stylesheets. http://en.wikipedia
 TODO LATER: integrate in the MiG style pages (menu etc).
 
 === RE lib ("db") page with ZI provided entries ===
-   local path to repo.conf should be in MiGserver.conf in order to parse information.
-   we generate RE entry from the XML feeds (enhanced as above)
+
+  * ZI configuration items needed in MiGserver.conf:
+     * Add a configuration item providing the ZI RE name and variable name
+     * a second config. item containing the URL (already there)
+     * possibly (see above) a third config. item containing the local path to repo.conf
+
+We generate RE entry from the XML feeds (enhanced as above)
   * using an XML parser
   * accessing the XML via HTTP (to allow remote packages, for instance official ZI packages)
   * RE entry construction (and check), possibly a cache file (but no RE files!)
@@ -73,13 +78,14 @@ TODO LATER: integrate in the MiG style pages (menu etc).
 ==== submission handler enhanced with 0install additions ====
 
   * add env.var. for every binary in a ZI feed 
-  * (hardwired name) "ZEROINSTALL" RE to add instead of the selected one
   * to avoid showing the user what we do: 
-    *  add extra fields ENVIRONMENT_ZEROINSTALL (containing definitions for binaries) and ZEROINSTALL (when submitting, see mrslparser::parse where checking for REs)
-    * "enrich" the job definition when actually submitting (see jobscriptgenerator::create_job_script and create_arc_job)
-    * RE requirements have to be kept for resubmission. We have to additionally save non-ZI REs somewhere for the job script generation.
-    * The scheduler needs to see/consider these _real_ RE requirements. Can be done by modifying the job in the job queue (not in the file)?
-  * Better solution: keep mRSL untouched until actual submit to resource (jobscriptgenerator). Only when resource specs are known do we expand to native or ZI implementation of RE.
+    *  ~~add extra fields ENVIRONMENT_ZEROINSTALL (containing definitions for binaries) and ZEROINSTALL (when submitting, see mrslparser::parse where checking for REs)~~
+    * ~~RE requirements have to be kept for resubmission. We have to additionally save non-ZI REs somewhere for the job script generation.~~
+    * Better: keep mRSL untouched until actual submit to resource (jobscriptgenerator). Only when resource specs are known do we expand to native or ZI implementation of RE.
+    * "enrich" the job definition when actually submitting to resource (see jobscriptgenerator::create_job_script and create_arc_job)
+    * The scheduler needs to see/consider these _real_ RE requirements. Can be done by 
+       * modifying the job in the job queue (not in the file)?
+       * better: making resources automatically provide ZI REs when they support ZI 
 
 === SW Repo should serve feeds from portal.grid.dk ===
   * need to generate server's gpg key (store it in MiG-certificates dir)

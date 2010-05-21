@@ -38,7 +38,7 @@ import shared.rekeywords as rekeywords
 from shared.fileio import pickle, unpickle
 from shared.validstring import valid_dir_input
 #from shared.parser import parse 
-from shared.shared.serial import load, dump
+from shared.serial import load, dump
 
 def list_runtime_environments(configuration):
     re_list = []
@@ -84,31 +84,33 @@ def is_runtime_environment(re_name, configuration):
 
 def list_0install_res(configuration):
     """Reads repo.conf of the software repository (location configurable),
-    returns dictionary of ( RE-name, URL of 0install feed xml )"""
+       returns dictionary of ( RE-name, URL of 0install feed xml )
+    
+       Convention: RE names are upper case"""
 
     # this is a dummy definition, remove when merging with the real code
     if not configuration.site_swrepo_url:
         return []
 
-    return {'flac':'http://localhost:10080/0install/flac.xml',
-            'blast2':'http://localhost:10080/0install/blast2.xml'}
+    return {'FLAC':'http://localhost:10080/0install/flac.xml',
+            'BLAST2':'http://localhost:10080/0install/blast2.xml'}
 
 def is_0install_re(name, configuration):
     """Simple check, inefficient if called many times"""
     list = list_0install_res(configuration)
-    return (name in [ x.upper() for x in list])
+    return (name in list)
 
 def get_0install_re_dict(name, configuration):
     """ http get and parse the 0install feed xml, extracting required information"""
 
     # read the URL from the repo.conf (make sure method fails later if name is invalid)
     res = list_0install_res(configuration)
-    url = res.get(name.lower(), "(undefined)")
+    url = res.get(name, "(undefined)")
 
     # read in the XML using http
     try:
         h    = urllib.urlopen(url)
-        feed = h.read() # FIXME make sure all contents are read (not guaranteed with urllib2)
+        feed = h.read()
         h.close()
     except Exception, err:
         configuration.logger.error('Error opening required URL' + \
@@ -117,6 +119,10 @@ def get_0install_re_dict(name, configuration):
                        '%s for runtime environment %s' % (url,name))
     
     re_dict = {}
+    # timestamp and creator are needed (apart from rekeywords)
+    re_dict['CREATED_TIMESTAMP'] = datetime.datetime(2010,05,20)
+    re_dict['CREATOR'] = 'provided by zero-install'
+
     # parse the xml feed, fill the keywords (see rekeywords.py)
     try:
         feeddoc = xml.parseString(feed)
@@ -132,16 +138,12 @@ def get_0install_re_dict(name, configuration):
 
         # empty fields:
         empty  = [ 'TESTPROCEDURE', 'VERIFYSTDOUT',
-                   'VERIFYSTDERR', 'VERIFYSTATUS',
-                   'CREATOR']
+                   'VERIFYSTDERR', 'VERIFYSTATUS']
         re_dict.update([ (e,'') for e in empty])
 
         # Directly mapped fields between XML and RE keywords:
         re_dict['RENAME'] = textFrom('name').upper()
-        re_dict['DESCRIPTION'] = textFrom('summary')
-
-        # timestamp is needed
-        re_dict['CREATED_TIMESTAMP'] = datetime.datetime(2010,05,20)
+        re_dict['DESCRIPTION'] = textFrom('description')
 
         # one SOFTWARE field, containing a dictionary with 
         # 'name', 'version', 'url', 'description', 'icon'
@@ -149,7 +151,7 @@ def get_0install_re_dict(name, configuration):
         software['version'] = 'can be provided by zero-install'
         software['name']        = textFrom('name')
         software['url']         = textFrom('homepage')
-        software['description'] = textFrom('description')
+        software['description'] = textFrom('summary')
         software['icon']        = textFrom('icon')
         
         re_dict['SOFTWARE'] = [software]

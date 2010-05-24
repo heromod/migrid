@@ -235,6 +235,19 @@ class Configuration:
     
     arc_clusters = [] 
     
+    # software repository and zero-install runtime env.
+
+    # zero install configuration for sw repo
+    # if kept as None, feature is switched off
+    # otherwise, should contain a pair (Name-Of-Runtimeenv, Name-Of-Zerolaunch-Variable)
+
+    zero_install_re = None
+
+    # the path to the repo.conf file is stored here as well (for now)
+    # under SITE, we have a second item, the URL
+
+    repo_conf_path  = None
+
     config_file = None
 
     # constructor
@@ -578,6 +591,22 @@ class Configuration:
         if config.has_option('ARC', 'arc_clusters'):
             self.arc_clusters = config.get('ARC',
                     'arc_clusters').split()
+
+        # zeroinstall RE configuration, for automatically adding REs 
+
+        if config.has_option('GLOBAL', 'zero_install_re'):
+            try:
+                self.zero_install_re = eval(config.get('GLOBAL',
+                                                       'zero_install_re'))
+                (re,var) = self.zero_install_re
+                if not re or not var:
+                    raise ("unuable value (%s,%s) " % (re,var))
+            except Exception, err:
+                self.logger.error("Parsing zero_install_re config: %s" % err)
+                self.zero_install_re = None
+        if config.has_option('GLOBAL', 'repo_conf_path'):
+            self.repo_conf_path = config.get('GLOBAL',
+                                              'repo_conf_path')
 
     def parse_peers(self, peerfile):
 

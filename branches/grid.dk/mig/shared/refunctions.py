@@ -72,10 +72,15 @@ def list_runtime_environments(configuration):
             configuration.logger.info('%s in %s is not a plain file, move it?'
                      % (entry, configuration.re_home))
 
+    re_list.extend(list_0install_res(configuration))
+
     return (True, re_list)
 
 
 def is_runtime_environment(re_name, configuration):
+    if is_0install_re(re_name, configuration):
+        return True
+
     if not valid_dir_input(configuration.re_home, re_name):
         configuration.logger.warning("registered possible illegal directory traversal attempt re_name '%s'"
                  % re_name)
@@ -91,12 +96,21 @@ def list_0install_res(configuration):
     
        Convention: RE names are upper case"""
 
-    repo_conf = SafeConfigParser()
-    conf_fd = open(configuration.repo_conf_path, 'r')
-    fcntl.flock(conf_fd, fcntl.LOCK_SH)
-    repo_conf.readfp(conf_fd)
-    fcntl.flock(conf_fd, fcntl.LOCK_UN)
-    conf_fd.close()
+    # if the feature is not configured, return empty
+    if not configuration.zero_install_re \
+           or not configuration.repo_conf_path:
+        return {}
+
+    try:
+        repo_conf = SafeConfigParser()
+        conf_fd = open(configuration.repo_conf_path, 'r')
+        fcntl.flock(conf_fd, fcntl.LOCK_SH)
+        repo_conf.readfp(conf_fd)
+        fcntl.flock(conf_fd, fcntl.LOCK_UN)
+        conf_fd.close()
+    except Exception, err:
+        configuration.logger.error("Could not read repo conf." % err)
+        return {}
     all_packages = {}
     for package in repo_conf.sections():
         entry = {}
@@ -172,21 +186,22 @@ def get_0install_re_dict(name, configuration):
         # of 'name', 'example', 'description'
         binaries = feeddoc.getElementsByTagName('binary')
         if binaries:
-            env_vars = [ {'name':b.getAttribute('name').__str__().upper(), 
-                          'example':'(none)',
+            env_vars = [ {'name': b.getAttribute('name').__str__().upper(), 
+                          'example': b.getAttribute('name').__str__(),
                           'description':'An executable binary in the package'}
                         for b in binaries ]
         else:
             # not defined. Use package name as the only definition
             env_vars = [{'name': software['name'].upper(), 
-                         'example': '(none)', 
+                         'example': software['name'],
                          'description': 'An executable binary'}]
 
         re_dict['ENVIRONMENTVARIABLE'] = env_vars
 
     except Exception, err:
         raise err
-        configuration.logger.error('Error parsing xml for %s: %s.\n XML dump: %s' % (name, err, feed))
+        configuration.logger.error('Error parsing xml for %s: %s.\n XML dump: %s' % \
+                                   (name, err, feed))
         return (False, 'Could not parse runtime environment %s' % (name))
 
     return (re_dict,'')
@@ -431,3 +446,63 @@ def get_active_re_list(re_home):
 
     return (True, 'Active RE list retrieved with success.', result)
 
+
+def zero_install_replace(required_res, provided_res, configuration):
+    """replaces the job's RE requirements specified (arg.1) by
+       environment definitions and ZI requirement, leaving out the
+       provided REs.
+
+       ZI configuration needed: name of ZI RE, name of variable for launch
+           (as a pair in configuration.zero_install_config?)
+
+       Returns: (Success, [env.var. def.], modified required_res)
+    """
+
+    logger   = configuration.logger
+    try:
+        (zi_re, zi_launch_var) = ('ZEROINSTALL-1.0', 'ZEROLAUNCH')
+                               # = configuration.zero_install_re
+        zi_res   = list_0install_res(configuration)
+    except:
+        logger.debug("Failed to retrieve ZI config., returning unchanged")
+        return (True, [], required_res)
+    if not zi_res:
+        logger.debug("NO ZI software found, returning unchanged")
+        return (True, [], required_res)
+
+    def zi_launch(bin, url):
+        "$%s -c -m %s " % (zi_launch_var, bin, url)
+
+    real_res = []
+    env_vars = []
+
+    for re in required_res:
+
+        if re in provided_res:
+            real_res.append(re)
+
+        else:
+            if not re in zi_res:
+                # give up matching (something is wrong)
+                logger.error("RE mismatch: %s neither ZI (%s), nor provided by resource (%s)" % \
+                             (re, zi_res, provided_res))
+                return (False, [], [])
+
+            # ugly! Should use the URL directly instead of retrieving it again.
+            url = re_dict.get(re, '')
+            (success, re_dict) = get_0install_re_dict(re, configuration)
+            if not success:
+                logger.error("Could not retrieve data for RE %s: %s" % \
+                             (re, re_dict))
+                return (False, [], [])
+            
+            for e in re_dict['ENVIRONMENTVARIABLE']:
+                # in re_dict {name: .., example: .., description: ..}
+                # where "name" is upper case of "example",  the bin name
+                env_vars.append( e['name'], zi_launch(e['example'], url)) 
+
+    if env_vars:
+        # if anything has been added here, we need the ZI RE
+        real_res.append(zi_re)
+
+    return (True, env_vars, real_res)

@@ -40,6 +40,7 @@ import shared.safeeval as safeeval
 from jobqueue import print_job
 from shared.resource import anon_resource_id
 from shared.vgrid import vgrid_access_match
+import shared.refunctions as refunctions
 
 
 class Scheduler:
@@ -1268,7 +1269,24 @@ class Scheduler:
         # REs look like [('POVRAY3.6', []), ('HKTEST', [('bla', 'bla2'), ('blaa', 'bla3')]), ('LOCALDISK', [])]
         # print "going to check that runtimeenvironments of job and resource match"
 
+        # add zero-install REs here (jump over req.ment if ZI
+        # provided and ZI package available)
+
+        # we reload the ZI package list each time to allow dynamic
+        # updates. If it was cached, deletion or addition would not
+        # take effect.
+        zi_res = []
+        if self.conf.zero_install_re:
+            (zi_re,_) = self.conf.zero_install_re
+            if zi_re in [ n for (n,_) in res['RUNTIMEENVIRONMENT'] ]:
+                zi_res = refunctions.list_0install_res(self.conf).keys()
+
         for jre in job['RUNTIMEENVIRONMENT']:
+
+            # for zero-install provided REs, skip the check
+            if zi_res and jre in zi_res:
+                break
+
             found = False
             for rre in res['RUNTIMEENVIRONMENT']:
                 (res_name, res_val) = rre

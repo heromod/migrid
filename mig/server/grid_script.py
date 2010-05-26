@@ -895,6 +895,15 @@ while True:
             # race condition if a job has not been dequeued after the
             # status in the mRSL file has been changed to CANCELED)
 
+            # ZEROINSTALL/SW Repo modifications:
+            #  resources providing ZEROINSTALL claim they provide all ZI REs
+            #  pass a modified resource config dictionary to the scheduler 
+
+            # you might think this is about passing the modified
+            # resource_config to schedule below. IT IS NOT, the
+            # scheduler caches resources (update_resource above), so
+            # the respective code is in scheduler.py.
+
             while True:
                 job_dict = scheduler.schedule(resource_config)
                 if not job_dict:

@@ -27,6 +27,7 @@
 
 """Job script generator"""
 
+import copy
 import os
 import time
 from binascii import hexlify
@@ -37,6 +38,8 @@ import genjobscriptjava
 from shared.ssh import copy_file_to_resource
 from shared.fileio import write_file, pickle, make_symlink
 from shared.useradm import client_id_dir
+
+from shared.refunctions import zero_install_replace
 
 try:
     import shared.mrsltoxrsl as mrsltoxrsl
@@ -91,7 +94,7 @@ def create_empty_job(
     job_dict['EXECUTABLES'] = ''
     job_dict['CPUTIME'] = str(cputime)
     job_dict['EXECUTION_DELAY'] = str(execution_delay)
-    job_dict['ENVIRONMENT'] = ''
+    job_dict['ENVIRONMENT'] = []
     job_dict['RUNTIMEENVIRONMENT'] = []
     job_dict['MAXPRICE'] = '0'
     job_dict['JOBNAME'] = 'empty job'
@@ -170,6 +173,9 @@ def create_job_script(
                                         unique_resource_name,
                                         'empty_job_helper_dict.%s' % exe)
 
+    logger.debug('create Job script, session ID: %s' % sessionid)
+    logger.debug('Job is this: %s' % job)
+
     # TODO: What decides that only these fields should be copied???
     #  Since job_dict is used to generate the job script we may very
     #  well loose some job fields here!
@@ -185,6 +191,14 @@ def create_job_script(
     job_dict['RUNTIMEENVIRONMENT'] = job['RUNTIMEENVIRONMENT']
     job_dict['MIGSESSIONID'] = sessionid
     job_dict['MIGIOSESSIONID'] = iosessionid
+
+    # replace requested REs by env. variables if zero-install configured
+    if configuration.zero_install_re:
+        (zi_env, real_res) = zero_install_replace(job['RUNTIMEENVIRONMENT'],
+                                         resource_config['RUNTIMEENVIRONMENT'],
+                                         configuration)
+        job_dict['RUNTIMEENVIRONMENT'] = real_res
+        job_dict['ENVIRONMENT'].extend(zi_env)
 
     if job.has_key('JOBTYPE'):
         job_dict['JOBTYPE'] = job['JOBTYPE']
@@ -202,6 +216,8 @@ def create_job_script(
         job_dict['MAXPRICE'] = '0'
     client_id = str(job['USER_CERT'])
     client_dir = client_id_dir(client_id)
+
+    logger.debug('Modified Job dict: %s' % job_dict)
 
     # if not job:
 
@@ -418,6 +434,45 @@ def create_arc_job(
 
     client_dir = client_id_dir(client_id)
 
+    # replace requested REs by env.var.s if zero-install configured.
+    # For this purpose, we need to copy the job dictionary (would
+    # otherwise modify it in-place and return it to grid_script).
+    job_copy = copy.deepcopy(job)
+
+    if configuration.zero_install_re:
+
+        # ARC resources do not provide any MiG-style runtime env.s.
+        # Especially, they do not provide the ZI runtime env. as we
+        # expect. So we make a fake entry for the replacement.
+
+        (zi_re, zi_launch_var) = configuration.zero_install_re
+
+        # The following are HARDCODED STRINGS which needs to be
+        # consistent with the real ARC runtime env. We assume that ARC
+        # will use ENV/ZEROINSTALL and adjust the path to make
+        # "0launch" work (unless in scope anyway).
+
+        arc_zi_re = 'ENV/ZERO-INSTALL'
+        arc_provides = [(zi_re,[(zi_launch_var, '0launch')])]
+
+        # end of HARDCODED STRINGS
+
+        (zi_env, real_res) = \
+             zero_install_replace(job_copy['RUNTIMEENVIRONMENT'],
+                                  arc_provides,
+                                  configuration)
+
+        # in the ARC case, real_res should not contain anything except
+        # zi_re (or nothing, if no zi software is required).
+        if real_res and real_res != [zi_re]:
+            return ('Cannot satisfy runtime env. requirements (ARC+ZI)',
+                    None)
+        if real_res == [zi_re]:
+        	real_res = [arc_zi_re]
+
+        job_copy['RUNTIMEENVIRONMENT'] = real_res
+        job_copy['ENVIRONMENT'].extend(zi_env)
+
     # make symbolic links inside webserver_home:
     #  
     # we need: link to owner's dir. to receive results, 
@@ -436,9 +491,7 @@ def create_arc_job(
     # be uploaded to sid_redirect/sessionid/job_output/job_id  
 
     try:
-        (xrsl, script, script_name) = mrsltoxrsl.translate(job, sessionid)
-        logger.debug('translated to xRSL: %s' % xrsl)
-        logger.debug('script:\n %s' % script)
+        (xrsl, script, script_name) = mrsltoxrsl.translate(job_copy, sessionid)
 
     except Exception, err:
         # error during translation, pass a message

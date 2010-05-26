@@ -126,12 +126,28 @@ def is_0install_re(name, configuration):
     list = list_0install_res(configuration)
     return (name in list)
 
-def get_0install_re_dict(name, configuration):
-    """ http get and parse the 0install feed xml, extracting required information"""
+# 0install RE information is XML and has to be parsed 
+def getText(nodelist):
+    """concatenate all CData found in nodelist, convert to ASCII"""
+    rc = ""
+    for node in nodelist:
+        if node.nodeType == node.TEXT_NODE:
+            rc = rc + node.data
+    return rc.__str__()
 
-    # read the URL from the repo.conf (make sure method fails later if name is invalid)
-    res = list_0install_res(configuration)
-    url = res.get(name, "(undefined)")
+def get_0install_re_dict(name, configuration, url=None):
+    """ http get URL and parse the 0install feed xml, extracting required
+        information. If URL is None, retrieve it from a list.
+
+        Returns: (RE dictionary in usual MiG format, error message)
+                 where either dictionary or message are empty."""
+
+    if not url:
+
+        # read the URL from the repo.conf (make sure method fails
+        # later if name is invalid)
+        res = list_0install_res(configuration)
+        url = res.get(name, "(undefined)")
 
     # read in the XML using http
     try:
@@ -141,8 +157,8 @@ def get_0install_re_dict(name, configuration):
     except Exception, err:
         configuration.logger.error('Error opening required URL' + \
                                     ' %s for %s: %s.' % (url, name, err))
-        return (False, 'Could not open required URL ' + \
-                       '%s for runtime environment %s' % (url,name))
+        return ({}, 'Could not open required URL ' + \
+                    '%s for runtime environment %s' % (url,name))
     
     re_dict = {}
     # timestamp and creator are needed (apart from rekeywords)
@@ -184,12 +200,20 @@ def get_0install_re_dict(name, configuration):
 
         # build ENVIRONMENTVARIABLE definitions, each containing a dictionary
         # of 'name', 'example', 'description'
+
+        # (field 'name') is upper case of the basename of the field
+        # 'example', which should be the real binary name, later used
+        # for defining environment variables!
+
         binaries = feeddoc.getElementsByTagName('binary')
         if binaries:
-            env_vars = [ {'name': b.getAttribute('name').__str__().upper(), 
-                          'example': b.getAttribute('name').__str__(),
-                          'description':'An executable binary in the package'}
-                        for b in binaries ]
+            env_vars = []
+            for b in binaries:
+                bin = b.getAttribute('name').__str__()
+                var = bin.rsplit('/')[-1].upper()
+                env_vars.append({'name': var, 'example':bin,
+                          'description':'An executable binary in the package'
+                                 })
         else:
             # not defined. Use package name as the only definition
             env_vars = [{'name': software['name'].upper(), 
@@ -199,20 +223,11 @@ def get_0install_re_dict(name, configuration):
         re_dict['ENVIRONMENTVARIABLE'] = env_vars
 
     except Exception, err:
-        raise err
         configuration.logger.error('Error parsing xml for %s: %s.\n XML dump: %s' % \
                                    (name, err, feed))
-        return (False, 'Could not parse runtime environment %s' % (name))
+        return ({}, 'Could not parse runtime environment %s' % (name))
 
     return (re_dict,'')
-
-def getText(nodelist):
-    """concatenate all CData found in nodelist, convert to ASCII"""
-    rc = ""
-    for node in nodelist:
-        if node.nodeType == node.TEXT_NODE:
-            rc = rc + node.data
-    return rc.__str__()
 
 def get_re_dict(name, configuration):
     if is_0install_re(name, configuration):
@@ -453,56 +468,94 @@ def zero_install_replace(required_res, provided_res, configuration):
        provided REs.
 
        ZI configuration needed: name of ZI RE, name of variable for launch
-           (as a pair in configuration.zero_install_config?)
+           ( as a pair in configuration.zero_install_re )
 
-       Returns: (Success, [env.var. def.], modified required_res)
+       Returns: ([env.var. def.], modified required_res)
+
+       The env.var definitions use the provided runtime environment
+       definitions for zero-install itself, to bring them in scope early.
     """
 
     logger   = configuration.logger
-    try:
-        (zi_re, zi_launch_var) = ('ZEROINSTALL-1.0', 'ZEROLAUNCH')
-                               # = configuration.zero_install_re
-        zi_res   = list_0install_res(configuration)
-    except:
-        logger.debug("Failed to retrieve ZI config., returning unchanged")
-        return (True, [], required_res)
+
+    logger.debug("zero_install_replace, %s, %s" % (required_res, provided_res))
+
+    if not configuration.zero_install_re:
+        logger.debug("ZI not configured, returning unchanged")
+        return ([], required_res)
+
+    zi_res   = list_0install_res(configuration)
+
     if not zi_res:
         logger.debug("NO ZI software found, returning unchanged")
-        return (True, [], required_res)
+        return ([], required_res)
+
+    logger.debug("ZI software: %s" % zi_res)
+
+    (zi_re, zi_launch_var) = configuration.zero_install_re
+
+    # The user ENV variables will be set before the runtime
+    # env. variable. Hence, we need to pick up the 0launch definition
+    # from the provided REs and use it for our env_vars.
+
+    zi_env = dict(provided_res).get(zi_re,[])
+    zi_launch_cmd = dict(zi_env).get(zi_launch_var, None)
+
+    # We assume that zero-install itself is provided by the
+    # resource, otherwise our definitions above will not work in
+    # practice anyway (we try our best using "0launch" otherwise).
+
+    if not zi_launch_cmd:
+        logger.error("ZI configuration error: variable content not found")
+        zi_launch_cmd = '0launch'
 
     def zi_launch(bin, url):
-        "$%s -c -m %s " % (zi_launch_var, bin, url)
+        return "\"%s -c -m %s %s\"" % (zi_launch_cmd, bin, url)
 
     real_res = []
     env_vars = []
 
     for re in required_res:
 
-        if re in provided_res:
+        if re in [k for (k,_) in provided_res]:
+            # provided_res carries the respective configuration (var-list)
             real_res.append(re)
 
         else:
-            if not re in zi_res:
-                # give up matching (something is wrong)
-                logger.error("RE mismatch: %s neither ZI (%s), nor provided by resource (%s)" % \
-                             (re, zi_res, provided_res))
-                return (False, [], [])
+            logger.debug("Need to provide env %s using Zero Install" % re)
 
-            # ugly! Should use the URL directly instead of retrieving it again.
-            url = re_dict.get(re, '')
-            (success, re_dict) = get_0install_re_dict(re, configuration)
-            if not success:
+            if not re in zi_res:
+                # zi_res is a dictionary, so this works without pattern match
+                logger.debug("RE mismatch: %s neither ZI (%s), nor provided by resource (%s)" % \
+                             (re, zi_res, provided_res))
+                # this can still make sense (precedence of 0-install
+                # over native), so keep as required RE, go on
+                real_res.append(re)
+
+            # get RE information for replacement.
+            # use the url from the dictionary instead of retrieving it again.
+            url = zi_res.get(re, '(unknown)')
+            (re_dict, msg) = get_0install_re_dict(re, configuration, url)
+            if msg:
                 logger.error("Could not retrieve data for RE %s: %s" % \
-                             (re, re_dict))
-                return (False, [], [])
-            
-            for e in re_dict['ENVIRONMENTVARIABLE']:
-                # in re_dict {name: .., example: .., description: ..}
-                # where "name" is upper case of "example",  the bin name
-                env_vars.append( e['name'], zi_launch(e['example'], url)) 
+                             (re, msg))
+                # keep as required RE, go on with next one
+                real_res.append(re)
+
+            else:
+                for e in re_dict['ENVIRONMENTVARIABLE']:
+                    # in re_dict {name: .., example: .., description: ..}
+                    # where "name" is upper case of "example",  the bin name
+                    env_vars.append( (e['name'], zi_launch(e['example'], url)))
 
     if env_vars:
-        # if anything has been added here, we need the ZI RE
+
+        # if anything has been added here, we need the ZI RE we have
+        # hard-wired the 0launch command path anyway, so this is "just
+        # to be sure"
+
         real_res.append(zi_re)
 
-    return (True, env_vars, real_res)
+    logger.debug("returning (%s,%s)" % (env_vars, real_res))
+
+    return (env_vars, real_res)

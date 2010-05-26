@@ -600,7 +600,7 @@ class Configuration:
                                                        'zero_install_re'))
                 (re,var) = self.zero_install_re
                 if not re or not var:
-                    raise ("unuable value (%s,%s) " % (re,var))
+                    raise ("unusable value (%s,%s) " % (re,var))
             except Exception, err:
                 self.logger.error("Parsing zero_install_re config: %s" % err)
                 self.zero_install_re = None

@@ -90,9 +90,7 @@ In the back end (jobscriptgenerator.py), if a RE is provided by ZI:
 
   * The scheduler needs to see/consider these _real_ RE requirements. Can be done by 
      * ~~modifying the job in the job queue (but not the file)~~. In that case, the job needs to be retouched after stopping the server (automatic re-queueing of new jobs if job queue could not be saved).
-
-     * making resources automatically provide all ZI REs when they support ZI 
- The place to make this change is (non-obviously) the file scheduler.py. The scheduler API call to schedule a job takes a resource configuration as parameter, but uses only the resource ID and then accesses an internal cache. Instead of cross-cutting changes to create (and update) that cache, we directly and only modify the place of the RE check inside scheduler.py. 
+     * making *resources automatically provide* all ZI REs when they support ZI. The place to make this change is (non-obviously) the file scheduler.py. The scheduler API call to schedule a job takes a resource configuration as parameter, but uses only the resource ID and then accesses an internal cache. Instead of cross-cutting changes to create (and update) that cache, we directly and only modify the place of the RE check inside scheduler.py. 
 
   * The user and frontend will never see the changes to the job. The mRSL file remains untouched (for resubmission), we only "enrich" the job definition when generating the script for a particular resource (see jobscriptgenerator::create_job_script and create_arc_job)
 

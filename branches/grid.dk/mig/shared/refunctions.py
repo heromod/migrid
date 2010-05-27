@@ -44,6 +44,11 @@ from ConfigParser import SafeConfigParser
 
 
 def list_runtime_environments(configuration):
+    """ List all runtime environments consisting of
+    traditional runtime environments from configuration.re_home +
+    zero install runtime environments from repo.conf
+    """
+       
     re_list = []
     dir_content = []
 
@@ -75,7 +80,6 @@ def list_runtime_environments(configuration):
     re_list.extend(list_0install_res(configuration))
 
     return (True, re_list)
-
 
 def is_runtime_environment(re_name, configuration):
     if is_0install_re(re_name, configuration):
@@ -272,13 +276,7 @@ def is_re_active(res_map, re_name, configuration):
     else:
         return (False, actives)
 
-                
-
-                
-        
-
-
-
+   
 #Function for removing an RTE from all resources.
 def del_re_from_resources(res_map, re_name, configuration):
     #Lock down access to resources, ensuring exclusive access during deletion

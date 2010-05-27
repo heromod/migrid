@@ -428,6 +428,9 @@ class Configuration:
             self.notify_protocols = []
         if config.has_option('GLOBAL', 'storage_protocols'):
             self.storage_protocols = config.get('GLOBAL', 'storage_protocols').split()
+        
+        if config.has_option('GLOBAL', 'repo_conf_path'):
+            self.repo_conf_path = config.get('GLOBAL', 'repo_conf_path')
 
         # logger.debug('starting scheduler options')
 

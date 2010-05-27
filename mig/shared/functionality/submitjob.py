@@ -40,14 +40,13 @@ from shared.settings import load_settings
 from shared.useradm import mrsl_template, get_default_mrsl, client_id_dir
 from shared.vgrid import user_allowed_vgrids
 from shared.vgridaccess import user_allowed_resources
-
+from shared.refunctions import list_0install_res
 
 def signature():
     """Signature of the main function"""
 
     defaults = {'description': ['False']}
     return ['html_form', defaults]
-
 
 def available_choices(configuration, client_id, field, spec):
     """Find the available choices for the selectable field.
@@ -237,7 +236,10 @@ def main(client_id, user_arguments_dict):
     # could instead extract valid prefixes as in settings.py
     # (means: by "eval" from configuration). We stick to hard-coding.
     submit_options = ['fields_form', 'textarea_form', 'files_form']
-
+    simple_view_fields = ["EXECUTE", "INPUTFILES", "OUTPUTFILES"]
+    # read the zero install packages
+    zeroinstall_run_envs = list_0install_res(configuration).keys()
+    
     title_entry['javascript'] = '''
 <link rel="stylesheet" type="text/css" href="/images/css/jquery.managers.css" media="screen"/>
 <link rel="stylesheet" type="text/css" href="/images/css/jquery.contextmenu.css" media="screen"/>
@@ -260,7 +262,13 @@ def main(client_id, user_arguments_dict):
     var open_chooser = function() {alert("Error: no handler installed");}
 
     // for switching between different submit options:
-    var options = %s;
+    var options = %(submit_interfaces)s;
+    
+    // zero install runtime environments
+    var zeroinstall_RTE = %(runtime_environments)s;
+    
+    // the default submission fields to be shown
+    var simple_view = %(default_fields)s;
 
     function switchTo(name) {
 
@@ -273,20 +281,82 @@ def main(client_id, user_arguments_dict):
         }
     }
 
-    // support code for file chooser dialog:
+    function update_re(jobtype){
+        $("select[name=RUNTIMEENVIRONMENT] option").show();
+        
+        if ("arc"==jobtype){
+            $("select[name=RUNTIMEENVIRONMENT] option").filter(
+                function(){
+                    return (zeroinstall_RTE.indexOf($(this).val())==-1);
+                }
+            ).hide();
+        }
+    }
+    
+    function show_fields(fields){
+        $(".job_fields").filter(
+            function(){
+                return (fields.indexOf($(this).attr("id")) != -1);
+            }).show();
+    }
 
     $(document).ready( function() {
          // submit style display
-         switchTo("%s");
-
+         switchTo("%(selected_style)s");
+                
          // file chooser initialisation and bindings:
 
          open_chooser = mig_filechooser_init(
               "fm_filechooser", function(file) { return; }, true );
          // we add specific callbacks/handlers in more scripts below
-    });
+          
+        // hide all fields at first
+        $(".job_fields").hide(); 
+        // make sure the default fields are always shown
+        show_fields(simple_view); 
+    
+    // When the job type is changed we update the RE options
+     $("select[name=JOBTYPE] option").click(
+        function(){
+            update_re($(this).val());
+        }
+     );
+     
+    $("#advanced").hover(
+        function(){
+            $(this).css('cursor','pointer');
+            //$(this).css({"color":"red"});
+            $(this).css({"font-size":"101%%"});
+        },
+        function(){
+            $(this).css('cursor','pointer');
+            //$(this).css({"color":"black"});
+            $(this).css({"font-size":"100%%"});
+        }
+    );
+    $("#advanced").toggle(
+        function () {
+            $(this).html("<b><u>Show less options</u></b>");
+            $(".job_fields").show();
+            //show_fields(simple_view);
+            },
+        function () {
+            $(this).html("<b><u>Show more options</u></b>");
+            $(".job_fields").hide();
+            show_fields(simple_view);
+            }
+        );
+      
+    $( ".file_chooser" ).click( function() {
+                open_chooser("Select "+$(this).attr("name"),
+                             function(path) {
+                                $(this).append(path + "\\n");
+                                }, false);
+          });
+    });      
+    
 </script>
-''' % (submit_options, submit_style + "_form")
+''' % {"submit_interfaces": submit_options, "runtime_environments":zeroinstall_run_envs, "selected_style":submit_style + "_form", "default_fields":simple_view_fields}
 
     # file chooser dialog elements, will be hidden by document.ready handler
 
@@ -334,6 +404,7 @@ accompanied by a help link providing further details about the field."""})
     output_objects.append({'object_type': 'html_form', 'text'
                           : """
 <table class="submitjob">
+<tr><td class=centertext>
 <form method="post" action="submitfields.py" id="miginput">
 """
                           })
@@ -350,10 +421,14 @@ accompanied by a help link providing further details about the field."""})
     allowed_vgrids.sort()
     configuration.vgrids = allowed_vgrids
     (re_status, allowed_run_envs) = list_runtime_environments(configuration)
+        
     allowed_run_envs.sort()
+            
     configuration.runtimeenvironments = allowed_run_envs
-    user_res = user_allowed_resources(configuration, client_id)
 
+    user_res = user_allowed_resources(configuration, client_id)
+    
+    
     # Allow any exe unit on all allowed resources
         
     allowed_resources = ['%s_*' % res for res in user_res.keys()]
@@ -381,15 +456,15 @@ accompanied by a help link providing further details about the field."""})
             default = spec['Value']
         # Hide sandbox field if sandboxes are disabled
         if field == 'SANDBOX' and not configuration.site_enable_sandboxes:
-            continue
+            continue  
         if 'invisible' == spec['Editor']:
             continue
         if 'custom' == spec['Editor']:
             continue
         output_objects.append({'object_type': 'html_form', 'text'
                                    : """
-<b>%s:</b>&nbsp;<a class='infolink' href='docs.py?show=job#%s'>help</a><br />
-%s""" % (title, field, description)
+<div class="job_fields" id='%(field)s'><b>%(title)s:</b>&nbsp;<a class='infolink 'href='docs.py?show=job#%(field)s'>help</a><br />
+%(description)s""" % {"title":title, "field": field, "description":description}
                                })
         
         if 'input' == spec['Editor']:
@@ -397,28 +472,13 @@ accompanied by a help link providing further details about the field."""})
             if -1 != title.find('Files'):
                 # create file chooser dialog for it
                 # all dialogs: append to textarea, prohibit directories 
-
+                                   
                 output_objects.append({'object_type': 'html_form',
                                    'text': '''
-<script type="text/javascript">
-     $( document ).ready( function() {
-          $( "#%(field)s_chooser" ).click( function() {
-                open_chooser("Select %(title)s",
-                             function(path) {
-                                $( "#%(field)s" ).append(path + "\\n");
-                         // as an option: extract basename if in subdirectory
-                         //       var match = path.match("^(.*/)([^/]+)$")
-                         //                   || [path,"",""];
-                         //       $( "#%(field)s" ).append(match[0] + " "
-                         //                                + match[2] + "\\n");
-                             }, false);
-          });
-     });
-</script>
-<a id="%(field)s_chooser" >
+<a class="file_chooser" name="%(title)s">
    (Browse and select)</a><br/>
-''' % { "field": field, "title": title }
-                                   })
+''' % {"title": title }
+                                   })                                   
 
             if field_type.startswith('multiple'):
                 output_objects.append({'object_type': 'html_form', 'text'
@@ -451,17 +511,27 @@ accompanied by a help link providing further details about the field."""})
             output_objects.append({'object_type': 'html_form', 'text'
                                    : value_select
                                    })
-        output_objects.append({'object_type': 'html_form', 'text': "<br />"})
-
+        output_objects.append({'object_type': 'html_form', 'text': "<br /> </div>"})
+    
     output_objects.append({'object_type': 'html_form', 'text'
                           : """
+</td>
+</tr>
 <tr>
-<td><br /></td>
+<td class=centertext>
+<div id="advanced"><b><u>Show more options</u></b></div>
+<br/>
+</td>
+</tr>
+<tr>
 <td class=centertext>
 <input type="submit" value="Submit Job" />
+</td>
+</tr>
+<tr>
+<td class=centertext>
 <input type="checkbox" name="save_as_default"> Save as default job template
 </td>
-<td><br /></td>
 </tr>
 </form>
 </table>

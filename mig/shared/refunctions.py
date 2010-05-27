@@ -215,10 +215,10 @@ def get_0install_re_dict(name, configuration, url=None):
                           'description':'An executable binary in the package'
                                  })
         else:
-            # not defined. Use package name as the only definition
+            # not defined. Use package name as the only definition (and leave example empty)
             env_vars = [{'name': software['name'].upper(), 
-                         'example': software['name'],
-                         'description': 'An executable binary'}]
+                         'example': '',
+                         'description': 'the default binary in the package'}]
 
         re_dict['ENVIRONMENTVARIABLE'] = env_vars
 
@@ -510,7 +510,10 @@ def zero_install_replace(required_res, provided_res, configuration):
         zi_launch_cmd = '0launch'
 
     def zi_launch(bin, url):
-        return "\"%s -c -m %s %s\"" % (zi_launch_cmd, bin, url)
+        if bin != '':
+            return "\"%s -c %s\"" % (zi_launch_cmd, url)
+        else:
+            return "\"%s -c -m %s %s\"" % (zi_launch_cmd, bin, url)
 
     real_res = []
     env_vars = []

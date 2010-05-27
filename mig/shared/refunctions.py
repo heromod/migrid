@@ -87,6 +87,8 @@ def is_runtime_environment(re_name, configuration):
         return False
     if os.path.isfile(configuration.re_home + re_name):
         return True
+    if re_name in list_0install_res(configuration).keys():
+        return True
     else:
         return False
 
@@ -510,7 +512,7 @@ def zero_install_replace(required_res, provided_res, configuration):
         zi_launch_cmd = '0launch'
 
     def zi_launch(bin, url):
-        if bin != '':
+        if bin == '':
             return "\"%s -c %s\"" % (zi_launch_cmd, url)
         else:
             return "\"%s -c -m %s %s\"" % (zi_launch_cmd, bin, url)

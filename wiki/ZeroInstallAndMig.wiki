@@ -13,10 +13,10 @@ When submitting a job:
   * then, submit job as usual
 
 == Work Items ==
-  * modify/extend Zero-install XML format (Jost, started)
+  * modify/extend Zero-install XML format 
   * RE database page
   * Job submission page
-  * Job submission handler + modifications for actual execution
+  * Job submission handler + modifications for actual execution (We are here)
   * Preparations: Software repository on portal, MiG resources, ARC resources
 
 === Zero-install XML format ===
@@ -31,23 +31,19 @@ Any extension with namespace should not harm 0install. Our extension defines the
 <binaries xmlns="http://portal.grid.dk/0install/namespace">
   <binary name="bl2seq"/>
   <binary name="blast2"/>
+  <binary name="/usr/bin/blastall"/>
   ...
 </binaries>
 }}}
 as a child element of `<interface>`. 
 
-A ZI feed may provide binary names or leave this feature out.
+The MiG-RE  derived from this XML will use the binaries' basenames, capitalised, as 
+variable names, their values being a call to 0launch using the full name (path) as the main program (-m flag). Corresponding env.var.s will be added to the env. when submitting to the resource.
 
-The derived MiG-RE uses the binaries' names, capitalised, as variable names
+A ZI feed may provide binary names or leave this feature out, in which case the only variable which is defined is the capitalised package name, calling the default main.
 
-  If no binary names are provided, we default to only the package name
-  QUESTION: what to do about duplicate definitions (native + 0install)
-   When conflicting with an existing RE definition, this should correspond.
-
-Corresponding env.var.s will be added to the env. when submitting
-
-  (a native RE implementation on the resource will take precedence by
-  overwriting these variables)
+QUESTION: what to do about duplicate definitions (native + 0install)
+   ZI provided REs should not duplicate existing native REs. A resource can implement any RE natively, but has to correspond to the generated ZI RE in this case.
 
 TODO: the swrepo management code should be modified to use the griddk namespace. 
 
@@ -60,32 +56,45 @@ TODO LATER: integrate in the MiG style pages (menu etc).
 === RE lib ("db") page with ZI provided entries ===
 
   * ZI configuration items needed in MiGserver.conf:
-     * Add a configuration item providing the ZI RE name and variable name
+     * One configuration item providing the ZI RE name and variable name
      * a second config. item containing the URL (already there)
-     * possibly (see above) a third config. item containing the local path to repo.conf
+     * a third config. item containing the local path to repo.conf
+  (but direct file access can eventually be replaced by http access and xml parsing)
 
-We generate RE entry from the XML feeds (enhanced as above)
-  * using an XML parser
-  * accessing the XML via HTTP (to allow remote packages, for instance official ZI packages)
-  * RE entry construction (and check), possibly a cache file (but no RE files!)
-  * Consider using REST interface instead of repo.conf
+  * A new method `list_0install_res()` is provided to pull ZI RE names from the system
+  * the MiG method `list_runtime_envs` includes these ZI RE names
+  * a check `is_0install_re` for RE names is provided
+  * the MiG method `is_runtime_env` is extended by this information.
+
+Once the URLs retrieved, a RE entry is generated from an XML feed (enhanced as above)
+  * reading XML from the URL via HTTP (to allow remote packages, for instance official ZI packages)
+  * using a minidom XML parser
+  * constructing a MiG RE entry (dictionary) and checking the entry
+
+  * the generated entries are added to the MiG RE page
+
+The overhead for reading the repo.conf file repeatedly is not a problem. MiG could use a cache file for this, but should not generate RE files (too static).
+  * (Consider using REST interface instead of repo.conf)
 
 === submission pages enhanced with ZI REs ===
-  * using a configurable local file path (to repo.conf) as above
-  * Define a method `list_0install_res()` to pull ZI RE names from the system
-  * Needs to be separate: later, we need to determine whether or not a RE is a ZI RE. 
+  * using the configurable local file path (to repo.conf) as above
+  * The new submission page will include information about whether or not a RE is a ZI RE. 
+  * For ARC jobs, only ZI REs will be offered to the user (javascript)
 
 ==== submission handler enhanced with 0install additions ====
+ZI REs are used when submitting a job to a resource (only at that point, it is clear which REs are provided natively on the executing resource).
 
-  * add env.var. for every binary in a ZI feed 
-  * to avoid showing the user what we do: 
-    *  ~~add extra fields ENVIRONMENT_ZEROINSTALL (containing definitions for binaries) and ZEROINSTALL (when submitting, see mrslparser::parse where checking for REs)~~
-    * ~~RE requirements have to be kept for resubmission. We have to additionally save non-ZI REs somewhere for the job script generation.~~
-    * Better: keep mRSL untouched until actual submit to resource (jobscriptgenerator). Only when resource specs are known do we expand to native or ZI implementation of RE.
-    * "enrich" the job definition when actually submitting to resource (see jobscriptgenerator::create_job_script and create_arc_job)
-    * The scheduler needs to see/consider these _real_ RE requirements. Can be done by 
-       * modifying the job in the job queue (not in the file)?
-       * better: making resources automatically provide ZI REs when they support ZI 
+In the back end (jobscriptgenerator.py), if a RE is provided by ZI: 
+  * it is removed from the RE requirements before generating the job script
+  * an env.var. is added for every binary specified in the ZI feed 
+
+  * The scheduler needs to see/consider these _real_ RE requirements. Can be done by 
+     * ~~modifying the job in the job queue (but not the file)~~. In that case, the job needs to be retouched after stopping the server (automatic re-queueing of new jobs if job queue could not be saved).
+
+     * making resources automatically provide all ZI REs when they support ZI 
+ The place to make this change is (non-obviously) the file scheduler.py. The scheduler API call to schedule a job takes a resource configuration as parameter, but uses only the resource ID and then accesses an internal cache. Instead of cross-cutting changes to create (and update) that cache, we directly and only modify the place of the RE check inside scheduler.py. 
+
+  * The user and frontend will never see the changes to the job. The mRSL file remains untouched (for resubmission), we only "enrich" the job definition when generating the script for a particular resource (see jobscriptgenerator::create_job_script and create_arc_job)
 
 === SW Repo should serve feeds from portal.grid.dk ===
   * need to generate server's gpg key (store it in MiG-certificates dir)

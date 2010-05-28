@@ -347,11 +347,17 @@ def main(client_id, user_arguments_dict):
             }
         );
       
+    
+     // launch the file chooser                           
     $( ".file_chooser" ).click( function() {
-                open_chooser("Select "+$(this).attr("name"),
-                             function(path) {
-                                $(this).append(path + "\\n");
-                                }, false);
+        
+        var field = $(this).attr("field");
+        // we define the callback function to contain the value of the field we eventually wish to update
+        var callback = function(path) {
+                                $("textarea#"+field).append(path + "\\n");
+                                };
+        open_chooser("Select "+$(this).attr("name"),
+                             callback, false);
           });
     });      
     
@@ -475,9 +481,9 @@ accompanied by a help link providing further details about the field."""})
                                    
                 output_objects.append({'object_type': 'html_form',
                                    'text': '''
-<a class="file_chooser" name="%(title)s">
+<a class="file_chooser" name="%(title)s" field="%(field)s">
    (Browse and select)</a><br/>
-''' % {"title": title }
+''' % {"title": title , "field": field}
                                    })                                   
 
             if field_type.startswith('multiple'):

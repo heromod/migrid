@@ -494,17 +494,21 @@ def zero_install_replace(required_res, provided_res, configuration):
 
     (zi_re, zi_launch_var) = configuration.zero_install_re
 
+    # We assume that zero-install itself is provided by the
+    # resource, otherwise our definitions above will not work in
+    # practice anyway.
+
+    zi_env = dict(provided_res).get(zi_re,[])
+    if not zi_env:
+        logger.debug("NO ZI provided on the resource, returning unchanged")
+        return ([], required_res)
+
     # The user ENV variables will be set before the runtime
     # env. variable. Hence, we need to pick up the 0launch definition
     # from the provided REs and use it for our env_vars.
+    # (we try our best using "0launch" otherwise)
 
-    zi_env = dict(provided_res).get(zi_re,[])
     zi_launch_cmd = dict(zi_env).get(zi_launch_var, None)
-
-    # We assume that zero-install itself is provided by the
-    # resource, otherwise our definitions above will not work in
-    # practice anyway (we try our best using "0launch" otherwise).
-
     if not zi_launch_cmd:
         logger.error("ZI configuration error: variable content not found")
         zi_launch_cmd = '0launch'

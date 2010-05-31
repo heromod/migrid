@@ -199,7 +199,7 @@ def get_0install_re_dict(name, configuration, url=None):
         software['url']         = textFrom('homepage')
         software['description'] = textFrom('summary')
 
-        icon = feeddoc.getElemtsByTagName('icon')
+        icon = feeddoc.getElementsByTagName('icon')
         if icon:
             software['icon'] = icon[-1].getAttribute('href').__str__()
         else:

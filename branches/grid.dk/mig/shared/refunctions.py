@@ -82,8 +82,6 @@ def list_runtime_environments(configuration):
     return (True, re_list)
 
 def is_runtime_environment(re_name, configuration):
-    if is_0install_re(re_name, configuration):
-        return True
 
     if not valid_dir_input(configuration.re_home, re_name):
         configuration.logger.warning("registered possible illegal directory traversal attempt re_name '%s'"
@@ -200,8 +198,12 @@ def get_0install_re_dict(name, configuration, url=None):
         software['name']        = textFrom('name')
         software['url']         = textFrom('homepage')
         software['description'] = textFrom('summary')
-        software['icon']        = textFrom('icon')
-        
+
+        icon = feeddoc.getElemtsByTagName('icon')
+        if icon:
+            software['icon'] = icon[-1].getAttribute('href').__str__()
+        else:
+            software['icon'] = ''
         re_dict['SOFTWARE'] = [software]
 
         # build ENVIRONMENTVARIABLE definitions, each containing a dictionary
@@ -512,6 +514,10 @@ def zero_install_replace(required_res, provided_res, configuration):
     if not zi_launch_cmd:
         logger.error("ZI configuration error: variable content not found")
         zi_launch_cmd = '0launch'
+    else:
+        # unquote the 0launch command (might be quoted with options in RE)
+        zi_launch_cmd = zi_launch_cmd.replace('"', '')
+        zi_launch_cmd = zi_launch_cmd.replace("'", "")
 
     def zi_launch(bin, url):
         if bin == '':

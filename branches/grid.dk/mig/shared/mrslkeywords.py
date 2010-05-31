@@ -119,6 +119,10 @@ Uploads some_file on the resource to some_url (e.g. ftp://myuser:mypw@myhost.org
         'Editor': 'input',
         'Required': False,
         }))
+        
+    
+ 
+        
     specs.append(('EXECUTABLES', {
         'Title': 'Executable Files',
         'Description': '''Executables to be copied to the resource before the job execution.
@@ -137,6 +141,26 @@ Copies myscript and myfile_or_url from your %s home to the resource, but myfile_
         'Editor': 'input',
         'Required': False,
         }))
+        
+    specs.append(('JOBTYPE', {
+        'Title': 'Job Type',
+        'Description': '''Specifies the type of a job:
+        A job can be of type "batch" or "arc". Batch jobs are executed in a headless mode and can not use graphical output. Type "arc" is for execution on resources with arc middleware.
+        '''+
+# old description : A job can be of type "interactive", "batch" or "bulk". Interactive jobs are executed on a resource but with the graphical display forwarded to the MiG display of the user. Batch jobs are executed in a headless mode and can not use graphical output. Bulk jobs are like batch jobs, but additionally allows concurrent execution of your other jobs on the same resource as long as the resource can provide the requested job resources (cpucpunt, nodecount, memory, disk). Set to "interactive" for jobs that use a display, set to bulk for high throughput jobs and leave unset or set to batch for the rest.
+'''
+This particular server supports the following values:
+%s
+'''\
+             % ', '.join(configuration.jobtypes),
+        'Example': 'batch',
+        'Type': 'string',
+        'Value': 'batch',
+        'Editor': 'select',
+        'Required': False,
+        }))
+        
+        
     specs.append(('RESOURCE', {
         'Title': 'Target Resources',
         'Description': '''A list of resources allowed to execute the job (default is unset which means any resource).
@@ -305,21 +329,7 @@ Compares JOB_ID.status from the job against the file called EXPECTED.status from
         'Editor': 'input',
         'Required': False,
         }))
-    specs.append(('JOBTYPE', {
-        'Title': 'Job Type',
-        'Description': '''Specifies the type of a job:
-A job can be of type "interactive", "batch" or "bulk". Interactive jobs are executed on a resource but with the graphical display forwarded to the MiG display of the user. Batch jobs are executed in a headless mode and can not use graphical output. Bulk jobs are like batch jobs, but additionally allows concurrent execution of your other jobs on the same resource as long as the resource can provide the requested job resources (cpucpunt, nodecount, memory, disk). Set to "interactive" for jobs that use a display, set to bulk for high throughput jobs and leave unset or set to batch for the rest.
-
-This particular server supports the following values:
-%s
-'''\
-             % ', '.join(configuration.jobtypes),
-        'Example': 'interactive',
-        'Type': 'string',
-        'Value': 'batch',
-        'Editor': 'select',
-        'Required': False,
-        }))
+   
     specs.append(('JOBNAME', {
         'Title': 'Job Name',
         'Description': 'Name identifying the job',
@@ -358,6 +368,15 @@ This makes is possible to get a total statistic for all jobs in a project.
         'Editor': 'invisible',
         'Required': False,
         }))
+    #specs.append(('ARC', {
+     #   'Title': 'Enable arc',
+     #   'Description': 'Enable execution on arc resources. May take up to several hours.',
+     #   'Example': 'True',
+      #  'Type': 'boolean',
+      #  'Value': False,
+      #  'Editor': 'select',
+      #  'Required': False,
+       # }))
     specs.append(('MAXPRICE', {
         'Title': 'Maximum Allowed Price',
         'Description': '''Maximum price to pay for the execution of the job.

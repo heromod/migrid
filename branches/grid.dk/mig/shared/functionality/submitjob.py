@@ -293,6 +293,19 @@ def main(client_id, user_arguments_dict):
         }
     }
     
+    // See if the user has a proxy certificate
+    function validate_proxy_certificate(){
+        $.getJSON('settings.py?output_format=json;topic=arc',{}, 
+                      function(jsonRes, textStatus){
+                         for(i=0; i<jsonRes.length; i++){
+                            if(jsonRes[i].object_type=="warning"){
+                                alert("Could not find a valid proxy certificate. \\nPlease go to 'Setting->arc settings' and upload one. \\nError: "+jsonRes[i].text);
+                            }
+                    };
+                });
+    }
+    
+    // show the specified fields
     function show_fields(fields){
         $(".job_fields").filter(
             function(){
@@ -315,13 +328,19 @@ def main(client_id, user_arguments_dict):
         // make sure the default fields are always shown
         show_fields(simple_view); 
     
+    
     // When the job type is changed we update the RE options
      $("select[name=JOBTYPE] option").click(
         function(){
             update_re($(this).val());
+            // if the user wants to run on arc we check if she has uploaded an arc proxy cert
+            if($(this).val()=="arc"){
+                validate_proxy_certificate();
+            }
         }
      );
      
+     // Events relating to simple/advance view
     $("#advanced").hover(
         function(){
             $(this).css('cursor','pointer');

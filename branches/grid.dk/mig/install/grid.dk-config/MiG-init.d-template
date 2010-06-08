@@ -42,7 +42,7 @@ fi
 MIG_SERVER=${MIG_HOME}/server/grid_script.py
 MIG_MONITOR=${MIG_HOME}/server/grid_monitor.py
 DELAY=5
-CUSTOMCONF+=" PYTHONPATH=/opt/nordugrid/lib/python2.4/site-packages"
+CUSTOMCONF+=" PYTHONPATH=/opt/nordugrid/lib/python2.4/site-packages:/opt/nordugrid/lib64/python2.4/site-packages"
 
 start() {
 	echo -n "Starting MiG server daemon: "

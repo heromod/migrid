@@ -119,7 +119,8 @@ def translate(mrsl_dict, session_id = None):
         addRel(xrsl, 'outputfiles', outfiles)
         
         # what we want to do: EXECUTE (should be there)
-        scriptlines = mrsl_dict['EXECUTE']
+        # the last command ensures successful completion (unless syntax error)
+        scriptlines = mrsl_dict['EXECUTE'] + ["# ensure completion", "touch .jobdone"]
         script = '\n'.join(['# generated script from mRSL EXECUTE'] 
                            + scriptlines)
         # the script is expected to be present as an input file,
@@ -176,7 +177,10 @@ def translate(mrsl_dict, session_id = None):
 #                var_val.append(vv.strip())
 #            addRel(xrsl,'environment',var_val)
             
-            addRel(xrsl,'environment',map(list,mrsl_dict['ENVIRONMENT']))
+# remove surplus quoting (necessary due to underquoting in MiG jobscript gen.)
+            addRel(xrsl,'environment',
+                   [ [name, unquote(val)]
+                    for (name,val) in mrsl_dict['ENVIRONMENT'] ])
             
         if 'RUNTIMEENVIRONMENT' in mrsl_dict:
             for line in mrsl_dict['RUNTIMEENVIRONMENT']:
@@ -268,6 +272,26 @@ def flip_for_input(list):
         return[list[0],'']
     else:   
         return [list[1],list[0]]
+
+# RSL allows to quote strings by `"' or `''.  inside a quoted string,
+# quotes are escaped by repeating them, like this: " a ""quoted""
+# word".  This is automatically done when adding a relation to the
+# xRSL object.  Thus, remove the quotes used by MiG at the outer
+# level, and replace \" by " inside.
+
+def unquote(s):
+    """Remove outer quotes from the string argument, replace escaped `\"' 
+    and `\'' by their unescaped variants.
+    """
+
+    if (s[0] == "'" and s[-1] == "'"):
+        s = s[1:][:-1]
+        return s.replace("\\'","'")
+    elif (s[0] == '"' and s[-1] == '"'):
+        s = s[1:][:-1]
+        return s.replace('\\"','"')
+    else:
+        return s
 
 if __name__ == '__main__':
     print 'starting translation test. Args: ' , len(sys.argv)

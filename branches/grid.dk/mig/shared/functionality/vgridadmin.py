@@ -102,8 +102,6 @@ def main(client_id, user_arguments_dict):
 
         # links for everyone: public pages and membership request
 
-        # remark (Jost): public wiki pages are currently broken, 
-        # will be filtered out by output.py
         vgrid_obj['publicwikilink'] = {'object_type': 'link',
                 'destination': '%s/vgridpublicwiki/%s'\
                                        % (configuration.migserver_http_url, vgrid_name),
@@ -158,6 +156,11 @@ Please write a message to the owners (field below).""",
                                            'class': 'wikilink',
                                            'title': 'Open %s members wiki' % vgrid_name,
                                            'text': 'Open'}
+            vgrid_obj['memberscmlink'] = {'object_type': 'link',
+                                          'destination': '/vgridscm/%s' % vgrid_name,
+                                          'class': 'scmlink',
+                                          'title': 'View %s members scm' % vgrid_name,
+                                          'text': 'View'}
             vgrid_obj['privatemonitorlink'] = {'object_type': 'link',
                                                'destination': 'showvgridmonitor.py?vgrid_name=%s'\
                                                % vgrid_name,
@@ -186,6 +189,11 @@ Please write a message to the owners (field below).""",
                                           'class': 'wikilink',
                                           'title': 'Open %s owners wiki' % vgrid_name,
                                           'text': 'Open'}
+            vgrid_obj['ownerscmlink'] = {'object_type': 'link',
+                                         'destination': '/vgridownerscm/%s' % vgrid_name,
+                                          'class': 'scmlink',
+                                          'title': 'View %s owners scm' % vgrid_name,
+                                          'text': 'View'}
 
             # correct the link to leave the VGrid
 
@@ -217,6 +225,7 @@ Please write a message to the owners (field below).""",
                                            'class': 'editlink',
                                            'title': 'Edit public %s web page' % vgrid_name,
                                            'text': 'Edit'}
+
 
         member_list['vgrids'].append(vgrid_obj)
 

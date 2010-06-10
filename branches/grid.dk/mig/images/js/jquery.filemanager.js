@@ -10,13 +10,13 @@ if (jQuery) (function($){
         }
         return errors;
     }
-    
+        
     $.fn.renderFileoutput = function(jsonRes) {
         
         var file_output = '';
         
         for(i=0;i<jsonRes.length; i++) {
-            if (jsonRes[i].object_type=='file_output') {            
+            if (jsonRes[i].object_type=='file_output') {
                 for(j=0; j<jsonRes[i].lines.length; j++) {
                     file_output += jsonRes[i].lines[j];
                 }
@@ -40,6 +40,7 @@ if (jQuery) (function($){
         return reloadPath;
     }
 
+<<<<<<< .working
     $.fn.reload = function reload(path) {
         var reloadPath = path;
         
@@ -51,6 +52,19 @@ if (jQuery) (function($){
         if (reloadPath == '/') {
             reloadPath = '';
         }
+=======
+    $.fn.reload = function reload(path) {
+        var reloadPath = path;
+        
+        if (reloadPath == '') {
+            reloadPath = $('.fm_addressbar input[name=fm_current_path]').val().substr(1);
+        }
+        
+        // Root is a special-case.
+        if (reloadPath == '/') {
+            reloadPath = '';
+        }
+>>>>>>> .merge-right.r1119
 
         // Trigger the click-event twice for obtaining the original state (collapse+expand).
         $('.fm_folders li [rel_path='+reloadPath+']').click();
@@ -81,6 +95,7 @@ if (jQuery) (function($){
 			      width: '800px', autoOpen: false, 
 			      closeOnEscape: true, modal: true};
 
+<<<<<<< .working
         function doubleClickEvent(el) {
 	    if (clickaction != undefined) {
 		clickaction(el);
@@ -176,7 +191,105 @@ if (jQuery) (function($){
                           if ((errors.length > 0) 
 			      || (file_output.length > 0) 
 			      || (misc_output.length>0)){
+=======
+        function doubleClickEvent(el) {
+	    if (clickaction != undefined) {
+		clickaction(el);
+		return;
+	    } 
+	    // if no clickaction is provided, default to opening and editing
+            if($(el).hasClass('directory')) {
+                $('.fm_files').parent().reload($(el).attr(pathAttribute));
+            } else {
+                // Do stuff with files.
+                callbacks['edit']('action', el, null);              
+            }
+        }
 
+        function toTimestamp(strDate){
+            var datum = Date.parse(strDate);
+            return datum/1000;
+        }
+
+        function copy(src, dst) {
+                                    
+            var flag = '';
+                        
+            // Handle directory copy, set flag and alter destination path.
+            if (clipboard['is_dir']) {
+                
+                flag = 'r';             
+                // Extract last directory from source
+                dst += src.split('/')[src.split('/').length-2];
+            }
+            if (dst == '') {
+                dst = '.';
+            }
+            
+            $('#cmd_dialog').dialog(okDialog);
+            $('#cmd_dialog').dialog('open');
+            $('#cmd_dialog').html('<p class="spinner" style="padding-left: 26px;">Copying... "'+src+'" <br />To: "'+dst+'"</p>');           
+            
+            $.getJSON('cp.py', { src: src,
+                                 dst: dst,
+                                 output_format: 'json',
+                                 flags: flag
+                               },
+                      function(jsonRes, textStatus) {
+                                    
+                          if (jsonRes.length > 3) {                                       
+                              for(var i=2; i<jsonRes.length; i++) {
+                                  $($('#cmd_dialog').html('<p>Error:</p>'+jsonRes[i].text));
+                              }                                       
+                          } else {
+                              // Only reload if destination is current folder
+                              if ($('.fm_addressbar input[name=fm_current_path]').val().substr(1) == dst.substring(0, dst.lastIndexOf('/'))+'/')
+                                  $('.fm_files').parent().reload($('.fm_addressbar input[name=fm_current_path]').val().substr(1));
+                              $('#cmd_dialog').dialog('close');
+                          }
+                      }
+		     );
+        }
+        
+        function jsonWrapper(el, dialog, url, jsonOptions) {
+            
+            var jsonSettings = { path: $(el).attr(pathAttribute),
+                                 output_format: 'json' };
+            
+            $.fn.extend(jsonSettings, jsonOptions);
+            
+            $.getJSON(url, jsonSettings,
+                      function(jsonRes, textStatus) {
+                          
+                          var errors      = $(this).renderError(jsonRes);
+                          var file_output = $(this).renderFileoutput(jsonRes);
+                          var misc_output = '';
+            
+                          for(var i=0; i<jsonRes.length; i++) {
+                              if (jsonRes[i]['object_type'] == 'submitstatuslist') {
+                                  for(j=0; j<jsonRes[i]['submitstatuslist'].length; j++) {
+                                      if (jsonRes[i]['submitstatuslist'][j]['status']) {
+                                          misc_output +=  '<p>Submitted "'
+                                              + jsonRes[i]['submitstatuslist'][j]['name']
+                                              + '"</P>'
+                                              + '<p>Job identfier: "'+jsonRes[i]['submitstatuslist'][j]['job_id']
+                                              + '"</p>';
+                                      } else {
+                                          misc_output +=  '<p>Failed submitting:</p><p>'
+                                              + jsonRes[i]['submitstatuslist'][j]['name']
+                                              + ' '+jsonRes[i]['submitstatuslist'][j]['message']
+                                              + '</p>';
+                                      }                                                   
+                                  }
+                              }
+                          }
+                          
+                          if ((errors.length > 0) 
+			      || (file_output.length > 0) 
+			      || (misc_output.length > 0)){
+>>>>>>> .merge-right.r1119
+
+<<<<<<< .working
                               $(dialog).dialog(okDialog);
                               $(dialog).dialog('open');
 
@@ -238,6 +351,69 @@ if (jQuery) (function($){
 				      }
 				  }
 			      }
+=======
+                              $(dialog).dialog(okDialog);
+                              $(dialog).dialog('open');
+
+                              if (file_output.length > 0) {
+                                  file_output = '<pre>'+file_output+'</pre>'; 
+                              }
+                              
+                              $(dialog).html(errors+file_output+misc_output);
+                          } else {
+                              $('.fm_files').parent().reload($(this).parentPath($(el).attr(pathAttribute))); 
+                          }
+                      }
+		     );
+	}
+      
+        // Callback helpers for context menu
+        var callbacks = {
+            
+            show:   function (action, el, pos) { 
+		document.location = 
+		    'cat.py?path='
+		    +$(el).attr(pathAttribute)+'&output_format=file' },
+            edit:   function (action, el, pos) {
+                
+                $("#editor_dialog textarea[name=editarea]").val('');
+                $('#editor_dialog').dialog('destroy');
+                $('#editor_output').html('');
+                $("#editor_dialog").dialog(
+		    { buttons: {
+                          'Save Changes': function() { 
+			      $('#editor_form').submit(); },
+                          Close: function() {
+			      $(this).dialog('close');},
+                          Download: function() { 
+			      document.location = 
+				  'cat.py?path='
+				  +$(el).attr(pathAttribute)
+				  +'&output_format=file'; }
+                      },
+                      autoOpen: false, closeOnEscape: true,
+                      modal: true, width: '800px'}
+                                                                    );
+                $("#editor_dialog div.spinner").show();
+                $("#editor_dialog input[name=submitjob]").attr('checked', false);
+                $("#editor_dialog input[name=path]").val('./'+$(el).attr(pathAttribute));
+                $("#editor_dialog").dialog('open');             
+                
+                // Grab file info
+                $.getJSON('cat.py',
+			  { path: $(el).attr(pathAttribute),
+			    output_format: 'json' },
+			  function(jsonRes, textStatus) {
+                    
+			      var file_output = '';
+			      for(i=0;i<jsonRes.length; i++) {
+				  if (jsonRes[i].object_type=='file_output') {
+				      for(j=0; j<jsonRes[i].lines.length; j++) {
+					  file_output += jsonRes[i].lines[j];
+				      }
+				  }
+			      }
+>>>>>>> .merge-right.r1119
 
 			      $("#editor_dialog textarea[name=editarea]").val(file_output);
 			      $("#editor_dialog div.spinner").hide();
@@ -444,7 +620,7 @@ if (jQuery) (function($){
           var cur_folder_names = new Array();
           var cur_file_names = new Array();
           var listing = new Array();
-          var i,j;          
+          var i, j;          
           for(i=0;i<jsonRes.length; i++) {            
 	      if (jsonRes[i].object_type=='dir_listings') {
 		  for(j=0; j<jsonRes[i].dir_listings.length; j++) {
@@ -454,12 +630,21 @@ if (jQuery) (function($){
 	  }
 		
           var folders = '';
+<<<<<<< .working
 		
           // Root node                    
           if (t=='/') {
              folders +=  '<ul class="jqueryFileTree">'+
                   '<li class="directory collapsed userhome" rel_path="" title=""><div>/</div>';
           }
+=======
+		
+          // Root node                    
+          if (t=='/') {
+             folders +=  '<ul class="jqueryFileTree">'+
+                  '<li class="directory collapsed userhome" rel_path="" title="Home"><div>/</div>';
+          }
+>>>>>>> .merge-right.r1119
 
           // Regular nodes from here on after
           folders += '<ul class="jqueryFileTree">';          
@@ -481,6 +666,7 @@ if (jQuery) (function($){
           
           for (i=0;i<listing.length;i++) {
             
+<<<<<<< .working
               // ignore the pseudo-dirs
               if ((listing[i]['name'] == '.') ||
                   (listing[i]['name'] == '..')) {
@@ -581,6 +767,108 @@ if (jQuery) (function($){
                 } else {
                     $('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;" rel_path="" title=""></div>');  
                 }
+=======
+              // ignore the pseudo-dirs
+              if ((listing[i]['name'] == '.') ||
+                  (listing[i]['name'] == '..')) {
+                  continue;
+              }
+              
+              is_dir = listing[i]['type'] == 'directory';
+              base_css_style  = 'file';
+              dir_prefix      = '__';
+                        
+              // Stats for the statusbar
+              file_count++;
+              total_file_size += listing[i]['file_info']['size'];
+                                                
+              path = listing[i]['name'];
+              if (t != '/') { // Do not prepend the fake-root.
+                  path = t+path;  
+              }
+
+              entry_title = path + ' ' + listing[i]['special'];
+              if (is_dir) {
+		  base_css_style = 'directory';
+                  extra_css_style = listing[i]['extra_class'];
+
+                  path += '/';
+                  folders +=  '<li class="'+base_css_style+' ' +extra_css_style+' collapsed" rel_path="'+path+'" title="'+entry_title+'"><div>'
+                      + listing[i]['name']
+                      +'</div></li>\n';
+                  dir_prefix = '##';
+                  
+                  cur_folder_names.push(listing[i]['name']);
+                  
+              }
+              else {
+                  cur_file_names.push(listing[i]['name']);
+              }
+                        
+              $('.fm_files table tbody').append($('<tr></tr>')
+                                                .attr('rel_path', path)
+                                                .addClass(base_css_style)
+                                                .addClass(extra_css_style)
+                                                .attr('title', entry_title)
+                                                .addClass('ext_'+listing[i]['ext'])
+                                                .dblclick( function() { doubleClickEvent(this); } )
+                                                .append(
+                                                    $( '<td style="padding-left: 20px;"><div>'+dir_prefix+listing[i]['name']+'</div>'+listing[i]['name']+'</td>'+
+                                                       '<td><div>'+listing[i]['file_info']['size']+'</div>'+pp_bytes(listing[i]['file_info']['size'])+'</td>'+
+                                                       '<td><div>'+listing[i]['file_info']['ext']+'</div>'+listing[i]['file_info']['ext']+'</td>'+
+                                                       '<td><div>'+listing[i]['file_info']['created']+'</div>'+pp_date(listing[i]['file_info']['created'])+'</td>'
+                                                     )
+                                                ));
+              emptyDir = false;
+          }
+
+            folders, files += '</ul>';
+
+            // End the root node
+            if (t=='/') {
+                folders += '</li></ul>';
+            }
+            
+            // Prefix '/' for the visual presentation of the current path.
+            if (t.substr(0, 1)=='/') {
+                addressbar.find('input[name=fm_current_path]').val(t);  
+            } else {
+                addressbar.find('input[name=fm_current_path]').val('/'+t);  
+            }
+            
+            folder_pane.removeClass('wait').append(folders);
+            
+            // Inform tablesorter of new data
+            var sorting = [[0, 0]]; 
+            $(".fm_files table").trigger("update");
+            if (!emptyDir)  { // Don't try and sort an empty table, this causes error!
+                $(".fm_files table").trigger("sorton", [sorting]);
+            }
+            
+            // Update statusbar
+            statusbar.html(file_count+' files in current folder of total '+pp_bytes(total_file_size)+' in size.');
+	    
+            if( options.root == t ) {
+                //if( options.root == t+'/' ) {
+		folder_pane.find('UL:hidden').show();
+            } else {
+		folder_pane.find('UL:hidden').slideDown(
+		    { duration: options.expandSpeed, 
+		      easing: options.expandEasing });
+            }
+
+            /* UI stuff: contextmenu, drag'n'drop. */
+            
+            // Create an element for the whitespace below the list of files in the file pane
+            var spacerHeight = $("#fm_filelisting").height() - $(".fm_files").height();
+            if (spacerHeight < 0) {
+                spacerHeight = $(".fm_files").height() - $("#fm_filelisting").height()-20;
+                if (t != '/') { // Do not prepend the fake-root.
+                    $('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;" rel_path="'+t+'" title="'+t+'"+></div>');
+                } else {
+                    $('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;" rel_path="" title=""></div>');  
+                }
+>>>>>>> .merge-right.r1119
 
                 $("div.filespacer").contextMenu(
 		    { menu: 'folder_context'},
@@ -835,6 +1123,7 @@ if (jQuery) (function($){
   };
  
 })(jQuery);
+<<<<<<< .working
 
 
 
@@ -900,3 +1189,70 @@ function mig_filechooser_init(name, callback, files_only, start_path) {
     return do_d;
 };
 
+=======
+
+
+
+/*  MiG-Special: initialize a filechooser dialog, installing the
+ *  callback for doubleclick or "select" selection
+ *  if files_only is set, directories cannot be chosen
+ */
+function mig_filechooser_init(name, callback, files_only, start_path) {
+
+    $( "#" + name ).dialog(
+        // see http://jqueryui.com/docs/dialog/ for options
+          {autoOpen: false,
+           modal: true,
+	   width: 800, 
+           buttons: {"Cancel": function() { $( "#" + name ).dialog("close"); }
+		    }
+          });
+
+    var do_d = function(text, action, files) {
+	// save and restore original callback and files-mode
+	var c = callback;
+	var f = files_only; 
+
+        $( "#" + name ).dialog("option", "title", text);
+
+	if (files != undefined) {
+	    files_only = files;
+	}
+	
+	if (action == undefined) {
+	    action = c;
+	}
+
+	callback = function(i) { action(i); 
+				 files_only = f; 
+				 callback = c; 
+			       };
+
+        $( "#" + name ).dialog("open");
+    };
+    // code entangled with specific filemanager naming
+    var pathAttribute = "rel_path";
+    var select_action = function (action, el, pos) {
+                var p = $(el).attr(pathAttribute);
+                if (files_only && $(el).hasClass("directory") ) {
+                    $("#" + name ).reload($(el).attr(pathAttribute));
+                    return;
+                }
+                callback(p);
+                $( "#" + name ).dialog("close");
+    };
+    
+    $( "#" + name ).filemanager(
+         {root: "/",
+          connector: "ls.py", params: "path",
+          expandSpeed: 0, collapseSpeed: 0, multiFolder: false,
+          subPath: ( start_path || "/" ),
+          actions: {select: select_action}
+         },
+         // doubleclick callback action
+         function(el) { select_action(undefined, el, undefined); }
+    );
+    return do_d;
+};
+
+>>>>>>> .merge-right.r1119

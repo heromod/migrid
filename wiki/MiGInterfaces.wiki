@@ -17,4 +17,5 @@ You can obtain the user scripts including the miglib python library from Downloa
 Direct access to MiG from just about any programming language is available through an XMLRPC interface. This is implemented via xmlrpclib for python (see [http://code.google.com/p/migrid/source/browse/trunk/mig/user/xmlrpcsslclient.py xmlrpcsslclient.py]) with a few examples in our repository. A documentation of the methods is under development [XmlRpcMethods here]. Additional API details can be found in the actual server code in `mig/shared/functionality/` but they may still change slightly over time.
 
 = JSON =
-We have a few students working on some very flexible and dynamic web solutions based on JSON. So we provide JSON as a output format, but this is still much in development, so please [ContactUs contact us] if this is something you would like to know more about.
+All MiG functionality pages can return their results in the platform neutral JSON format. Just append output_format=json in the query string to get JSON formatted output directly usable for e.g. JQuery integration. A number of the MiG web pages already use that mechanism for very flexible and dynamic web solutions, and developers and users can easily add their own external additions.
+Please [ContactUs contact us] if this is something you would like to know more about.

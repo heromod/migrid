@@ -26,6 +26,7 @@
 #
 
 # showstats.py by Jost Berthold (berthold@diku.dk)
+# Extended by Jesper Rude Selknnæs, 06.2010, to include statistics per VO
 #
 """Read usage statistics from couchdb and display it in html table and
    graphics. Uses jquery visualization module and views defined in
@@ -48,7 +49,7 @@ from shared.functional import validate_input, validate_input_and_cert
 import shared.vgrid as vgrid
 
 # allowed parameters, first value is default
-displays = ['machine','user','summary']
+displays = ['machine','user', 'vgrid', 'summary']
 time_groups = ['month', 'week', 'day']
 
 
@@ -91,12 +92,12 @@ def main(client_id, user_arguments_dict):
     group_in_time = accepted['group_in_time'][-1] # day, week, month
     time_start    = accepted['time_start'][-1]
     time_end      = accepted['time_end'][-1]
-    display       = accepted['display'][-1] # machine, user, summary
+    display       = accepted['display'][-1] # machine, user, vgrid, summary
 
     # check arguments against configured lists of valid inputs:
     reject = False
 
-    # make sure: grouping in ['user','machine']
+    # make sure: grouping in ['user','machine', 'vgrid']
     if not display in displays:
         output_objects.append({'object_type': 'error_text', 'text'
                    : 'invalid display grouping specified: %s' % display })

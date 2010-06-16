@@ -16,7 +16,7 @@ When submitting a job:
   * modify/extend Zero-install XML format 
   * RE database page
   * Job submission page
-  * Job submission handler + modifications for actual execution (We are here)
+  * Job submission handler + modifications for actual execution
   * Preparations: Software repository on portal, MiG resources, ARC resources
 
 === Zero-install XML format ===
@@ -95,66 +95,19 @@ In the back end (jobscriptgenerator.py), if a RE is provided by ZI:
   * The user and frontend will never see the changes to the job. The mRSL file remains untouched (for resubmission), we only "enrich" the job definition when generating the script for a particular resource (see jobscriptgenerator::create_job_script and create_arc_job)
 
 === SW Repo should serve feeds from portal.grid.dk ===
-  * need to generate server's gpg key (store it in MiG-certificates dir)
-  * need to relocate and re-sign existing ZI feeds with this server's key 
+  * we use the server's gpg key (the gpg key of user root) for signing
+  * existing ZI feeds from Jonas have been re-signed with this key, 
 cascading to their dependencies. Needs a `zeroinstall-injector` installation on portal.grid.dk. http://0install.net/install-linux.html (use centos rpm!)
-  * need to put packages on the server, accessible through plain http (aliasing a respective directory for the swrepo)
+  * packages reside on the server, accessible through plain http (aliasing a respective directory for the swrepo). MiG apache is configured accordingly (state/swfeeds for now).
 
-=== MiG resources: need to deploy key of our server ===
-  * (can do it manually by using one of the packages once manually)
+=== MiG resources: need to manually deploy key of our server ===
+  * this can be done manually by using one of the packages one time on the cmd line
   * This is for all resources providing the ZEROINSTALL (native) RE
 
 === ARC resources: ===
-  * need to make 0install work! (problems on benedict when run inside ARC jobs, no other cluster available for tests)
-  * need to set 'XDG_CONFIG_HOME' (+friends) for ZERO_INSTALL RE
-  * send a request for this RE definition (to whom?? Who helps?)
-  * need to deploy our server key
+  * ARC clusters benedict and steno provide environment ENV/ZERO-INSTALL and have a working zeroinstall-injector installation.
+  * Key acceptance and caching are achieved by setting 'XDG_CONFIG_HOME' and 'XDG_CACHE_HOME' for this RE
+  * installation requests for this RE are informal, there is no established procedure to get a custom ARC RE.
+  * the server key can be deployed through a special ARC job (checked in)
 
--------
-
-== OLD: Misc notes ==
-
-=== Authentication problem with zero-install: ===
-
-Software has to be approved by trusting the signing key for a
-downloaded package.
-
-When a new software is downloaded and used for the first time, a
-message will pop up asking the user to trust the author (unless
-already known with this site). Trusted keys are stored per-URL.
-
-When submitting a job through ARC, the trust database (an XML file)
-cannot be located (HOME is set to be the session directory)
-
-Hack around: The following variables (not documented) influence where 0install searches for keystore and package cache:
-
-'XDG_DATA_HOME',
-'XDG_CACHE_HOME' ( os.path.join(home, '.cache'))
-
-'XDG_CONFIG_HOME'
-
-Solutions
-  # Set these variables for the grid user when using ARC-RE ZERO-INSTALL
-  Effect: global package cache (OK) and global keys (bad, need deployment)
-  # Include server key to accept as an input file in session
-  Effect: key acceptance control per-job (good), no package cache (bad)
-
-=== Notes Benjamin, May 03 ===
-{{{
-- runtime environment page:
-    - add info about binaries/alias(es) defined by the package
-    - present information by pulling xml from .conf file
-    - another table with 0-install apps
-    - sort table using table sorter
-    - remove sw catalog link
-- job submit:
-    - create new page / rewrite page
-    - make detail levels or field groups
-    - filter REs (when enabling arc, architecture?, ) (this will catch mismatching RE<->resource)
-    - make "arc" check box
-- arc
-    - get an arc resource with zero install for testing
-    - modify mrsl file in mrslparser.py before submitting
-    -
-- job script should implement the requested RE by additional environment vars
-}}}
+Supporting files for the ARC parts and the signed software feeds have been checked in with the software-repository.

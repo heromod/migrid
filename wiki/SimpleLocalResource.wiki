@@ -47,7 +47,8 @@ At this point you should be able to see a couple of miguser processes on the res
 
 = Simple Local Storage Resource =
 In addition to execution nodes it is also possible to add storage nodes to provide additional storage for vgrids.
-The configured path on the storage node will then be virtually added as a directory in the corresponding vgrid directory, so that all vgrid members can use it just like any other directories in their MiG home.
+The configured path on the storage node will then be virtually linked in as a directory in the corresponding vgrid directory, so that all vgrid members can use it just like any other directories in their MiG home.
+
 So if we create a vgrid called myvgrid and add a storage resource participating in that vgrid, we will see show up as a directory inside the myvgrid dir in the root of our MiG home.
 Just add the following to the simple example above:
   * Storage node(s): localhost
@@ -61,4 +62,7 @@ Just add the following to the simple example above:
 
 Now start the storage node in resource management to actually add the storage directory to the vgrid directory and stop it again later to remove it again. The files will remain on the storage node when stopped, but they will not be available through MiG until started again.
 
-Resources can mix and match execution and storage nodes freely, so it is possible to have pure storage resources, pure execution resources and a mix storage and execution nodes.
+Resources can mix and match execution and storage nodes freely, so it is possible to have pure storage resources, pure execution resources and a mixed storage and execution resources.
+
+The technical background details for the storage nodes are that the node directory gets sshfs mounted onto the MiG server and then symlinked into the relevant vgrid directories.
+Automatic ssh-tunneling takes place if the node is located behind a frontend host, and the mount is made with automatic reconnect in order to preserve it across any network outages.

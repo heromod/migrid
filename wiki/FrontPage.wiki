@@ -25,6 +25,7 @@ The following sections provide links to pages ordered by topic, but you can also
 
 = Resource Owner Topics =
  * [ResourceOwnerFAQ Frequently Asked Questions - resource owners]
+ * [SimpleLocalResource Setting Up Resources]
  * [SettingUpRuntimeEnvironments Setting Up Runtime Environments]
 
 = Developer topics =

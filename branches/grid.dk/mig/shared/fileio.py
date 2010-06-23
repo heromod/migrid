@@ -187,3 +187,34 @@ def touch(filepath, timestamp=None):
 
         print "could not touch file: '%s', Error: %s" % (filepath, err)
         return False
+
+
+def remove_rec(dir, configuration):
+    """
+    Remove the given dir, and all subdirectories, recursively.
+    This function sets the permissions on files and subdirectories
+    before using shutil.rmtree, which is necessary when removing
+    VGrid directories (wiki script and mercurial script).
+
+    Returns Boolean to indicate success, writes messages to log.
+    """
+
+    try:
+        if not os.path.isdir(dir):
+            raise Exception("Directory %s does not exist" % dir)
+
+        os.chmod(dir, 0777)
+
+        # extend permissions top-down
+        for root, dirs, files in os.walk(dir, topdown=True):
+            for name in files:
+                os.chmod(os.path.join(root, name), 0777)
+            for name in dirs:
+                os.chmod(os.path.join(root, name), 0777)
+        shutil.rmtree(dir)
+
+    except Exception, err:
+        configuration.logger.error("Could not remove_rec %s: %s" % (dir, err))
+        return False
+
+    return True

@@ -131,11 +131,19 @@ def vgrid_list_subvgrids(vgrid_name, configuration):
 
     result_list = []
     (status, all_vgrids_list) = vgrid_list_vgrids(configuration)
+
     if not status:
+
         return (False, 'could not get list of all vgrids on server')
+
     for vgrid in all_vgrids_list:
-        if vgrid.startswith(vgrid_name) and vgrid_name != vgrid:
+
+        # sub-vgrids have a prefix vgrid_name + os.sep.
+        # os.sep has been added to filter out siblings with this prefix.
+
+        if vgrid.startswith(vgrid_name + os.sep):
             result_list.append(vgrid)
+
     return (True, result_list)
 
 
@@ -266,7 +274,14 @@ def vgrid_list(vgrid_name, group, configuration):
 
             # msg is a list
 
-            output.extend(msg)
+            # We sometimes find singleton lists containing an empty
+            # string. Reason is historic python type confusion(tm),
+            # namely using the empty list as an error indicator, on
+            # the way down through listhandling, fileio, and serial.
+            # The empty lists are put in at createvgrid.py.
+
+            if msg != ['']: output.extend(msg)
+
         else:
             return (False, msg)
     return (True, output)
@@ -275,7 +290,7 @@ def vgrid_owners(vgrid_name, configuration):
     """Extract owners list for a vgrid"""
     return vgrid_list(vgrid_name, 'owners', configuration)
 
-def vgrid_member(vgrid_name, configuration):
+def vgrid_members(vgrid_name, configuration):
     """Extract members list for a vgrid"""
     return vgrid_list(vgrid_name, 'members', configuration)
 

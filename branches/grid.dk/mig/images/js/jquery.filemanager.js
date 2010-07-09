@@ -88,7 +88,7 @@ if (jQuery) (function($){
 	    } 
 	    // if no clickaction is provided, default to opening and editing
             if($(el).hasClass('directory')) {
-                $('.fm_files').parent().reload($(el).attr(pathAttribute));
+                $('.fm_folders li [rel_path='+$(el).attr(pathAttribute)+']').click();
             } else {
                 // Do stuff with files.
                 callbacks['edit']('action', el, null);              
@@ -458,7 +458,7 @@ if (jQuery) (function($){
           // Root node                    
           if (t=='/') {
              folders +=  '<ul class="jqueryFileTree">'+
-                  '<li class="directory collapsed userhome" rel_path="" title="Home"><div>/</div>';
+                  '<li class="directory expanded userhome" rel_path="" title="Home"><div>/</div>';
           }
 
           // Regular nodes from here on after
@@ -732,7 +732,7 @@ if (jQuery) (function($){
      if (options.subPath == '/') {
          options.subPath = '';
      }
-                        
+     
      showBranch( $('.fm_folders', obj), escape(options.root) );            
             
      /**
@@ -833,7 +833,7 @@ if (jQuery) (function($){
     });
         
   };
- 
+
 })(jQuery);
 
 
@@ -899,4 +899,3 @@ function mig_filechooser_init(name, callback, files_only, start_path) {
     );
     return do_d;
 };
-

@@ -373,6 +373,8 @@ def html_format(configuration, ret_val, ret_msg, out_obj):
     """Generate output in html format"""
 
     lines = []
+    include_widgets = True
+    user_widgets = {}
     status_line = \
         """
     <div id="exitcode">
@@ -402,18 +404,23 @@ Exit code: %s Description: %s<br />
             include_menu = True
             if i.has_key('skipmenu'):
                 include_menu = not i['skipmenu']
+            if i.has_key('skipwidgets'):
+                include_widgets = not i['skipwidgets']
             user_menu = []
             if i.has_key('user_menu'):
                 user_menu = i['user_menu']
-                
+            if i.has_key('user_widgets'):
+                user_widgets = i['user_widgets']
             lines.append(get_cgi_html_header(
                 configuration, html_escape(i['text']),
                 '',
                 True,
                 javascript,
                 bodyfunctions,
-                include_menu, 
-                user_menu
+                include_menu,
+                include_widgets,
+                user_menu,
+                user_widgets
                 ))
         elif i['object_type'] == 'text':
             lines.append('<p>%s</p>' % html_escape(i['text']))
@@ -1142,7 +1149,7 @@ Exit code: %s Description: %s<br />
             lines.append('unknown object %s' % i)
 
     if status_line:
-        lines.append(get_cgi_html_footer(configuration, status_line))
+        lines.append(get_cgi_html_footer(configuration, status_line, True, include_widgets, user_widgets))
     return '\n'.join(lines)
 
 
@@ -1160,8 +1167,7 @@ def soap_format(configuration, ret_val, ret_msg, out_obj):
         import SOAPpy
         return SOAPpy.buildSOAP(out_obj)
     except Exception, exc:
-        print 'SOAPpy not available on server! Defaulting to .txt output. (%s)'\
-             % exc
+        configuration.logger.error('soap unavailable (%s) - using txt' % exc)
         return None
 
 
@@ -1172,24 +1178,23 @@ def pickle_helper(configuration, ret_val, ret_msg, out_obj, protocol=None):
         from shared.serial import dumps
         return dumps(out_obj, protocol)
     except Exception, exc:
-        print 'pickle not available on server! Defaulting to .txt output. (%s)'\
-             % exc
+        configuration.logger.error('pickle unavailable (%s) - using txt' % exc)
         return None
 
 def pickle_format(configuration, ret_val, ret_msg, out_obj):
     """Generate output in default pickle protocol format"""
 
-    return pickle_helper(ret_val, ret_msg, out_obj, protocol=0)
+    return pickle_helper(configuration, ret_val, ret_msg, out_obj, protocol=0)
 
 def pickle1_format(configuration, ret_val, ret_msg, out_obj):
     """Generate output in pickle protocol 1 format"""
 
-    return pickle_helper(ret_val, ret_msg, out_obj, protocol=1)
+    return pickle_helper(configuration, ret_val, ret_msg, out_obj, protocol=1)
 
 def pickle2_format(configuration, ret_val, ret_msg, out_obj):
     """Generate output in default pickle protocol 2 format"""
 
-    return pickle_helper(ret_val, ret_msg, out_obj, protocol=2)
+    return pickle_helper(configuration, ret_val, ret_msg, out_obj, protocol=2)
 
 
 def yaml_format(configuration, ret_val, ret_msg, out_obj):
@@ -1199,8 +1204,7 @@ def yaml_format(configuration, ret_val, ret_msg, out_obj):
         import yaml
         return yaml.dump(out_obj)
     except Exception, exc:
-        print 'yaml not available on server! Defaulting to .txt output. (%s)'\
-             % exc
+        configuration.logger.error('yaml unavailable (%s) - using txt' % exc)
         return None
 
 
@@ -1218,8 +1222,7 @@ def xmlrpc_format(configuration, ret_val, ret_msg, out_obj):
                     entry[key] = xmlrpclib.Binary(entry[key])
         return xmlrpclib.dumps((out_obj, ), allow_none=True)
     except Exception, exc:
-        print 'xmlrpclib not available on server! Defaulting to .txt output. (%s)'\
-             % exc
+        configuration.logger.error('xmlrpc unavailable (%s) - using txt' % exc)
         return None
 
 
@@ -1237,8 +1240,7 @@ def json_format(configuration, ret_val, ret_msg, out_obj):
             json.dumps = json.write
         return json.dumps(out_obj)
     except Exception, exc:
-        print 'json not available on server! Defaulting to .txt output. (%s)'\
-             % exc
+        configuration.logger.error('json unavailable (%s) - using txt' % exc)
         return None
 
 def file_format(configuration, ret_val, ret_msg, out_obj):

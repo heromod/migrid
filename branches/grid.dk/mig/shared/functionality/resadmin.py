@@ -425,6 +425,7 @@ $(document).ready(function() {
 <style type="text/css">
 .hidden { display:none; }
 </style>
+<script type="text/javascript" src="/images/js/jquery.js"></script>
 
 <script type="text/javascript" >
 
@@ -494,7 +495,7 @@ $(document).ready(function() {
                  {'object_type': 'link',
                   'destination':
                   "javascript:runConfirmDialog('%s','%s');" % \
-                  ("Really delete resource? note that resources can not be deleted if it is bussy! " + unique_resource_name + "?", 
+                  ("Really delete resource? note that resources can not be deleted if it is busy! " + unique_resource_name + "?", 
                    'delres.py?unique_resource_name=%s'\
                    % (unique_resource_name)),
                   'class': 'removelink',
@@ -560,14 +561,6 @@ $(document).ready(function() {
         output_objects.append({'object_type': 'text', 'text'
                               : 'Resource admin back end delivered data in %.2f seconds'
                                % (finish_time - start_time)})
-
-
-
-
-    # jquery support for tablesorter and confirmation on "leave":
-
-
-
 
     return (output_objects, returnvalues.OK)
 

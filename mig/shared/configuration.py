@@ -352,6 +352,7 @@ class Configuration:
             self.javabin_home = config.get('GLOBAL', 'javabin_home')
             self.smtp_server = config.get('GLOBAL', 'smtp_server')
             self.wwwpublic = config.get('GLOBAL', 'wwwpublic')
+            self.vm_home = config.get('GLOBAL', 'vm_home')
             self.architectures = config.get('GLOBAL', 'architectures').split()
             self.scriptlanguages = config.get('GLOBAL',
                                               'scriptlanguages').split()
@@ -493,6 +494,10 @@ class Configuration:
                                    i not in self.site_default_menu]
         else:
             self.site_user_menu = []
+        if config.has_option('SITE', 'script_deps'):
+            self.site_script_deps = config.get('SITE', 'script_deps').split()
+        else:
+            self.site_script_deps = []
         if config.has_option('SITE', 'external_doc'):
             self.site_external_doc = config.get('SITE', 'external_doc')
         else:

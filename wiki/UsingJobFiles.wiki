@@ -188,15 +188,15 @@ Then output.txt from the job will be saved in ABC/output.txt in your MiG home wh
 
 At first glance it may seem stupid to submit the same job description many times, but if you do so-called Monte Carlo simulations where each run gives different results because it simulates statistical variations, this comes in handy. 
 
-== Live output ==
-MiG supports live output of files from actively running jobs. The web interface provides a Live Output option in the right click menu for the jobs on the Jobs page. It triggers a request for an update of the stdout/stderr files from the job in the corresponding job_output/JOBID directory of your MiG home.
-The liveoutput can additionally be used directly to get any file from the job and in any destination path under your MiG home:
+== Live input/output ==
+MiG supports live input and output of files in actively running jobs. The web interface provides a Live Output option in the right click menu for the jobs on the Jobs page. It triggers a request for an update of the stdout/stderr files from the job in the corresponding job_output/JOBID directory of your MiG home.
+The liveoutput interface can additionally be used directly to get any file from the job and in any destination path under your MiG home:
 {{{
 https://SERVERURL/cgi-bin/liveoutput.py?job_id=JOBID;src=SRC;dst=DST
 }}}
 The above example triggers an upload of the file with SRC relative to the job directory for job JOBID. The file will be uploaded to the DST/ directory inside your MiG home. Multiple src values are allowed and they will all end in the same destination directory with any relative path prefixes stripped.
 
-Jobs can even trigger updates themselves by writing a simple file during job execution:
+Jobs can also trigger updates themselves by writing a simple file during job execution:
 {{{
 ::EXECUTE::
 uname -a > out.txt
@@ -206,7 +206,10 @@ echo "job_id ${MIG_JOBID}" > update.tmp
 echo "localjobname ${MIG_LOCALJOBNAME}" >> update.tmp
 echo "source_files out.txt more.txt" >> update.tmp
 echo "destination_dir /" >> update.tmp
-cp update.tmp ${MIG_LOCALJOBNAME}.update
+cp update.tmp ${MIG_LOCALJOBNAME}.sendupdate
+# do calculations or wait
+sleep 60
+[ -f ${MIG_LOCALJOBNAME}.sendupdatedone ] && echo "live output files uploaded"
 }}}
 This simple example outputs some data to the out.txt and more.txt files and requests upload of them to the server in the root of the user home.
 The first two lines with job_id and localjobname are used MiG internally and they must hold the actual job information from the execution environment. Similarly the file must be called ${MIG_LOCALJOBNAME}.update to signal that it is a request to MiG.
@@ -216,6 +219,19 @@ The same result would be manually achieved if you requested live output through 
 {{{
 https://SERVERURL/cgi-bin/liveoutput.py?job_id=JOBID;src=out.txt;src=more.txt;dst=/
 }}}
+
+Live input can similarly be requested in jobs with something like:
+{{{
+echo "job_id ${MIG_JOBID}" > update.tmp
+echo "localjobname ${MIG_LOCALJOBNAME}" >> update.tmp
+echo "source_files inputfiles/input.txt" >> update.tmp
+echo "destination_dir live-input" >> update.tmp
+cp update.tmp ${MIG_LOCALJOBNAME}.getupdate
+# do calculations or wait
+sleep 60
+[ -f ${MIG_LOCALJOBNAME}.getupdatedone ] && echo "live input files downloaded"
+}}}
+This example triggers download of inputfiles/input.txt from your MiG home into the local live-input directory. Live input and output requests are marked done with corresponding ${MIG_LOCALJOBNAME}.getupdatedone and ${MIG_LOCALJOBNAME}.sendupdatedone files, so it is possible but not mandatory to detect the actual finishing of transfers. The Xupdatedone files simply declare that the live transfer finished, but not necessarily with success. Missing source files and such problems are left for the user to handle.
 
 == Lots of Files or Recursive Directories ==
 If your job requires lots of input or output files it may be tedious to manually handle them in the INPUTFILES and OUTPUTFILES fields. In that case it may be simpler to pack and unpack the files before and after the transfers between MiG server and resource.

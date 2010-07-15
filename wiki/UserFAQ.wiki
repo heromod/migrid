@@ -35,6 +35,23 @@ Please take a look at the Runtime Envs page for details about the available envi
 Jobs are sent to *any* available resources unless the job description explicitly requests specific attributes. In this case the typical cause is that no ARCHITECTURE field is used and the job therefore sometimes end up on a CPU architecture that doesn't support the binaries you included. We have resources with a.o. X86, SPARC and POWER architectures, so binaries are likely to not fit all resources.
 Please also refer to the `command not found: XYZ` entry for runtime environment information.
 
+== How can I make my job execution and results dynamic ==
+Sometimes it is useful to make jobs act on the actual execution environment. E.g. Monte Carlo simulations may use the exact same job description for multiple jobs doing randomized simulations. So it may be necessary to make the job output files unique in order to avoid that each job truncates the existing output files. MiG provides the job description keywords +JOBID+ and +JOBNAME+ for such situations.
+All string fields in job descriptions have automatic expansion of the variables +JOBID+ and +JOBNAME+ to the actual ID and name of the job. Thus unique output can be specified with something like:
+{{{
+::OUTPUTFILES::
+result.txt result-+JOBID+.txt
+}}}
+to get the each result saved in result-JOBID.txt in your MiG home, with JOBID replaced by the actual MiG job ID.
+
+The EXECUTE field additionally supports a number of environment variables for the actual job execution. The list includes MIG_JOBNODECOUNT, MIG_JOBCPUTIME, MIG_JOBCPUCOUNT, MIG_JOBMEMORY, MIG_JOBDISK, MIG_JOBID, MIG_LOCALJOBNAME, MIG_EXENODE, MIG_JOBDIR and more may come. 
+So for example a job can print the job ID and list all environment variable values with:
+{{{
+::EXECUTE::
+echo "Hello from job with ID $MIG_JOBID on the grid"
+env
+}}}
+The latter can be used to get an idea about the actual use of the values.
 
 == My job status page show multiple lines of QUEUED times and one or more FAILED lines. What does this mean? ==
 

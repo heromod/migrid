@@ -189,14 +189,10 @@ Then output.txt from the job will be saved in ABC/output.txt in your MiG home wh
 At first glance it may seem stupid to submit the same job description many times, but if you do so-called Monte Carlo simulations where each run gives different results because it simulates statistical variations, this comes in handy. 
 
 == Live input/output ==
-MiG supports live input and output of files in actively running jobs. The web interface provides a Live Output option in the right click menu for the jobs on the Jobs page. It triggers a request for an update of the stdout/stderr files from the job in the corresponding job_output/JOBID directory of your MiG home.
-The liveoutput interface can additionally be used directly to get any file from the job and in any destination path under your MiG home:
-{{{
-https://SERVERURL/cgi-bin/liveoutput.py?job_id=JOBID;src=SRC;dst=DST
-}}}
-The above example triggers an upload of the file with SRC relative to the job directory for job JOBID. The file will be uploaded to the DST/ directory inside your MiG home. Multiple src values are allowed and they will all end in the same destination directory with any relative path prefixes stripped.
+MiG supports live input and output of files in actively running jobs. In that way it is possible to monitor and even remote control long-running jobs. The web interface provides a Live I/O option in the right click menu for the jobs on the Jobs page. It opens a request page where you can trigger a request to upload (send) any file from the job execution into any destination directory under your MiG home or download (get) any file from your MiG home into the job execution directory on the resource.
+Multiple src values are allowed and they will all end in the same destination directory with any relative path prefixes stripped.
 
-Jobs can also trigger updates themselves by writing a simple file during job execution:
+Jobs can also trigger I/O updates themselves by writing a simple file during job execution:
 {{{
 ::EXECUTE::
 uname -a > out.txt
@@ -215,10 +211,7 @@ This simple example outputs some data to the out.txt and more.txt files and requ
 The first two lines with job_id and localjobname are used MiG internally and they must hold the actual job information from the execution environment. Similarly the file must be called ${MIG_LOCALJOBNAME}.update to signal that it is a request to MiG.
 The use of the temporary update.tmp file is just to avoid races.
 
-The same result would be manually achieved if you requested live output through the web interface with:
-{{{
-https://SERVERURL/cgi-bin/liveoutput.py?job_id=JOBID;src=out.txt;src=more.txt;dst=/
-}}}
+The same result would be manually achieved if you requested live output through the web interface with source paths set to out.txt and more.txt and destination path set to / .
 
 Live input can similarly be requested in jobs with something like:
 {{{

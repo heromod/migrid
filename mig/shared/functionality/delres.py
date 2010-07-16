@@ -28,18 +28,16 @@
 """Deletion of a resource"""
 
 import shared.returnvalues as returnvalues
-from shared.conf import get_resource_configuration
 from shared.functional import validate_input_and_cert, REJECT_UNSET
 from shared.init import initialize_main_variables, find_entry
 from shared.resconfkeywords import get_resource_keywords, get_exenode_keywords
 from shared.resource import anon_to_real_res_map
-from shared.vgridaccess import user_visible_resources, user_allowed_vgrids, \
-     get_resource_map, get_vgrid_map, CONF
+from shared.vgridaccess import  user_allowed_vgrids,\
+     get_resource_map,  user_owned_resources
 
 from shared.serial import load, dump
 import os
 import fcntl
-import shutil
 
 def signature():
     """Signature of the main function"""
@@ -74,8 +72,22 @@ def main(client_id, user_arguments_dict):
     res_name = resource_list.pop()
 
     res_dir = os.path.join(configuration.resource_home, res_name)
-    vgrid_map = get_vgrid_map(configuration)
 
+
+    #Checking that the user own the reosurce he is trying to delete.
+    users_resources = user_owned_resources(configuration, client_id)
+
+    if not res_name in users_resources:
+        output_objects.append({'object_type': 'text', 'text'
+                                : 'You are not the owner of resource %s. You can not delete a resource you don\'t own!: ' + res_name})
+
+        output_objects.append({'object_type': 'link', 'destination': 'resman.py',
+                               'class': 'infolink', 'title': 'Show resources',
+                               'text': 'Show resources'})
+
+        status = returnvalues.CLIENT_ERROR
+        return (output_objects, status)
+        
 
     #Locking the access to resources and vgrids.
     lock_path_vgrid = os.path.join(configuration.resource_home, "vgrid.lock")
@@ -90,61 +102,60 @@ def main(client_id, user_arguments_dict):
 
 
 
-    #Check whether the resource is a member of a vgrid.
-    #If so, the resource can't be deleted.
-    res_active = False
-    vgrids = []
+    #Check to verify that a resource is down.
+    #On resources that are down may be deleted.
+
+    resource_config_file = os.path.join(res_dir, 'config')
+    resource_config = load(resource_config_file)
+    exe = resource_config['EXECONFIG'][0]['name']
     
-    for vgrid in vgrid_map['__vgrids__']:
-        if res_name in vgrid_map['__vgrids__'][vgrid]:
-           vgrids.append(vgrid)
-           res_active = True
-        
+    last_req_file = os.path.join(configuration.resource_home,
+                                 res_name,
+                                 'last_request.%s' % exe)
+    
 
-
-    if res_active:
-        title_entry = find_entry(output_objects, 'title')
-        title_entry['text'] = 'Resource deletion failed.'
-        output_objects.append({'object_type': 'header', 'text'
-                           : 'Failed to delete resource ' + res_name})
-
+    if not os.path.isfile(last_req_file):
         output_objects.append({'object_type': 'text', 'text'
-                           : "Could not delete resource " + res_name
-                               + "because it is still member of:"})
-
-        output_objects.append({'object_type': 'list', 'list'
-                           : vgrids})
+                               : 'Could not determine wheter the resource %s is busy.'% res_name })
 
         output_objects.append({'object_type': 'link', 'destination': 'resman.py',
                                'class': 'infolink', 'title': 'Show resources',
                                'text': 'Show resources'})
-                
-        return (output_objects, returnvalues.OK)
-
-
-    #If the reource is not a member of a vgrid, it is deleted.
-    try:
-         shutil.rmtree(res_dir)
-    except Exception, err:
-        output_objects.append({'object_type': 'text', 'text'
-                               : 'Deletion exception: ' + str(err)})
-
-        output_objects.append({'object_type': 'link', 'destination': 'resman.py',
-                               'class': 'infolink', 'title': 'Show resources',
-                               'text': 'Show resources'})
-        
+         
         status = returnvalues.CLIENT_ERROR
         lock_handle_vgrid.close()
         lock_handle_res.close()
         return (output_objects, status)
 
+
+
+
+    #Deleting the reosurce files, but not the resouce directory it self.
+    #The resource directory is kept, to prevent hijacking of reource id's
+
+    try:
+        for f in os.listdir(res_dir):
+            file_path = os.path.join(res_dir, f)
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+    except Exception, err:
+        output_objects.append({'object_type': 'text', 'text'
+                                : 'Deletion exception: ' + str(err)})
+
+        output_objects.append({'object_type': 'link', 'destination': 'resman.py',
+                               'class': 'infolink', 'title': 'Show resources',
+                               'text': 'Show resources'})
+
+        status = returnvalues.CLIENT_ERROR
+        lock_handle_vgrid.close()
+        lock_handle_res.close()
+        return (output_objects, status)
+        
+
             
     #Deleting vgrid.map and resource.map, so that new maps will be generated
     #on the next listing of resources.
-    title_entry = find_entry(output_objects, 'title')
-    title_entry['text'] = 'Resource Deletion'
-    output_objects.append({'object_type': 'header', 'text'
-                          : 'Deleting resource'})
+   
     try:
         if os.path.exists(os.path.join(configuration.resource_home, 'vgrid.map')):
             os.remove(os.path.join(configuration.resource_home ,'vgrid.map'))
@@ -164,13 +175,21 @@ def main(client_id, user_arguments_dict):
          lock_handle_vgrid.close()
          lock_handle_res.close()
          return (output_objects, status)
-        
+
+
+   
 
 
     #The resource has been deleted, and OK is returned.
+    title_entry = find_entry(output_objects, 'title')
+    title_entry['text'] = 'Resource Deletion'
+    output_objects.append({'object_type': 'header', 'text'
+                          : 'Deleting resource'})
+    
     output_objects.append({'object_type': 'text', 'text'
                            : 'Sucessfully deleted resource: ' + res_name})
 
+    
     output_objects.append({'object_type': 'link', 'destination': 'resman.py',
                                'class': 'infolink', 'title': 'Show resources',
                                'text': 'Show resources'})
@@ -181,5 +200,5 @@ def main(client_id, user_arguments_dict):
     lock_handle_res.close()
 
     status = returnvalues.OK
-      
+
     return (output_objects, status)

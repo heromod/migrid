@@ -50,7 +50,7 @@ We've considered and tried to consistently use a single one, but in reality it t
 
 == Objects/Classes ==
 Among the original MiG developers there's a general opinion that classes are (a sometimes necessary) evil. Thus the code so far only uses classes very sparingly. 
-For performance seasons the use of classes/objects should be kept to a minimum in short-lived scripts where they infer a relatively big overhead. It's fine to use classes where inheritance is possible/required, but we generally use a strategy of _not_ using classes except when it's actually needed. Obviously new developers may have a different view on these issues, but it will probably take a fair amount of good reasons to change this strategy :-) 
+For performance reasons the use of classes/objects should be kept to a minimum in short-lived scripts where they infer a relatively big overhead. It's fine to use classes where inheritance is possible/required, but we generally use a strategy of _not_ using classes except when it's actually needed. Obviously new developers may have a different view on these issues, but it will probably take a fair amount of good reasons to change this strategy :-) 
 
 
 == Documentation ==
@@ -74,7 +74,7 @@ Apart from the guide there are a few tools to help coding in a way that adheres 
 
 PyLint catches most style errors and PythonTidy corrects only some of them, so it may be a good idea to use the two programs in combination.
 
-PyLint may be aliased to ignore the unofficial 'all-caps constants at module level' rule with:
+PyLint may be configured to ignore the unofficial 'all-caps constants at module level' rule with the const-rgx option as in:
 {{{ 
 alias pylint="pylint --const-rgx='([a-z_][a-z0-9_]{2,30})|([A-Z_][A-Z1-9_]*)|(__.*__)$'" 
 }}}

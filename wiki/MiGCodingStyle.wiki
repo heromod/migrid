@@ -74,6 +74,11 @@ Apart from the guide there are a few tools to help coding in a way that adheres 
 
 PyLint catches most style errors and PythonTidy corrects only some of them, so it may be a good idea to use the two programs in combination.
 
+PyLint may be aliased to ignore the unofficial 'all-caps constants at module level' rule with:
+{{{ 
+alias pylint="pylint --const-rgx='([a-z_][a-z0-9_]{2,30})|([A-Z_][A-Z1-9_]*)|(__.*__)$'" 
+}}}
+In addition to that exception the messages about relative imports can be safely ignored as that is just a result of our code running in user space paths.
 
 = Bourne Shell =
 A number of resource scripts are currently only available as (ba)sh scripts. Additionally user scripts are available in a sh version. The whitespace guidelines conflicts with variable assignment in sh, so that part can not be used. There's a tradition of using all upper case variable names in sh scripts, so that is acceptable. Alternatively the all lower case with underscores style used in python can be used. This makes especially user scripts easier to keep in sync with the python version.

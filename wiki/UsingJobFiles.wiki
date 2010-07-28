@@ -200,12 +200,13 @@ date >> out.txt
 date > more.txt
 echo "job_id ${MIG_JOBID}" > update.tmp
 echo "localjobname ${MIG_LOCALJOBNAME}" >> update.tmp
+echo "action liveio" >> update.tmp
 echo "source out.txt more.txt" >> update.tmp
 echo "destination /" >> update.tmp
 cp update.tmp ${MIG_LOCALJOBNAME}.sendupdate
 # do calculations or wait
-sleep 60
-[ -f ${MIG_LOCALJOBNAME}.sendupdatedone ] && echo "live output files uploaded"
+while [ ! -f ${MIG_LOCALJOBNAME}.sendupdatedone ]; do sleep 5; done
+echo "live output files uploaded"
 }}}
 This simple example outputs some data to the out.txt and more.txt files and requests upload of them to the server in the root of the user home.
 The first two lines with job_id and localjobname are used MiG internally and they must hold the actual job information from the execution environment. Similarly the file must be called ${MIG_LOCALJOBNAME}.update to signal that it is a request to MiG.
@@ -217,14 +218,50 @@ Live input can similarly be requested in jobs with something like:
 {{{
 echo "job_id ${MIG_JOBID}" > update.tmp
 echo "localjobname ${MIG_LOCALJOBNAME}" >> update.tmp
+echo "action liveio" >> update.tmp
 echo "source inputfiles/input.txt" >> update.tmp
 echo "destination live-input" >> update.tmp
 cp update.tmp ${MIG_LOCALJOBNAME}.getupdate
 # do calculations or wait
-sleep 60
-[ -f ${MIG_LOCALJOBNAME}.getupdatedone ] && echo "live input files downloaded"
+while [ ! -f ${MIG_LOCALJOBNAME}.getupdatedone ]; do sleep 5; done
+echo "live input files downloaded"
 }}}
 This example triggers download of inputfiles/input.txt from your MiG home into the local live-input directory. Live input and output requests are marked done with corresponding ${MIG_LOCALJOBNAME}.getupdatedone and ${MIG_LOCALJOBNAME}.sendupdatedone files, so it is possible but not mandatory to detect the actual finishing of transfers. The Xupdatedone files simply declare that the live transfer finished, but not necessarily with success. Missing source files and such problems are left for the user to handle.
+
+== Message Queues ==
+In addition to Live I/O file support, the related personal message queues can be used for communication between jobs and for centrally orchestrating jobs.
+You can use the message queue link on the liveio page to manage your queues and active jobs can access the queues in a manner similar to the liveio files. I.e. to pass a message in msg.txt to the default message queue the job creates a sendupdate file:
+{{{
+::EXECUTE::
+echo "$(date): hello from job ${MIG_JOBID}" > msg.txt
+echo "job_id ${MIG_JOBID}" > update.tmp
+echo "localjobname ${MIG_LOCALJOBNAME}" >> update.tmp
+echo "action mqueue" >> update.tmp
+echo "source msg.txt" >> update.tmp
+echo "destination default" >> update.tmp
+cp update.tmp ${MIG_LOCALJOBNAME}.sendupdate
+# do calculations or wait
+while [ ! -f ${MIG_LOCALJOBNAME}.sendupdatedone ]; do sleep 5; done
+echo "message sent to default message queue"
+}}}
+When sending messages the source field is the path of the message file and the destination field is the name of the message queue.
+
+Fetching the first message in the default message queue from the job is similarly done with a getupdate file:
+{{{
+echo "job_id ${MIG_JOBID}" > update.tmp
+echo "localjobname ${MIG_LOCALJOBNAME}" >> update.tmp
+echo "action mqueue" >> update.tmp
+echo "source default" >> update.tmp
+echo "destination ." >> update.tmp
+cp update.tmp ${MIG_LOCALJOBNAME}.getupdate
+# do calculations or wait
+while [ ! -f ${MIG_LOCALJOBNAME}.getupdatedone ]; do sleep 5; done
+echo "message received from default queue"
+}}}
+In this case the source is the name of the message queue and the destination is the destination directory for a file with the message. Thus the message will appear in a file called 'default' in the current working directory in this example.
+
+You can orchestrate jobs by filling job instructions in a message queue and submitting jobs that fetch actual job instructions when they start executing, in order to create a typical producer/consumer situation.
+Another possibility is to have jobs communicate directly through the message queues. E.g. by having each job generate the input for a future job and send it to the message queue for the next job to proceed with. As it takes some seconds to pass the messages between the grid and the resources, it will not be useful as a low latency message passing mechanism, but it makes sense for long running jobs.
 
 == Lots of Files or Recursive Directories ==
 If your job requires lots of input or output files it may be tedious to manually handle them in the INPUTFILES and OUTPUTFILES fields. In that case it may be simpler to pack and unpack the files before and after the transfers between MiG server and resource.

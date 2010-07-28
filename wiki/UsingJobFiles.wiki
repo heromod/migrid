@@ -200,7 +200,7 @@ date >> out.txt
 date > more.txt
 echo "job_id ${MIG_JOBID}" > update.tmp
 echo "localjobname ${MIG_LOCALJOBNAME}" >> update.tmp
-echo "action liveio" >> update.tmp
+echo "target liveio" >> update.tmp
 echo "source out.txt more.txt" >> update.tmp
 echo "destination /" >> update.tmp
 cp update.tmp ${MIG_LOCALJOBNAME}.sendupdate
@@ -218,7 +218,7 @@ Live input can similarly be requested in jobs with something like:
 {{{
 echo "job_id ${MIG_JOBID}" > update.tmp
 echo "localjobname ${MIG_LOCALJOBNAME}" >> update.tmp
-echo "action liveio" >> update.tmp
+echo "target liveio" >> update.tmp
 echo "source inputfiles/input.txt" >> update.tmp
 echo "destination live-input" >> update.tmp
 cp update.tmp ${MIG_LOCALJOBNAME}.getupdate
@@ -236,7 +236,7 @@ You can use the message queue link on the liveio page to manage your queues and 
 echo "$(date): hello from job ${MIG_JOBID}" > msg.txt
 echo "job_id ${MIG_JOBID}" > update.tmp
 echo "localjobname ${MIG_LOCALJOBNAME}" >> update.tmp
-echo "action mqueue" >> update.tmp
+echo "target mqueue" >> update.tmp
 echo "source msg.txt" >> update.tmp
 echo "destination default" >> update.tmp
 cp update.tmp ${MIG_LOCALJOBNAME}.sendupdate
@@ -250,7 +250,7 @@ Fetching the first message in the default message queue from the job is similarl
 {{{
 echo "job_id ${MIG_JOBID}" > update.tmp
 echo "localjobname ${MIG_LOCALJOBNAME}" >> update.tmp
-echo "action mqueue" >> update.tmp
+echo "target mqueue" >> update.tmp
 echo "source default" >> update.tmp
 echo "destination ." >> update.tmp
 cp update.tmp ${MIG_LOCALJOBNAME}.getupdate

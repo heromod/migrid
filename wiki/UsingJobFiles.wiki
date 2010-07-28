@@ -206,9 +206,10 @@ echo "destination live-files" >> update.tmp
 cp update.tmp ${MIG_LOCALJOBNAME}.sendupdate
 # do calculations or wait
 while [ ! -f ${MIG_LOCALJOBNAME}.sendupdatedone ]; do sleep 5; done
-echo "live output files uploaded"
+echo "live output files uploaded to live-files directory:"
+cat out.txt
+cat example.txt
 # clean up
-cat ${MIG_LOCALJOBNAME}.sendupdatedone
 rm -f ${MIG_LOCALJOBNAME}.sendupdatedone
 }}}
 This simple example outputs some data to the out.txt and example.txt files and requests upload of them to the server in the live-files directory in the root of the user home.
@@ -227,10 +228,9 @@ echo "destination live-input" >> update.tmp
 cp update.tmp ${MIG_LOCALJOBNAME}.getupdate
 # do calculations or wait
 while [ ! -f ${MIG_LOCALJOBNAME}.getupdatedone ]; do sleep 5; done
-echo "live input files downloaded"
+echo "live input file downloaded to live-input/example.txt:"
 cat live-input/example.txt
 # clean up
-cat ${MIG_LOCALJOBNAME}.getupdatedone
 rm -f ${MIG_LOCALJOBNAME}.getupdatedone
 }}}
 This example triggers download of inputfiles/input.txt from your MiG home into the local live-input directory. Live input and output requests are marked done with corresponding ${MIG_LOCALJOBNAME}.getupdatedone and ${MIG_LOCALJOBNAME}.sendupdatedone files, so it is possible but not mandatory to detect the actual finishing of transfers. The Xupdatedone files simply declare that the live transfer finished, but not necessarily with success. Missing source files and such problems are left for the user to handle.
@@ -249,9 +249,9 @@ echo "destination default" >> update.tmp
 cp update.tmp ${MIG_LOCALJOBNAME}.sendupdate
 # do calculations or wait
 while [ ! -f ${MIG_LOCALJOBNAME}.sendupdatedone ]; do sleep 5; done
-echo "message sent to default message queue"
+echo "message sent to default message queue:"
+cat msg.txt
 # clean up
-cat ${MIG_LOCALJOBNAME}.sendupdatedone
 rm -f ${MIG_LOCALJOBNAME}.sendupdatedone
 }}}
 When sending messages the source field is the path of the message file and the destination field is the name of the message queue.
@@ -269,7 +269,6 @@ while [ ! -f ${MIG_LOCALJOBNAME}.getupdatedone ]; do sleep 5; done
 echo "message received from default queue:"
 cat default
 # clean up
-cat ${MIG_LOCALJOBNAME}.getupdatedone
 rm -f ${MIG_LOCALJOBNAME}.getupdatedone
 }}}
 In this case the source is the name of the message queue and the destination is the destination directory for a file with the message. Thus the message will appear in a file called 'default' in the current working directory in this example.

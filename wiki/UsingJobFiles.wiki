@@ -197,34 +197,41 @@ Jobs can also trigger I/O updates themselves by writing a simple file during job
 ::EXECUTE::
 uname -a > out.txt
 date >> out.txt
-date > more.txt
+echo "$(date): example text" > example.txt
 echo "job_id ${MIG_JOBID}" > update.tmp
 echo "localjobname ${MIG_LOCALJOBNAME}" >> update.tmp
 echo "target liveio" >> update.tmp
-echo "source out.txt more.txt" >> update.tmp
-echo "destination /" >> update.tmp
+echo "source out.txt example.txt" >> update.tmp
+echo "destination live-files" >> update.tmp
 cp update.tmp ${MIG_LOCALJOBNAME}.sendupdate
 # do calculations or wait
 while [ ! -f ${MIG_LOCALJOBNAME}.sendupdatedone ]; do sleep 5; done
 echo "live output files uploaded"
+# clean up
+cat ${MIG_LOCALJOBNAME}.sendupdatedone
+rm -f ${MIG_LOCALJOBNAME}.sendupdatedone
 }}}
-This simple example outputs some data to the out.txt and more.txt files and requests upload of them to the server in the root of the user home.
-The first two lines with job_id and localjobname are used MiG internally and they must hold the actual job information from the execution environment. Similarly the file must be called ${MIG_LOCALJOBNAME}.update to signal that it is a request to MiG.
+This simple example outputs some data to the out.txt and example.txt files and requests upload of them to the server in the live-files directory in the root of the user home.
+The first two lines with job_id and localjobname are used MiG internally and they must hold the actual job information from the execution environment. Similarly the file must be called ${MIG_LOCALJOBNAME}.sendupdate to signal that it is a request to MiG.
 The use of the temporary update.tmp file is just to avoid races.
 
-The same result would be manually achieved if you requested live output through the web interface with source paths set to out.txt and more.txt and destination path set to / .
+The same result would be manually achieved if you requested live output through the web interface with source paths set to out.txt and example.txt and destination path set to live-files.
 
 Live input can similarly be requested in jobs with something like:
 {{{
 echo "job_id ${MIG_JOBID}" > update.tmp
 echo "localjobname ${MIG_LOCALJOBNAME}" >> update.tmp
 echo "target liveio" >> update.tmp
-echo "source inputfiles/input.txt" >> update.tmp
+echo "source live-files/example.txt" >> update.tmp
 echo "destination live-input" >> update.tmp
 cp update.tmp ${MIG_LOCALJOBNAME}.getupdate
 # do calculations or wait
 while [ ! -f ${MIG_LOCALJOBNAME}.getupdatedone ]; do sleep 5; done
 echo "live input files downloaded"
+cat live-input/example.txt
+# clean up
+cat ${MIG_LOCALJOBNAME}.getupdatedone
+rm -f ${MIG_LOCALJOBNAME}.getupdatedone
 }}}
 This example triggers download of inputfiles/input.txt from your MiG home into the local live-input directory. Live input and output requests are marked done with corresponding ${MIG_LOCALJOBNAME}.getupdatedone and ${MIG_LOCALJOBNAME}.sendupdatedone files, so it is possible but not mandatory to detect the actual finishing of transfers. The Xupdatedone files simply declare that the live transfer finished, but not necessarily with success. Missing source files and such problems are left for the user to handle.
 
@@ -243,6 +250,9 @@ cp update.tmp ${MIG_LOCALJOBNAME}.sendupdate
 # do calculations or wait
 while [ ! -f ${MIG_LOCALJOBNAME}.sendupdatedone ]; do sleep 5; done
 echo "message sent to default message queue"
+# clean up
+cat ${MIG_LOCALJOBNAME}.sendupdatedone
+rm -f ${MIG_LOCALJOBNAME}.sendupdatedone
 }}}
 When sending messages the source field is the path of the message file and the destination field is the name of the message queue.
 
@@ -256,7 +266,11 @@ echo "destination ." >> update.tmp
 cp update.tmp ${MIG_LOCALJOBNAME}.getupdate
 # do calculations or wait
 while [ ! -f ${MIG_LOCALJOBNAME}.getupdatedone ]; do sleep 5; done
-echo "message received from default queue"
+echo "message received from default queue:"
+cat default
+# clean up
+cat ${MIG_LOCALJOBNAME}.getupdatedone
+rm -f ${MIG_LOCALJOBNAME}.getupdatedone
 }}}
 In this case the source is the name of the message queue and the destination is the destination directory for a file with the message. Thus the message will appear in a file called 'default' in the current working directory in this example.
 

@@ -21,7 +21,7 @@ The following sections provide links to pages ordered by topic, but you can also
  * [MiGOneClickCoding Coding MiG One-Click Jobs]
  * [SandboxResourceCoding Coding MiG Sandbox Jobs]
  * [MiGInterfaces Overview of available MiG interfaces]
- * [CustomWebInterfaces Customizing your MiG web interfaces]
+ * [CustomizeWebInterfaces Customizing your MiG web interfaces]
  * [MiGFSIntro Introduction to MiGFS Fuse based file access]
 
 = Resource Owner Topics =

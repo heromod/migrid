@@ -23,6 +23,7 @@ The following sections provide links to pages ordered by topic, but you can also
  * [MiGInterfaces Overview of available MiG interfaces]
  * [CustomizeWebInterfaces Customizing your MiG web interfaces]
  * [MiGFSIntro Introduction to MiGFS Fuse based file access]
+ * [http://code.google.com/p/cspbuilder/wiki/MiGHowto CSP on MiG]
 
 = Resource Owner Topics =
  * [ResourceOwnerFAQ Frequently Asked Questions - resource owners]

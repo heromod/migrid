@@ -1,0 +1,187 @@
+= Introduction =
+This file contains sporadic news entries and changelog entries for the
+individual releases of the MiG project code.
+
+
+== News ==
+A short description of changes 
+
+=== August 3rd, 2010 ===
+Feature and interface improvement release with thanks to grid.dk for a
+considerable contribution especially in the usability and interface areas.
+New feautures are mainly focused on improving VGrid usability, making job
+execution more flexible and administrating resources.
+
+
+=== March 15th, 2010 ===
+Our previous shared virtual host for Session ID and certificate based
+access could *potentially* open up for a Man-in-the-Middle attack like:
+http://securitytracker.com/alerts/2009/Nov/1023145.html
+Additionally the same SSL renegotiation prevented upload of big files
+through the web interface. We repartitioned the virtual hosts to prevent
+any such security issues in the future and remove the upload limit at
+once. However, this means that a MiG server now requires either two public IP
+adresses or two SSL ports to work.
+Apart from that we mostly worked on integrating interface polishing and
+improvements from the Grid.dk project. Now some of the main web pages
+use AJAX to some extent for a far more flexible and crisp user experience.
+
+
+=== September 17th, 2009 ===
+********************************************************
+*** IMPORTANT * This upgrade requires admin actions! ***
+********************************************************
+This release changed the user database format and the default location
+of state directories. If you upgrade an existing installation you have
+to at least migrate the user database and optionally move your state
+directories to the new locations.
+
+With the restructuring of the user database *all* existing installations
+need to update their user database before they can use the new version.
+Please backup all your state data and the MiG-users.db and run
+cd mig/server
+./migrateusers.py [OPTIONS]
+Where OPTIONS may be one or more of:
+   -c CONF_FILE        Use CONF_FILE as server configuration
+   -d DB_FILE          Use DB_FILE as user data base file
+   -f                  Force operations to continue past errors
+   -h                  Show this help
+   -p                  Prune duplicate users (keeps the one with latest expire)
+   -v                  Verbose output              
+which in most cases will be just
+./migrateusers.py
+to automatically upgrade all your MiG user directories and the database.
+Run the migrateusers command with the -v flag for detailed informations
+about applied changes.
+You also need to update your apache MiG configuration to map SSL
+certificates to the new user dirs.
+If you choose to switch to the new relocatable state directory layout
+you also need to update your MiGserver.conf and move the state
+directories around.
+Please refer to the example apache and MiGserver confs or use the config
+generator to achieve this.
+After migrating users you will have truly unique users, but you will no
+longer be able to use the migrated data with older middleware versions.
+
+=== May 1st, 2009 ===
+We finally got the old grey web pages completely overhauled. Thanks to those of you 
+that contributed to this often overlooked area.
+Updated setup helpers to make custom install locations easier.
+
+
+=== March 17, 2009 ===
+Added this file for easier tracking of changes. Another bugfixing
+release (1.0.2), so we recommend that everyone upgrades to this version.
+
+
+=== March 06, 2009 ===
+After a long time in planning we finally released the project under the
+GPL v2 today. The project started all the way back in 2003, so there's
+already quite a bit of code and the setup is not trivial. Over the
+coming months we will improve the code and instructions to ease setup
+for other users.
+
+
+== Changelogs ==
+More detailed changelogs for the public releases.
+The full changelog is available from the repository:
+http://code.google.com/p/migrid/source/list
+
+== 1.3.0 ==
+-New central message queues for synchronized job communication
+-Full live I/O support in jobs
+-Added python version of generated resource admin script
+-Support for job freeze/thaw in queue
+-Full zip/unzip support in user homes
+-New fancy file and settings editors
+-New user defined widgets using html/css/javascript
+-Integrated resource removal from grid.dk
+-Integrated runtime env removal from grid.dk
+-Integrated VGrid removal from grid.dk
+-Merged improved Submit job, Docs, VGrids and Resources pages from grid.dk
+-Merged site specific settings for SSS and VGrid components from grid.dk
+-New public resource viewer for ordinary users
+-New optional VGrid SCM
+-Support repair/update VGrid Wiki and SCM
+-Bugfixes in user scripts, nested vgrid web pages, LRMS job scripts, etc.
+-General page layout polish and code clean up
+
+== 1.2.0 ==
+-Work around potential Man-in-the-Middle apache issue (separate vhosts)
+-Fixed upload of big files (separate vhosts)
+-Optional resource anonymity
+-Optional auto creation of users with valid certificate
+-Fixed some notification timeout delays with threading
+-Multiple submit job styles
+-Support site specific customization
+-Optional resource targetting in submit job
+-New AJAX file manager
+-New AJAX job manager
+-New AJAX MiG shell
+-New optional statistics page
+-Overhauled Most other pages
+-Individual user stats on Dashboard
+-Integrate optional software catalogue from grid.dk
+-Integrate optional ARC support
+
+== 1.1.0 ==
+-reworked user ID structure to avoid collissions when users with same
+full name exist
+-move to apache 2.x as default web server
+-moved state directories to improve relocation support
+-more relocatable installation with e.g. MIG_CONF environment
+-users can now request scheduling information
+-support for external users signing up or imported from XML
+-added resource storage units for integration of external storage
+-custom style sheets support for all pages
+-added optional usage records for statistics and accounting
+-several SSS monitor improvements including sorting
+-allow sandbox jobs on all resources, but not the other way around
+-lowered default number of job retries and provided override in mRSL
+-user selectable job submit and files page interfaces
+-improved handling of quotes in EXECUTE field
+-added new dashboard user entry page
+-web interface improvements and fixes
+-rescheduling fixes
+-jabber notification fixes
+-ssh/scp timeout tuning
+-user script fixes
+-fixed several minor bugs pointed out by pylint
+-initial support for skin customization 
+
+== 1.0.4 ==
+-complete reworking of web layout
+-minor bugfixes and code clean up
+-updated RedHat compatible server configurations
+-java notes for One-click resources (IcedTea Java does not work)
+-fixed a number of install issues
+-updated install helper scripts to ease custom install
+-parallel resource admin scripts
+
+== 1.0.3 ==
+-added NEWS (this file) for tracking changes
+-Fixes to VGrid parsing and job notification
+-move job notifications to background threads to avoid blocking server
+-added experimental JSON output support
+-reworked ssh/scp helpers to prevent blocking of server
+
+== 1.0.2 ==
+-another minor bugfix and doc release
+-overhauled the sandbox generator to make it work everywhere
+-Moved some internal state files out of the code directories
+-cleaned up a leftover ssh to sandboxes the and corresponding log errors
+-cleaned up vgrid finder to remove irrelevant/annoying log error entries
+-added some missing license headers
+-fixed a bug in job handout
+-general tidying of all python code
+
+== 1.0.1 ==
+-verified install instructions
+-updated confs and tested complete install with apache2
+-added some missing license headers
+-more server documentation
+-merged One-Click source
+
+== 1.0.0 ==
+-first public release
+-rearranged old directory layout and added required license information

@@ -70,6 +70,8 @@
 .contextMenu LI.copy A { background-image: url(/images/icons/page_white_copy.png); }
 .contextMenu LI.paste A { background-image: url(/images/icons/page_white_paste.png); }
 .contextMenu LI.delete A { background-image: url(/images/icons/page_white_delete.png); }
+.contextMenu LI.zip A { background-image: url(/images/icons/compress.png); }
+.contextMenu LI.unzip A { background-image: url(/images/icons/zip.png); }
 .contextMenu LI.rename A { background-image: url(/images/icons/drive_rename.png); }
 .contextMenu LI.quit A { background-image: url(/images/icons/door.png); }
 .contextMenu LI.mrsl a { background-image: url('/images/icons/page_white_text.png'); }
@@ -78,5 +80,7 @@
 .contextMenu LI.outputfiles a{ background-image: url(/images/icons/download.png); }
 .contextMenu LI.schedule a { background-image: url(/images/icons/calendar.png); }
 .contextMenu LI.resubmit a { background-image: url(/images/icons/arrow_redo.png); }
+.contextMenu LI.freeze a { background-image: url(/images/icons/hourglass_delete.png); }
+.contextMenu LI.thaw a { background-image: url(/images/icons/hourglass_add.png); }
 .contextMenu LI.cancel a { background-image: url(/images/icons/cancel.png); }
-.contextMenu LI.liveoutput a { background-image: url(/images/icons/page_white_go.png); }
+.contextMenu LI.liveio a { background-image: url(/images/icons/page_white_go.png); }

@@ -142,10 +142,16 @@ def ls(user_arguments_dict):
     return stub('shared.functionality.ls', user_arguments_dict)
 
 
-def liveoutput(user_arguments_dict):
+def liveio(user_arguments_dict):
     """Wrap backend of same name"""
 
-    return stub('shared.functionality.liveoutput', user_arguments_dict)
+    return stub('shared.functionality.liveio', user_arguments_dict)
+
+
+def mqueue(user_arguments_dict):
+    """Wrap backend of same name"""
+
+    return stub('shared.functionality.mqueue', user_arguments_dict)
 
 
 def tail(user_arguments_dict):
@@ -243,6 +249,12 @@ def canceljob(user_arguments_dict):
     """Wrap backend of same name"""
 
     return stub('shared.functionality.canceljob', user_arguments_dict)
+
+
+def jobaction(user_arguments_dict):
+    """Wrap backend of same name"""
+
+    return stub('shared.functionality.jobaction', user_arguments_dict)
 
 
 def submit(user_arguments_dict):
@@ -397,10 +409,22 @@ def updateresconfig(user_arguments_dict):
                 user_arguments_dict)
 
 
+def delres(user_arguments_dict):
+    """Wrap backend of same name"""
+
+    return stub('shared.functionality.delres', user_arguments_dict)
+
+
 def createre(user_arguments_dict):
     """Wrap backend of same name"""
 
     return stub('shared.functionality.createre', user_arguments_dict)
+
+
+def deletere(user_arguments_dict):
+    """Wrap backend of same name"""
+
+    return stub('shared.functionality.deletere', user_arguments_dict)
 
 
 def docs(user_arguments_dict):
@@ -482,6 +506,12 @@ def zip(user_arguments_dict):
     return stub('shared.functionality.zip', user_arguments_dict)
 
 
+def unzip(user_arguments_dict):
+    """Wrap backend of same name"""
+
+    return stub('shared.functionality.unzip', user_arguments_dict)
+
+
 def showvgridmonitor(user_arguments_dict):
     """Wrap backend of same name"""
 
@@ -526,7 +556,8 @@ if '__main__' == __name__:
     server.register_function(my_id)
     server.register_function(jobstatus)
     server.register_function(ls)
-    server.register_function(liveoutput)
+    server.register_function(liveio)
+    server.register_function(mqueue)
     server.register_function(tail)
     server.register_function(head)
     server.register_function(addresowner)
@@ -569,7 +600,9 @@ if '__main__' == __name__:
     server.register_function(rmvgridres)
     server.register_function(adminvgrid)
     server.register_function(updateresconfig)
+    server.register_function(delres)
     server.register_function(createre)
+    server.register_function(deletere)
     server.register_function(docs)
     server.register_function(spell)
     server.register_function(startexe)
@@ -581,6 +614,7 @@ if '__main__' == __name__:
     server.register_function(settings)
     server.register_function(pubvgridprojects)
     server.register_function(zip)
+    server.register_function(unzip)
     server.register_function(showvgridmonitor)
     server.register_function(mv)
     server.register_function(signature)

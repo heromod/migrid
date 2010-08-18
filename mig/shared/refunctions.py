@@ -3,8 +3,8 @@
 #
 # --- BEGIN_HEADER ---
 #
-# refunctions - [insert a few words of module description on this line]
-# Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
+# refunctions - runtime environment functions
+# Copyright (C) 2003-2010  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
 #
@@ -20,7 +20,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 # -- END_HEADER ---
 #
@@ -34,14 +34,13 @@ import urllib
 import xml.dom.minidom as xml
 
 
-import shared.parser as parser
 import shared.rekeywords as rekeywords
+import shared.parser as parser
 from shared.fileio import pickle, unpickle
-from shared.validstring import valid_dir_input
-#from shared.parser import parse 
 from shared.serial import load, dump
 from ConfigParser import SafeConfigParser
 
+WRITE_LOCK = 'write.lock'
 
 def list_runtime_environments(configuration):
     """ List all runtime environments consisting of
@@ -59,35 +58,34 @@ def list_runtime_environments(configuration):
             try:
                 os.mkdir(configuration.re_home)
             except Exception, err:
-                configuration.logger.info('refunctions.py: not able to create directory %s: %s'
-                         % (configuration.re_home, err))
+                configuration.logger.info(
+                    'refunctions.py: not able to create directory %s: %s'
+                    % (configuration.re_home, err))
 
     for entry in dir_content:
 
-        # Skip dot files/dirs and the rte.lock
+        # Skip dot files/dirs and the write lock
 
-        if (entry.startswith('.')) or (entry == "rte.lock"):
+        if (entry.startswith('.')) or (entry == WRITE_LOCK):
             continue
-        if os.path.isfile(configuration.re_home + entry):
+        if os.path.isfile(os.path.join(configuration.re_home, entry)):
 
-            # entry is a file and hence a re
+            # entry is a file and hence a runtime environment
 
             re_list.append(entry)
         else:
-            configuration.logger.info('%s in %s is not a plain file, move it?'
-                     % (entry, configuration.re_home))
+            configuration.logger.warning(
+                '%s in %s is not a plain file, move it?'
+                % (entry, configuration.re_home))
 
     re_list.extend(list_0install_res(configuration))
 
     return (True, re_list)
 
-def is_runtime_environment(re_name, configuration):
 
-    if not valid_dir_input(configuration.re_home, re_name):
-        configuration.logger.warning("registered possible illegal directory traversal attempt re_name '%s'"
-                 % re_name)
-        return False
-    if os.path.isfile(configuration.re_home + re_name):
+def is_runtime_environment(re_name, configuration):
+    """Check that re_name is an existing runtime environment"""
+    if os.path.isfile(os.path.join(configuration.re_home, re_name)):
         return True
     if re_name in list_0install_res(configuration).keys():
         return True
@@ -238,159 +236,45 @@ def get_0install_re_dict(name, configuration, url=None):
     return (re_dict,'')
 
 def get_re_dict(name, configuration):
+    """Helper to extract a saved runtime environment"""
     if is_0install_re(name, configuration):
         return get_0install_re_dict(name, configuration)
 
-    dict = unpickle(configuration.re_home + name, configuration.logger)
-    if not dict:
-        return (False, 'Could not open runtimeenvironment %s' % name)
+    re_dict = load(os.path.join(configuration.re_home, name))
+    if not re_dict:
+        return (False, 'Could not open runtime environment %s' % name)
     else:
-        return (dict, '')
+        return (re_dict, '')
 
-#Function for determining whether or not a runtimeenvironment is active:
-def is_re_active(res_map, re_name, configuration):
-    #Lock down access to resources, ensuring exclusive access during deletion
-    lock_path = os.path.join(configuration.resource_home, "resource.lock")
+# this was del_re before...
+def delete_runtimeenv(re_name, configuration):
+    """Delete an existing runtime environment"""
+    status, msg = True, ""
+    # Lock the access to the runtime env files, so that deletion is done
+    # with exclusive access.
+    lock_path = os.path.join(configuration.re_home, WRITE_LOCK)
     lock_handle = open(lock_path, 'a')
     fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX)
 
-    actives = []
+    # TODO: the following code leaves status==True (wrong)
 
-    for res in res_map:
-        for rte in res_map[res]['__conf__']['RUNTIMEENVIRONMENT']:
-            if rte[0] == re_name:
-
-                #Building the path to relevant config files
-                path = configuration.resource_home + str(res)
-                config_file = path + "/" + "config"
-
-                #Check if the rte is in the resource under investigation.
-                if rte in res_map[res]['__conf__']['RUNTIMEENVIRONMENT']:
-                    actives.append(res)
-
-    #Release the lock on the resources.
-    lock_handle.close()
- 
-    #If the RTE was found in any resource, (true, actives) is returned.
-    #Otherwise (False, actives), as to indicate whether the RTE is active or not
-    if len(actives) > 0:
-        return (True, actives)
-    else:
-        return (False, actives)
-
-   
-#Function for removing an RTE from all resources.
-def del_re_from_resources(res_map, re_name, configuration):
-    #Lock down access to resources, ensuring exclusive access during deletion
-    lock_path = os.path.join(configuration.resource_home, "resource.lock")
-    lock_handle = open(lock_path, 'a')
-    fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX)
-
-
-    #Iterate over all resources, removing RTE re_name from the resources
-    for res in res_map:        
-        for rte in res_map[res]['__conf__']['RUNTIMEENVIRONMENT']:
-            if rte[0] == re_name:
-
-                #Building the path to relevant config files
-                path = configuration.resource_home + str(res)
-                config_file = path + "/" + "config"
-
-                #Remove RTE re_name from the config file and write it back
-                res_map[res]['__conf__']['RUNTIMEENVIRONMENT'].remove(rte)
-                dump(res_map[res]['__conf__'],config_file)
-                
-                #Load and parse the MRSL file for the resource
-                mrsldata = parser.parse(config_file + ".MiG")
-
-                #Iterate through the parse tree for the MRSL file,
-                #removing any entry of RTE re_name
-                for section in mrsldata:
-                    if section[0] == "::RUNTIMEENVIRONMENT::":
-                        start = section[1].index("name: " + re_name)
-                        next_rte = False
-                        stop = start
-                        while not next_rte:
-                            stop =stop + 1
-                            if not stop < len(section[1]):
-                                next_rte = True
-                                
-                            else:
-                                if section[1][stop][0:5] == "name:":
-                                    next_rte = True
-                        del section[1][start:stop]
-                        
-                #Build MRSL string from the revised parse tree
-                mrsl = ""
-                for section in mrsldata:
-                    mrsl = mrsl + section[0]  + "\n"
-                    for item in section[1]:
-                        mrsl = mrsl + item + "\n"
-                    mrsl = mrsl + "\n"
-
-
-
-                #Write MRSL string to config.tmp
-                tmp_path = config_file + ".tmp"
-                accepted_path = config_file + ".MiG"
-
-                try:
-                    fh = open(tmp_path, 'w')
-                    fh.write(mrsl)
-                    fh.close()
-                except Exception, err:
-                    pass #FILL OUT
-
-
-                #Truncate the temporary file with the real one.
-                try:
-                    os.rename(tmp_path, accepted_path)
-                except Exception, err:
-                    pass
-                   
-    
-    #Release the lock on the resources.
-    lock_handle.close()
-    return (True, "")
-
-
-
-#Function for deleting a RTE
-def del_re(re_name, configuration):
-    #Lock the access to the RTE files, so that deletion is done with exclusive access.
-    lock_path = os.path.join(configuration.re_home, "rte.lock")
-    lock_handle = open(lock_path, 'a')
-    fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX)
-
-    #If the RTE does not exists, an error is returned
-    if not valid_dir_input(configuration.re_home, re_name):
-        msg = "registered possible illegal directory traversal attempt re_name '%s'" % re_name
-        configuration.logger.warning(msg)
-        lock_handle.close()      
-        return False, msg
-    
-    #If the RTE does exists, deletion is atempted. If an error acours, it is returned.
-    filename = configuration.re_home + re_name
-    if os.path.isfile(configuration.re_home + re_name):
+    # TODO: catch if re_name is a relative path outside of re_home
+    filename = os.path.join(configuration.re_home, re_name)
+    if os.path.isfile(filename):
         try:
             os.remove(filename)
-            lock_handle.close()
-            return True, ""        
         except Exception, err:
-            msg = "Exception during deletion of runtime enviroment '%s'" %re_name
-            lock_handle.close()
-            return False, msg
-            
+            msg = "Exception during deletion of runtime enviroment '%s': %s"\
+                  % (re_name, err)
     else:
-        msg = "Tried to delete unexisting runtime enviroment '%s'" %re_name
+        msg = "Tried to delete unexisting runtime enviroment '%s'" % re_name
         configuration.logger.warning(msg)
-        lock_handle.close()
-        return False, msg
-    
-    
+    lock_handle.close()
+    return (status, msg)
     
 
 def create_runtimeenv(filename, client_id, configuration):
+    """Create a new runtime environment"""
     result = parser.parse(filename)
     external_dict = rekeywords.get_keywords_dict()
 
@@ -403,8 +287,6 @@ def create_runtimeenv(filename, client_id, configuration):
         msg = \
             'Exception removing temporary runtime environment file %s, %s'\
              % (filename, err)
-
-        # should we exit because of this? o.reply_and_exit(o.ERROR)
 
     if not status:
         msg = 'Parse failed (typecheck) %s' % parsemsg
@@ -422,47 +304,28 @@ def create_runtimeenv(filename, client_id, configuration):
 
     re_name = new_dict['RENAME']
 
-    pickle_filename = configuration.re_home + re_name
+    re_filename = os.path.join(configuration.re_home, re_name)
 
-    if os.path.exists(pickle_filename):
+    # Lock the access to the runtime env files, so that creation is done
+    # with exclusive access.
+    lock_path = os.path.join(configuration.re_home, WRITE_LOCK)
+    lock_handle = open(lock_path, 'a')
+    fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX)
+
+    status, msg = True, ''
+    if os.path.exists(re_filename):
+        status = False
         msg = \
-            "'%s' not created because a runtime environment with the same name exists!"\
-             % re_name
-        return (False, msg)
+            "can not recreate existing runtime environment '%s'!" % re_name
 
-    if not pickle(new_dict, pickle_filename, configuration.logger):
-        msg = 'Error pickling and/or saving new runtime environment'
-        return (False, msg)
-
-    # everything ok
-
-    return (True, '')
-
-
-def get_active_re_list(re_home):
-    result = []
     try:
-        re_list = os.listdir(re_home)
-        for re in re_list:
-            re_version_list = os.listdir(re_home + re)
-            maxcounter = -1
-            for re_version in re_version_list:
-                if -1 != re_version.find('.RE.MiG'):
-                    lastdot = re_version.rindex('.RE.MiG')
-                    counter = int(re_version[:lastdot])
-                    if counter > maxcounter:
-                        maxcounter = counter
-
-        if -1 < maxcounter:
-            result.append(re + '_' + str(maxcounter))
+        dump(new_dict, re_filename)
     except Exception, err:
+        status = False
+        msg = 'Internal error saving new runtime environment: %s' % err
 
-        return (False,
-                'Could not retrieve Runtime environment list! Failure: %s'
-                 % str(err), [])
-
-    return (True, 'Active RE list retrieved with success.', result)
-
+    lock_handle.close()
+    return (status, msg)
 
 def zero_install_replace(required_res, provided_res, configuration):
     """replaces the job's RE requirements specified (arg.1) by

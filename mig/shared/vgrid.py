@@ -4,7 +4,7 @@
 # --- BEGIN_HEADER ---
 #
 # vgrid - helper functions related to VGrid actions
-# Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
+# Copyright (C) 2003-2010  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
 #
@@ -30,7 +30,7 @@
 import os
 import fnmatch
 
-from shared.defaults import default_vgrid, any_vgrid
+from shared.defaults import default_vgrid
 from shared.findtype import is_user, is_resource
 from shared.listhandling import list_items_in_pickled_list
 from shared.validstring import valid_dir_input
@@ -84,8 +84,8 @@ def vgrid_is_cert_in_list(
     (status, entries) = vgrid_list(vgrid_name, group, configuration)
 
     if not status:
-        configuration.logger.error('status not True in vgrid_is_cert_in_list: %s'
-                                    % entries)
+        configuration.logger.error(
+            'unexpected status in vgrid_is_cert_in_list: %s' % entries)
         return False
 
     return vgrid_allowed(client_id, entries)
@@ -161,7 +161,7 @@ def vgrid_list_vgrids(configuration):
 
         for directory in dirs:
 
-            # strip vgrid_home prefix to get entire vgrid name (/dalton/dk/imada)
+            # strip vgrid_home prefix to get entire vgrid name (/diku/sub/grid)
 
             complete_vgrid_location = os.path.join(root, directory)
             vgrid_name_without_location = \
@@ -206,7 +206,7 @@ def init_vgrid_script_add_rem(
             msg += '%s is not a valid %s resource' % \
                     (subject, configuration.short_title)
             msg += \
-                ' (OK, if removing or if e.g. the resource creation is pending)'
+                ' (OK, if removing or e.g. the resource creation is pending)'
     else:
         msg += 'unknown subject type in init_vgrid_script_add_rem'
         return (False, msg, [])
@@ -280,8 +280,8 @@ def vgrid_list(vgrid_name, group, configuration):
             # the way down through listhandling, fileio, and serial.
             # The empty lists are put in at createvgrid.py.
 
-            if msg != ['']: output.extend(msg)
-
+            if msg != ['']:
+                output.extend(msg)
         else:
             return (False, msg)
     return (True, output)
@@ -346,7 +346,7 @@ def vgrid_request_and_job_match(resource_vgrid, job_vgrid):
 
     for (resource_elem, job_elem) in zip(resource_vgrid_list,
             job_vgrid_list):
-        if not resource_elem == job_elem:
+        if resource_elem != job_elem:
             return False
     return True
 

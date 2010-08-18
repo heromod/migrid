@@ -103,7 +103,9 @@ ___%s___
             # We do not want link junk in plain text
             # lines.append('%s\n' % txt_link(i))
 
-            continue
+            # Show any explicit plain_text contents
+            if i.get('plain_text', False):
+                lines.append('%s\n' % i['plain_text'])
         elif i['object_type'] == 'multilinkline':
 
             # We do not want link junk in plain text
@@ -125,11 +127,20 @@ ___%s___
                 lines += pprint_table(txt_table_if_have_keys(header,
                                   submitstatuslist, ['name', 'status',
                                                      'job_id', 'message']))
+        elif i['object_type'] == 'resubmitobjs':
+            resubmitobjs = i['resubmitobjs']
+            if len(resubmitobjs) == 0:
+                continue
+            header = [['Job ID', 'Resubmit status', 'New job ID',
+                      'Message']]
+            lines += pprint_table(txt_table_if_have_keys(header,
+                                  resubmitobjs, ['job_id',
+                                  'status', 'new_job_id', 'message']))
         elif i['object_type'] == 'changedstatusjobs':
             changedstatusjobs = i['changedstatusjobs']
             if len(changedstatusjobs) == 0:
                 continue
-            header = [['Job ID', 'Old status', 'New status Message',
+            header = [['Job ID', 'Old status', 'New status',
                       'Message']]
             lines += pprint_table(txt_table_if_have_keys(header,
                                   changedstatusjobs, ['job_id',
@@ -526,7 +537,7 @@ Exit code: %s Description: %s<br />
                     lines.append('%s<br />'
                                   % html_link(obj['jobschedulelink']))
                     lines.append('%s<br />'
-                                  % html_link(obj['liveoutputlink']))
+                                  % html_link(obj['liveiolink']))
                     if obj.has_key('outputfileslink'):
                         lines.append('<br />%s'
                                  % html_link(obj['outputfileslink']))
@@ -538,7 +549,7 @@ Exit code: %s Description: %s<br />
             resubmitobjs = i['resubmitobjs']
             if len(resubmitobjs) == 0:
                 continue
-            lines.append("<table class='resubmit'><tr><th>Job ID</th><th>Resubmit status</th><th>New jobid</th><th>Message</th></tr>"
+            lines.append("<table class='resubmit'><tr><th>Job ID</th><th>Resubmit status</th><th>New job ID</th><th>Message</th></tr>"
                          )
             for resubmitobj in resubmitobjs:
                 lines.append('<tr>%s</tr>'
@@ -778,7 +789,7 @@ Exit code: %s Description: %s<br />
             if len(links) == 0:
                 lines.append('No links found!')
             else:
-                lines.append(' / '.join([html_link(link) for link in
+                lines.append(' , '.join([html_link(link) for link in
                              links]))
         elif i['object_type'] == 'file':
             lines.append(i['name'])
@@ -1328,8 +1339,9 @@ def format_output(
         return eval('%s_format(configuration, ret_val, ret_msg, out_obj)' % \
                     outputformat)
     except Exception, err:
-        msg = outputformat + \
-              ' failed on server! Defaulting to .txt output. (%s)' % err
+        msg = '%s failed on server! Defaulting to txt output. (%s)' % \
+              (outputformat, err)
+        configuration.logger.error(msg)
         return (txt_format(configuration, ret_val, msg, out_obj))
 
 def format_timedelta(timedelta):

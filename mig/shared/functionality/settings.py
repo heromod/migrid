@@ -29,7 +29,7 @@ import os
 
 import shared.returnvalues as returnvalues
 from shared.functional import validate_input_and_cert
-from shared.init import initialize_main_variables
+from shared.init import initialize_main_variables, find_entry
 from shared.settings import load_settings, load_widgets
 from shared.settingskeywords import get_settings_specs
 from shared.widgetskeywords import get_widgets_specs
@@ -41,6 +41,223 @@ try:
 except Exception, exc:
     # Ignore errors and let it crash if ARC is enabled without the lib
     pass
+
+
+cm_prefix = '/images/lib/codemirror'
+cm_css_prefix = '%s/css' % cm_prefix
+cm_js_prefix = '%s/js' % cm_prefix
+txt_parsers, txt_stylesheets = ['parsedummy.js'], []
+css_parsers, css_stylesheets = ["parsecss.js"], ["%s/csscolors.css" % cm_css_prefix]
+web_parsers = ["parsexml.js", "parsecss.js", "tokenizejavascript.js",
+               "parsejavascript.js", "parsehtmlmixed.js"]
+web_stylesheets = ["%s/%s" % (cm_css_prefix, i) for i in \
+                   ["xmlcolors.css", "jscolors.css", "csscolors.css"]]
+edit_defaults = {'parserfile': txt_parsers, 'stylesheet': txt_stylesheets,
+                  'path': "%s/" % cm_js_prefix, 'autoMatchParens': "true",
+                  'tabMode': "spaces", 'indentUnit': 4, 'height': '600px'}
+general_edit = edit_defaults.copy()
+general_edit['height'] = '50px'
+style_edit = edit_defaults.copy()
+style_edit['parserfile'] = css_parsers
+style_edit['stylesheet'] = css_stylesheets
+widgets_edit = edit_defaults.copy()
+widgets_edit['parserfile'] = web_parsers
+widgets_edit['stylesheet'] = web_stylesheets
+widgets_edit['height'] = '400px'
+
+
+def py_to_js(options):
+    """Format python dictionary as dictionary string used in javascript"""
+
+    out = []
+    for (key, val) in options.items():
+        if isinstance(val, basestring):
+            val = '"%s"' % val
+        out.append('%s: %s' % (key, val))
+    return '{%s}' % ', '.join(out)
+
+def wrap_edit_area(name, area, edit_opts=edit_defaults, toolbar_buttons='ALL'):
+    """Wrap HTML textarea in user friendly editor with syntax highlighting
+    and optional basic toolbar.
+    """
+    init_buttons = ''
+    button_impl = ''
+    if toolbar_buttons:
+        # TODO: switch to python generated html with icon buttons!
+        init_buttons = '''  
+  this.spellcheck;
+  makeField(this.searchid, 15);
+  makeButton("Search", "search");
+  makeField(this.replaceid, 15);
+  makeButton("Replace", "replace");
+  makeButton("Replace All", "replaceall");
+  makeSpace("SearchSep");
+  makeButton("Undo", "undo");
+  makeButton("Redo", "redo");
+  makeSpace("UndoSep");
+  makeButton("Help", "help");
+'''
+        button_impl = '''
+  search: function() {
+    var text = document.getElementById(this.searchid).value;
+    if (!text) {
+      alert("Please specify something in the search field!");
+      return;
+    }
+    var first = true;
+    do {
+      var cursor = this.editor.getSearchCursor(text, first);
+      first = false;
+      while (cursor.findNext()) {
+        cursor.select();
+        return;
+      }
+    } while (confirm("End of document reached. Start over?"));
+  },
+
+  replace: function() {
+    var from = document.getElementById(this.searchid).value;
+    if (!from) {
+      alert("Please specify something to replace in the search field!");
+      return;
+    }
+    var to = document.getElementById(this.replaceid).value;
+    var cursor = this.editor.getSearchCursor(from, false);
+    while (cursor.findNext()) {
+      cursor.select();
+      if (confirm("Replace selected entry with '" + to + "'?")) {
+        cursor.replace(to);
+      }
+    }
+  },
+
+  replaceall: function() {
+    var from = document.getElementById(this.searchid).value, to;
+    if (!from) {
+      alert("Please specify something to replace in the search field!");
+      return;
+    }
+    var to = document.getElementById(this.replaceid).value;
+
+    var cursor = this.editor.getSearchCursor(from, false);
+    while (cursor.findNext()) {
+      cursor.replace(to);
+    }
+  },
+
+  undo: function() {
+    this.editor.undo();
+  },
+  
+  redo: function() {
+    this.editor.redo();
+  },
+  
+  help: function() {
+    alert("Quick help:\\n\\nShortcuts:\\nCtrl-z: undo\\nCtrl-y: redo\\nTab re-indents line\\nEnter inserts a new indented line\\n\\nPlease refer the CodeMirror manual for more detailed help.");
+  },
+'''
+
+    if toolbar_buttons == 'ALL':
+        init_buttons += '''
+  makeSpace("HelpSep");
+  makeField(this.jumpid, 2);
+  makeButton("Jump to line", "jump");
+  makeSpace("JumpSep");
+  makeButton("Re-Indent all", "reindent");
+  makeSpace("IndentSep");
+  makeButton("Toggle line numbers", "line");
+  //makeSpace("LineSep");
+  //makeButton("Toggle spell check", "spell");
+'''
+        button_impl += '''
+  jump: function() {
+    var line = document.getElementById(this.jumpid).value;
+    if (line && !isNaN(Number(line)))
+      this.editor.jumpToLine(Number(line));
+    else
+      alert("Please specify a line to jump to in the jump field!");
+  },
+
+  line: function() {
+    this.editor.setLineNumbers(!this.editor.lineNumbers);
+    this.editor.focus();
+  },
+
+  reindent: function() {
+    this.editor.reindent();
+  },
+  
+  spell: function() {
+    if (this.spellcheck == undefined) this.spellcheck = !this.editor.options.disableSpellcheck;
+    this.spellcheck = !this.spellcheck
+    this.editor.setSpellcheck(this.spellcheck);
+    this.editor.focus();
+  },
+'''
+
+    script = '''
+/*
+Modified version of the MirrorFrame example from CodeMirror:
+Adds a basic toolbar to the editor widget with limited use of alert popups.
+*/
+
+
+function dumpobj(obj) {
+  alert("dump: " + obj.toSource());
+}
+
+
+function TextAreaEditor(toolbar, textarea, options) {
+  this.bar = toolbar;
+  this.prefix = textarea;
+  this.searchid = this.prefix + "searchfield";
+  this.replaceid = this.prefix + "replacefield";
+  this.jumpid = this.prefix + "jumpfield";
+
+  var self = this;
+  function makeButton(name, action) {
+    var button = document.createElement("INPUT");
+    button.type = "button";
+    button.value = name;
+    self.bar.appendChild(button);
+    button.onclick = function() { self[action].call(self); };
+  }
+  function makeField(name, size) {
+    var field = document.createElement("INPUT");
+    field.type = "text";
+    field.id = name;
+    field.size = size;
+    self.bar.appendChild(field);
+  }
+  function makeSpace(name) {
+    var elem = document.createTextNode(" | ");
+    self.bar.appendChild(elem);
+  }
+
+%s  
+
+  this.editor = CodeMirror.fromTextArea(textarea, options);
+}
+
+TextAreaEditor.prototype = {
+%s
+};
+''' % (init_buttons, button_impl)
+    out = '''
+<div class="inlineeditor" id="%sinlineeditor">
+<div class="editortoolbar" id="%stoolbar">
+<!--- filled by script --->
+</div>
+%s
+<script type="text/javascript">
+%s
+var editor = new TextAreaEditor(document.getElementById("%stoolbar"), "%s", %s);
+</script>
+</div>
+'''
+    return out % (name, name, area, script, name, name, py_to_js(edit_opts))
+
 
 def signature():
     """Signature of the main function"""
@@ -72,6 +289,14 @@ def main(client_id, user_arguments_dict):
 
     base_dir = os.path.abspath(os.path.join(configuration.user_home,
                                client_dir)) + os.sep
+
+    javascript = '''
+<script type="text/javascript" src="%s/codemirror.js"></script>
+''' % cm_js_prefix
+
+    title_entry = find_entry(output_objects, 'title')
+    title_entry['text'] = 'Settings'
+    title_entry['javascript'] = javascript
 
     valid_topics = ['general', 'job', 'style']
     if configuration.site_script_deps:
@@ -119,6 +344,7 @@ def main(client_id, user_arguments_dict):
         </td></tr>
         <tr><td>
         <form method="post" action="settingsaction.py">
+        <input type="hidden" name="topic" value="general" />
         Please note that if you want to set multiple values (e.g. addresses) in the same field, you must write each value on a separate line.
         </td></tr>
         <tr><td>
@@ -150,24 +376,24 @@ def main(client_id, user_arguments_dict):
                         current_choice = current_settings_dict[keyword]
 
                     if len(valid_choices) > 0:
-                        html += '<select multiple name=%s>' % keyword
+                        html += '<div class="scrollselect">'
                         for choice in valid_choices:
                             selected = ''
                             if choice in current_choice:
-                                selected = 'selected'
-                            html += '<option %s value=%s>%s</option>'\
-                                    % (selected, choice, choice)
-                        html += '</select><br />'
+                                selected = 'checked'
+                            html += '<input type="checkbox" name="%s" %s value=%s>%s<br />'\
+                                    % (keyword, selected, choice, choice)
+                        html += '</div>'
                 except:
                     # failed on evaluating configuration.%s
 
-    #        elif val['Type'] == 'multiplestrings':
-                    html += \
-                         """<textarea cols="40" rows="1" wrap="off" name="%s">"""\
-                         % keyword
+                    area = \
+                         '''<textarea id="%s" cols=40 rows=1 name="%s">''' % (keyword,
+                                                               keyword)
                     if current_settings_dict.has_key(keyword):
-                        html += '\n'.join(current_settings_dict[keyword])
-                    html += '</textarea><br />'
+                        area += '\n'.join(current_settings_dict[keyword])
+                    area += '</textarea><br />'
+                    html += wrap_edit_area(keyword, area, general_edit, 'BASIC')
 
             elif val['Type'] == 'string':
 
@@ -224,21 +450,29 @@ If you use the same fields and values in many of your jobs, you can save your pr
 <form method="post" action="editfile.py">
 <input type="hidden" name="path" value="%(mrsl_template)s" />
 <input type="hidden" name="newline" value="unix" />
-<textarea cols="82" rows="25" wrap="off" name="editarea">
+'''
+        keyword = "defaultjob"
+        area = '''
+<textarea id="%(keyword)s" cols=82 rows=25 name="editarea">
 %(default_mrsl)s
 </textarea>
+'''
+        html += wrap_edit_area(keyword, area, edit_defaults, 'BASIC')
+        
+        html += '''
 </td></tr>
 <tr><td>
 <input type="submit" value="Save template" />
-<input type="reset" value="Forget changes" />
 </form>
 </td></tr>
 </table>
 </div>
-''' % {
+'''
+        html = html % {
             'default_mrsl': default_mrsl,
             'mrsl_template': mrsl_template,
             'site': configuration.short_title,
+            'keyword': keyword
             }
 
         output_objects.append({'object_type': 'html_form', 'text': html})
@@ -269,22 +503,28 @@ Please note that you can not save an empty style file, but must at least leave a
 <form method="post" action="editfile.py">
 <input type="hidden" name="path" value="%(css_template)s" />
 <input type="hidden" name="newline" value="unix" />
-<textarea cols="82" rows="25" wrap="off" min_len=1 name="editarea">
+'''
+        keyword = "defaultstyle"
+        area = '''
+<textarea id="%(keyword)s" cols=82 rows=25 min_len=1 name="editarea">
 %(default_css)s
 </textarea>
+'''
+        html += wrap_edit_area(keyword, area, style_edit)
+        html += '''
 </td></tr>
 <tr><td>
 <input type="submit" value="Save style" />
-<input type="reset" value="Forget changes" />
 </form>
 </td></tr>
 </table>
 </div>
-'''\
-        % {
+'''
+        html = html % {
             'default_css': default_css,
             'css_template': css_template,
             'site': configuration.short_title,
+            'keyword': keyword
             }
 
         output_objects.append({'object_type': 'html_form', 'text': html})
@@ -303,7 +543,7 @@ Please note that you can not save an empty style file, but must at least leave a
         html = \
              '''
 <div id="widgets">
-<table class="swidgets">
+<table class="widgets">
 <tr class="title"><td class="centertext">
 Default user defined widgets for all pages
 </td></tr>
@@ -318,19 +558,23 @@ You can simply copy/paste from the available widget file links below if you want
 <a class="urllink" href="/images/widgets/simple-calendar.app">simple calendar</a>,
 <a class="urllink" href="/images/widgets/calendar.app">calendar</a>,
 <a class="urllink" href="/images/widgets/calculator.app">calculator</a>,
+<a class="urllink" href="/images/widgets/localrss.app">local rss reader</a>,
 <a class="urllink" href="/images/widgets/rss.app">rss reader</a>,
 <a class="urllink" href="/images/widgets/clock.app">clock</a>,
 <a class="urllink" href="/images/widgets/weather.app">weather</a>,
 <a class="urllink" href="/images/widgets/progressbar.app">progress bar</a>,
 <a class="urllink" href="/images/widgets/simple-move.app">simple-move</a>,
 <a class="urllink" href="/images/widgets/portlets.app">portlets</a>,
-<a class="urllink" href="/images/widgets/countdown.app">countdown</a>
+<a class="urllink" href="/images/widgets/countdown.app">countdown</a>,
+<a class="urllink" href="/images/widgets/piechart.app">pie chart</a>,
+<a class="urllink" href="/images/widgets/simple-jobmon.app">simple-jobmon</a>
 </td></tr>
 <tr><td>
-<div class="warningtext">Please note that the widgets parser is rather grumpy so you may have to avoid blank lines and "#" signs in your widget code below. Additionally any errors in your widgets code may cause severe corruption in your pages, so it may be a good idea to keep another browser tab/window open on this page while experimenting.</div> 
+<div class="warningtext">Please note that the widgets parser is rather grumpy so you may have to avoid blank lines in your widget code below. Additionally any errors in your widgets code may cause severe corruption in your pages, so it may be a good idea to keep another browser tab/window open on this page while experimenting.</div> 
 </td></tr>
 <tr><td>
-<form method="post" action="widgetsaction.py">
+<form method="post" action="settingsaction.py">
+<input type="hidden" name="topic" value="widgets" />
 </td></tr>
 <tr><td>
 ''' % configuration.short_title
@@ -359,21 +603,22 @@ You can simply copy/paste from the available widget file links below if you want
                         current_choice = current_widgets_dict[keyword]
 
                     if len(valid_choices) > 0:
-                        html += '<select multiple name=%s>' % keyword
+                        html += '<div class="scrollselect">'
                         for choice in valid_choices:
                             selected = ''
                             if choice in current_choice:
-                                selected = 'selected'
-                            html += '<option %s value=%s>%s</option>'\
-                                    % (selected, choice, choice)
-                        html += '</select><br />'
+                                selected = 'checked'
+                            html += '<input type="checkbox" name="%s" %s value=%s>%s<br />'\
+                                    % (keyword, selected, choice, choice)
+                        html += '</div>'
                 except:
-                    html += \
-                         """<textarea cols="78" rows="10" wrap="off" name="%s">"""\
-                         % keyword
+                    area = \
+                         """<textarea id='%s' cols=78 rows=10 name='%s'>""" % \
+                         (keyword, keyword)
                     if current_widgets_dict.has_key(keyword):
-                        html += '\n'.join(current_widgets_dict[keyword])
-                    html += '</textarea><br />'
+                        area += '\n'.join(current_widgets_dict[keyword])
+                    area += '</textarea><br />'
+                    html += wrap_edit_area(keyword, area, widgets_edit)
 
         html += \
              '''

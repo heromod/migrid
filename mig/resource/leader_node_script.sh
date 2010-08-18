@@ -88,16 +88,20 @@ sync_clean() {
 handle_update() {
     localjobname=$1
         
-    # any .update file available?
-    if [ -f "${localjobname}.update" ]; then
-        echo "${localjobname}.update found! Send files to frontend" 1>> $exehostlog 2>> $exehostlog
-
+    # any .sendupdate file available?
+    sendreq="${localjobname}.sendupdate"
+    if [ -f "$sendreq" ]; then
+        runreq="${localjobname}.runsendupdate"
+        echo "$sendreq found! Send files to frontend" 1>> $exehostlog 2>> $exehostlog
         force_refresh .
-
-        reqjobid=`awk '/MIG_JOBID/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
-        echo "$copy_command ${reqjobid}.{stdout,stderr} ${copy_frontend_prefix}${frontend_dir}/job-dir_${localjobname}/" >> $exehostlog
+        reqjobid=`awk '/^#MIG_JOBID/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+        reqsrc=`awk '/source/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./$sendreq`
+        if [ -z "$reqsrc" ]; then
+            reqsrc="${reqjobid}.stdout ${reqjobid}.stderr"
+        fi
+        echo "$copy_command ${reqsrc} ${copy_frontend_prefix}${frontend_dir}/job-dir_${localjobname}/" >> $exehostlog
         
-        $copy_command ${reqjobid}.{stdout,stderr} ${copy_frontend_prefix}${frontend_dir}/job-dir_${localjobname}/ >> $exehostlog 2>> $exehostlog
+        $copy_command ${reqsrc} ${copy_frontend_prefix}${frontend_dir}/job-dir_${localjobname}/ >> $exehostlog 2>> $exehostlog
         retval=$?
         if [ ! $retval -eq 0 ]; then
             echo "ERROR ($retval) copying update files to frontend ${copy_frontend_prefix}${frontend_dir}/job-dir_${localjobname}/" >> $exehostlog
@@ -105,16 +109,52 @@ handle_update() {
             return 1
         fi
         
-        echo "this is the content of ${localjobname}.updatedone" >> "${localjobname}.updatedone"
-        echo $end_marker >> "${localjobname}.updatedone"
-        $copy_command "${localjobname}.updatedone" ${copy_frontend_prefix}${frontend_dir}/ >> $exehostlog 2>> $exehostlog
+        cat $sendreq > $runreq
+        grep 'copy_command' $sendreq 1> /dev/null 2> /dev/null || { \
+            echo "execution_user $execution_user" >> $runreq && \
+            echo "execution_node $execution_node" >> $runreq && \
+            echo "execution_dir $execution_dir" >> $runreq && \
+            echo "copy_command $copy_command" >> $runreq && \
+            echo "copy_frontend_prefix $copy_frontend_prefix" >> $runreq && \
+            echo "copy_execution_prefix $copy_execution_prefix" >> $runreq && \
+            echo "move_command $move_command" >> $runreq; }
+        echo "$end_marker" >> $runreq
+        sync_complete $runreq
+        $copy_command "$runreq" ${copy_frontend_prefix}${frontend_dir}/ >> $exehostlog 2>> $exehostlog
         retval=$?
         if [ ! $retval -eq 0 ]; then
-            echo "ERROR ($retval) copying updatedone to frontend ${copy_frontend_prefix}${frontend_dir}/" >> $exehostlog
+            echo "ERROR ($retval) copying $runreq to frontend ${copy_frontend_prefix}${frontend_dir}/" >> $exehostlog
             return 1
         fi
-        $clean_command "${localjobname}.update"
-        sync_clean "${localjobname}.update"
+        $clean_command "$sendreq" "$runreq"
+        sync_clean "$sendreq"
+        sync_clean "$runreq"
+    fi
+    # any .getupdate file available?
+    getreq="${localjobname}.getupdate"
+    if [ -f "$getreq" ]; then
+        runreq="${localjobname}.rungetupdate"
+        echo "$getreq found! Get files from frontend" 1>> $exehostlog 2>> $exehostlog
+        cat $getreq > $runreq
+        grep 'copy_command' $getreq 1> /dev/null 2> /dev/null || { \
+            echo "execution_user $execution_user" >> $runreq && \
+            echo "execution_node $execution_node" >> $runreq && \
+            echo "execution_dir $execution_dir" >> $runreq && \
+            echo "copy_command $copy_command" >> $runreq && \
+            echo "copy_frontend_prefix $copy_frontend_prefix" >> $runreq && \
+            echo "copy_execution_prefix $copy_execution_prefix" >> $runreq && \
+            echo "move_command $move_command" >> $runreq; }
+        echo "$end_marker" >> $runreq
+        sync_complete $runreq
+        $copy_command "$runreq" ${copy_frontend_prefix}${frontend_dir}/ >> $exehostlog 2>> $exehostlog
+        retval=$?
+        if [ ! $retval -eq 0 ]; then
+            echo "ERROR ($retval) copying $runreq to frontend ${copy_frontend_prefix}${frontend_dir}/" >> $exehostlog
+            return 1
+        fi
+        $clean_command "$getreq" "$runreq"
+        sync_clean "$getreq"
+        sync_clean "$runreq"
     fi
 }
 
@@ -283,12 +323,12 @@ control_submit() {
         sync_complete ${localjobname}.job
 
         echo "Transferring requested nodes, time, etc to environment" >> $exehostlog
-        reqnodecount=`awk '/MIG_JOBNODECOUNT/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
-        reqcpucount=`awk '/MIG_JOBCPUCOUNT/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
-        reqcputime=`awk '/MIG_JOBCPUTIME/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
-        reqmemory=`awk '/MIG_JOBMEMORY/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
-        reqdisk=`awk '/MIG_JOBDISK/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
-        reqjobid=`awk '/MIG_JOBID/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+        reqnodecount=`awk '/^#MIG_JOBNODECOUNT/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+        reqcpucount=`awk '/^#MIG_JOBCPUCOUNT/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+        reqcputime=`awk '/^#MIG_JOBCPUTIME/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+        reqmemory=`awk '/^#MIG_JOBMEMORY/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+        reqdisk=`awk '/^#MIG_JOBDISK/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+        reqjobid=`awk '/^#MIG_JOBID/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
         export MIG_JOBNODES=$reqnodecount
         export MIG_JOBSECONDS=$reqcputime
         export MIG_JOBNODECOUNT=$reqnodecount
@@ -336,7 +376,7 @@ control_submit() {
             echo "MiG submit environment settings:" >> $exehostlog
             env|grep -E '^MIG_' >> $exehostlog
             #echo "MiG submit command: $command" >> $exehostlog
-            # Mark job as locally queued to avoid problems with missing liveoutput
+            # Mark job as locally queued to avoid problems with missing liveio
             # These files will be truncated when job actually runs
             echo '(No output yet: MiG job still waiting in LRMS)' > ${MIG_JOBID}.stdout
             cat ${MIG_JOBID}.stdout > ${MIG_JOBID}.stderr
@@ -374,7 +414,8 @@ control_submit() {
         [ $real_job -eq 0 ] || touch run_handle_updates.${localjobname}
 
         dummywaitdone="$exe.dummywaitdone"
-        cp $dummywaitinput $dummywaitdone && \
+        echo "job_id $reqjobid" > $dummywaitdone
+        cat $dummywaitinput >> $dummywaitdone && \
             $clean_command $dummywaitinput
     done
 }
@@ -395,6 +436,7 @@ control_finished() {
         execution_node=`awk '/execution_node/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $dummywaitdone`
         execution_dir=`awk '/execution_dir/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $dummywaitdone`
         localjobname=`awk '/localjobname/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $dummywaitdone` 
+        job_id=`awk '/job_id/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $dummywaitdone` 
         admin_email=`awk '/admin_email/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $dummywaitdone` 
 
         exe_pid=`awk '/exe_pid/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $dummywaitjob`
@@ -412,6 +454,7 @@ control_finished() {
         export MIG_EXEUNIT=$exe
         export MIG_JOBNAME="MiG_$exe"
         export MIG_LOCALJOBNAME=$localjobname
+        export MIG_JOBID=$job_id
         export MIG_JOBDIR="$execution_dir/job-dir_$localjobname"
         export MIG_EXENODE=$execution_node
         export MIG_ADMINEMAIL="$admin_email"
@@ -487,6 +530,7 @@ control_results() {
         execution_node=`awk '/execution_node/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $dummysend`
         execution_dir=`awk '/execution_dir/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $dummysend`
         localjobname=`awk '/localjobname/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $dummysend` 
+        job_id=`awk '/job_id/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $dummysend` 
         admin_email=`awk '/admin_email/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $dummysend` 
 
         [ -z "$localjobname" ] && continue
@@ -499,6 +543,7 @@ control_results() {
         export MIG_EXEUNIT=$exe
         export MIG_JOBNAME="MiG_$exe"
         export MIG_LOCALJOBNAME=$localjobname
+        export MIG_JOBID=$job_id
         export MIG_JOBDIR="$execution_dir/job-dir_$localjobname"
         export MIG_EXENODE=$execution_node
         export MIG_ADMINEMAIL="$admin_email"
@@ -531,7 +576,20 @@ control_results() {
             fi
         done
 
-        echo "${execution_user} ${execution_node} ${execution_dir}" > ${localjobname}.jobdone
+        echo "job_id $job_id" > ${localjobname}.jobdone
+        echo "exeunit $exe" >> ${localjobname}.jobdone
+        echo "cputime $cputime" >> ${localjobname}.jobdone
+        echo "nodecount $nodecount" >> ${localjobname}.jobdone
+        echo "localjobname $localjobname" >> ${localjobname}.jobdone
+        echo "execution_user $execution_user" >> ${localjobname}.jobdone
+        echo "execution_node $execution_node" >> ${localjobname}.jobdone
+        echo "execution_dir $execution_dir" >> ${localjobname}.jobdone
+        echo "copy_command $copy_command" >> ${localjobname}.jobdone
+        echo "copy_frontend_prefix $copy_frontend_prefix" >> ${localjobname}.jobdone
+        echo "copy_execution_prefix $copy_execution_prefix" >> ${localjobname}.jobdone
+        echo "move_command $move_command" >> ${localjobname}.jobdone
+        echo "execution_delay $execution_delay" >> ${localjobname}.jobdone
+        echo "exe_pgid $pgid" >> ${localjobname}.jobdone
         echo "$end_marker" >> ${localjobname}.jobdone
         sync_complete ${localjobname}.jobdone
 
@@ -662,7 +720,7 @@ stop_leader() {
         pgid=$1
     fi
     echo "leader node stopping pgid $pgid" >> $exehostlog
-    kill -9 -$pgid
+    kill -n 9 -- -$pgid
     ${clean_command} $leader_pgid
     sync_clean $leader_pgid
 }

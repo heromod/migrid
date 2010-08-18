@@ -114,53 +114,92 @@ clean_and_exit() {
     exit $exit_code
 }
 
-handle_updates() {
+handle_update() {
+    localjobname=$1
+        
+    # any .sendupdate file available?
+    sendreq="${localjobname}.sendupdate"
+    if [ -f "$sendreq" ]; then
+        runreq="${localjobname}.runsendupdate"
+        echo "$sendreq found! Send files to frontend" 1>> $exehostlog 2>> $exehostlog
+        force_refresh .
+        reqjobid=`awk '/^#MIG_JOBID/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+        reqsrc=`awk '/source/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./$sendreq`
+        if [ -z "$reqsrc" ]; then
+            reqsrc="${reqjobid}.stdout ${reqjobid}.stderr"
+        fi
+        echo "$copy_command ${reqsrc} ${copy_frontend_prefix}${frontend_dir}/job-dir_${localjobname}/" >> $exehostlog
+        
+        $copy_command ${reqsrc} ${copy_frontend_prefix}${frontend_dir}/job-dir_${localjobname}/ >> $exehostlog 2>> $exehostlog
+        retval=$?
+        if [ ! $retval -eq 0 ]; then
+            echo "ERROR ($retval) copying update files to frontend ${copy_frontend_prefix}${frontend_dir}/job-dir_${localjobname}/" >> $exehostlog
+            echo "DEBUG: dir contents: " * >> $exehostlog
+            return 1
+        fi
+        
+        cat $sendreq > $runreq
+        grep 'copy_command' $sendreq 1> /dev/null 2> /dev/null || { \
+            echo "execution_user $execution_user" >> $runreq && \
+            echo "execution_node $execution_node" >> $runreq && \
+            echo "execution_dir $execution_dir" >> $runreq && \
+            echo "copy_command $copy_command" >> $runreq && \
+            echo "copy_frontend_prefix $copy_frontend_prefix" >> $runreq && \
+            echo "copy_execution_prefix $copy_execution_prefix" >> $runreq && \
+            echo "move_command $move_command" >> $runreq; }
+        echo "$end_marker" >> $runreq
+        sync_complete $runreq
+        $copy_command "$runreq" ${copy_frontend_prefix}${frontend_dir}/ >> $exehostlog 2>> $exehostlog
+        retval=$?
+        if [ ! $retval -eq 0 ]; then
+            echo "ERROR ($retval) copying $runreq to frontend ${copy_frontend_prefix}${frontend_dir}/" >> $exehostlog
+            return 1
+        fi
+        $clean_command "$sendreq" "$runreq"
+        sync_clean "$sendreq"
+        sync_clean "$runreq"
+    fi
+    # any .getupdate file available?
+    getreq="${localjobname}.getupdate"
+    if [ -f "$getreq" ]; then
+        runreq="${localjobname}.rungetupdate"
+        echo "$getreq found! Get files from frontend" 1>> $exehostlog 2>> $exehostlog
+        cat $getreq > $runreq
+        grep 'copy_command' $getreq 1> /dev/null 2> /dev/null || { \
+            echo "execution_user $execution_user" >> $runreq && \
+            echo "execution_node $execution_node" >> $runreq && \
+            echo "execution_dir $execution_dir" >> $runreq && \
+            echo "copy_command $copy_command" >> $runreq && \
+            echo "copy_frontend_prefix $copy_frontend_prefix" >> $runreq && \
+            echo "copy_execution_prefix $copy_execution_prefix" >> $runreq && \
+            echo "move_command $move_command" >> $runreq; }
+        echo "$end_marker" >> $runreq
+        sync_complete $runreq
+        $copy_command "$runreq" ${copy_frontend_prefix}${frontend_dir}/ >> $exehostlog 2>> $exehostlog
+        retval=$?
+        if [ ! $retval -eq 0 ]; then
+            echo "ERROR ($retval) copying $runreq to frontend ${copy_frontend_prefix}${frontend_dir}/" >> $exehostlog
+            return 1
+        fi
+        $clean_command "$getreq" "$runreq"
+        sync_clean "$getreq"
+        sync_clean "$runreq"
+    fi
+}
+
+handle_update_loop() {
     localjobname=$1
     loop_count=0
-    sync_limit=5
     while [ 1 ]; do
         if [ ! -f "${execution_dir}/run_handle_updates.${localjobname}" ]; then
             echo "exit update loop" 1>> $exehostlog 2>> $exehostlog
             exit 0
         fi
         
-        # any .update file available?
-        if [ -f "${localjobname}.update" ]; then
-            echo "${localjobname}.update found! Send files to frontend" 1>> $exehostlog 2>> $exehostlog
-            while [ 1 ]; do
-
-                force_refresh .
-
-                reqjobid=`awk '/MIG_JOBID/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
-                echo "$copy_command ${reqjobid}.{stdout,stderr} ${copy_frontend_prefix}${frontend_dir}/job-dir_${localjobname}/" >> $exehostlog
-        
-                $copy_command ${reqjobid}.{stdout,stderr} ${copy_frontend_prefix}${frontend_dir}/job-dir_${localjobname}/ >> $exehostlog 2>> $exehostlog
-                retval=$?
-                if [ ! $retval -eq 0 ]; then
-                    echo "ERROR ($retval) copying update files to frontend ${copy_frontend_prefix}${frontend_dir}/job-dir_${localjobname}/" >> $exehostlog
-                    echo "DEBUG: dir contents: " * >> $exehostlog
-                    sleep 9
-                    continue
-                fi
-         
-                echo "this is the content of ${localjobname}.updatedone" >> "${localjobname}.updatedone"
-                echo $end_marker >> "${localjobname}.updatedone"
-                $copy_command "${localjobname}.updatedone" ${copy_frontend_prefix}${frontend_dir}/ >> $exehostlog 2>> $exehostlog
-                retval=$?
-                if [ ! $retval -eq 0 ]; then
-                    echo "ERROR ($retval) copying updatedone to frontend ${copy_frontend_prefix}${frontend_dir}/" >> $exehostlog
-                    sleep 9
-                else
-                    break
-                fi
-                
-            done
-            rm -f "${localjobname}.update"
-            sync_clean "${localjobname}.update"
-        fi
+        handle_update $localjobname
         loop_count=$((loop_count+1))
         # slow down
-        sleep 60
+        sleep 20
     done &
 }
 
@@ -282,12 +321,12 @@ sync_complete ${localjobname}.job
 force_refresh .
 
 echo "Transferring requested nodes, time, etc to environment" >> $exehostlog
-reqnodecount=`awk '/MIG_JOBNODECOUNT/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
-reqcpucount=`awk '/MIG_JOBCPUCOUNT/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
-reqcputime=`awk '/MIG_JOBCPUTIME/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
-reqmemory=`awk '/MIG_JOBMEMORY/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
-reqdisk=`awk '/MIG_JOBDISK/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
-reqjobid=`awk '/MIG_JOBID/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+reqnodecount=`awk '/^#MIG_JOBNODECOUNT/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+reqcpucount=`awk '/^#MIG_JOBCPUCOUNT/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+reqcputime=`awk '/^#MIG_JOBCPUTIME/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+reqmemory=`awk '/^#MIG_JOBMEMORY/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+reqdisk=`awk '/^#MIG_JOBDISK/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
+reqjobid=`awk '/^#MIG_JOBID/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ./${localjobname}.job`
 export MIG_JOBNODES=$reqnodecount
 export MIG_JOBSECONDS=$reqcputime
 export MIG_JOBNODECOUNT=$reqnodecount
@@ -325,7 +364,7 @@ if [ ! -z "$submit_job_command" ]; then
         command="`eval echo ${submit_job_command}` ${command}"
         echo "MiG submit environment settings:" >> $exehostlog
         env|grep -E '^MIG_' >> $exehostlog
-        # Mark job as locally queued to avoid problems with missing liveoutput
+        # Mark job as locally queued to avoid problems with missing liveio
         # These files will be truncated when job actually runs
         echo '(No output yet: MiG job still waiting in LRMS)' > ${MIG_JOBID}.stdout
         cat ${MIG_JOBID}.stdout > ${MIG_JOBID}.stderr
@@ -333,7 +372,7 @@ if [ ! -z "$submit_job_command" ]; then
         echo "empty job: running ${command} locally" >> $exehostlog
     fi
 fi
-handle_updates $localjobname
+handle_update_loop $localjobname
   
 #echo "run with job dir contents: `ls`" >> $exehostlog
 echo "`date`: ${prepend_execute} ${command}" >> $exehostlog
@@ -392,7 +431,20 @@ while [ 1 ]; do
    fi
 done
 
-echo "${execution_user} ${execution_node} ${execution_dir}" > ${localjobname}.jobdone
+echo "job_id $reqjobid" > ${localjobname}.jobdone
+echo "exeunit $exe" >> ${localjobname}.jobdone
+echo "cputime $cputime" >> ${localjobname}.jobdone
+echo "nodecount $nodecount" >> ${localjobname}.jobdone
+echo "localjobname $localjobname" >> ${localjobname}.jobdone
+echo "execution_user $execution_user" >> ${localjobname}.jobdone
+echo "execution_node $execution_node" >> ${localjobname}.jobdone
+echo "execution_dir $execution_dir" >> ${localjobname}.jobdone
+echo "copy_command $copy_command" >> ${localjobname}.jobdone
+echo "copy_frontend_prefix $copy_frontend_prefix" >> ${localjobname}.jobdone
+echo "copy_execution_prefix $copy_execution_prefix" >> ${localjobname}.jobdone
+echo "move_command $move_command" >> ${localjobname}.jobdone
+echo "execution_delay $execution_delay" >> ${localjobname}.jobdone
+echo "exe_pgid $pgid" >> ${localjobname}.jobdone
 echo "$end_marker" >> ${localjobname}.jobdone
 sync_complete ${localjobname}.jobdone
 echo "sending localjobname.jobdone to frontend" >> $exehostlog

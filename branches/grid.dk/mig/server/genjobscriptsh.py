@@ -58,10 +58,29 @@ def curl_cmd_send(resource_filename, mig_server_filename,
 
         sid_put_marker = '-X SIDPUT'
 
+    # Live output requires variable expansion in filenames (double quotes)
+
     return 'curl --location --connect-timeout 30 --max-time 3600 '\
          + upload_bw_limit + ' --fail --silent --insecure '\
-         + " --upload-file '" + resource_filename + "' "\
-         + sid_put_marker + " '" + dst_url + "'"
+         + '--upload-file "' + resource_filename + '" '\
+         + sid_put_marker + ' "' + dst_url + '"'
+
+
+def curl_cmd_send_mqueue(resource_filename, queue, https_sid_url_arg):
+    """Send message to mqueue"""
+
+    upload_bw_limit = ''
+    if resource_conf.has_key('MAXUPLOADBANDWIDTH')\
+         and resource_conf['MAXUPLOADBANDWIDTH'] > 0:
+        upload_bw_limit = '--limit-rate %ik'\
+             % resource_conf['MAXUPLOADBANDWIDTH']
+
+    return 'curl --location --connect-timeout 30 --max-time 3600 '\
+           + upload_bw_limit + ' --fail --silent --insecure '\
+           + '-F "action=send" -F "iosessionid=' + job_dict['MIGSESSIONID']\
+           + '" -F "queue=' + queue + '" -F "msg=<' + resource_filename\
+           + '" -F "output_format=txt" ' + https_sid_url_arg\
+           + '/cgi-sid/mqueue.py'
 
 
 def curl_cmd_get(mig_server_filename, resource_filename,
@@ -74,11 +93,7 @@ def curl_cmd_get(mig_server_filename, resource_filename,
         download_bw_limit = '--limit-rate %ik'\
              % resource_conf['MAXDOWNLOADBANDWIDTH']
 
-    dest_path = os.path.dirname(resource_filename)
     cmd = ''
-    if dest_path:
-        cmd += "mkdir -p '%s' && \\" % dest_path
-        cmd += '\n'
     if mig_server_filename.find('://') != -1:
 
         # Pass URLs for external sources directly to curl
@@ -91,9 +106,11 @@ def curl_cmd_get(mig_server_filename, resource_filename,
         src_url = https_sid_url_arg + '/sid_redirect/'\
              + job_dict['MIGSESSIONID'] + '/' + mig_server_filename
 
+    # Live input requires variable expansion in filenames (double quotes)
+
     cmd += 'curl --location --connect-timeout 30 --max-time 3600 '\
-         + download_bw_limit + ' --fail --silent --insecure ' + " -o '"\
-         + resource_filename + "' '" + src_url + "'"
+         + download_bw_limit + ' --fail --silent --insecure --create-dirs '\
+         + '-o "' + resource_filename + '" "' + src_url + '"'
     return cmd
 
 
@@ -107,16 +124,30 @@ def curl_cmd_get_special(file_extension, resource_filename,
         download_bw_limit = '--limit-rate %ik'\
              % resource_conf['MAXDOWNLOADBANDWIDTH']
 
-    dest_path = os.path.dirname(resource_filename)
     cmd = ''
-    if dest_path:
-        cmd += "mkdir -p '%s' && \\" % dest_path
-        cmd += '\n'
     cmd += 'curl --location --connect-timeout 30 --max-time 3600 '\
-         + download_bw_limit + ' --fail --silent --insecure ' + " -o '"\
-         + resource_filename + "' '" + https_sid_url_arg\
-         + '/sid_redirect/' + job_dict['MIGSESSIONID'] + file_extension\
-         + "'"
+           + download_bw_limit + ' --fail --silent --insecure --create-dirs '\
+           + "-o '" + resource_filename + "' '" + https_sid_url_arg\
+           + '/sid_redirect/' + job_dict['MIGSESSIONID'] + file_extension + "'"
+    return cmd
+
+
+def curl_cmd_get_mqueue(queue, resource_filename, https_sid_url_arg):
+    """Receive message from mqueue"""
+
+    download_bw_limit = ''
+    if resource_conf.has_key('MAXDOWNLOADBANDWIDTH')\
+         and resource_conf['MAXDOWNLOADBANDWIDTH'] > 0:
+        download_bw_limit = '--limit-rate %ik'\
+             % resource_conf['MAXDOWNLOADBANDWIDTH']
+
+    cmd = ''
+    cmd += 'curl --location --connect-timeout 30 --max-time 3600 '\
+           + download_bw_limit + ' --fail --silent --insecure --create-dirs '\
+           + '-o "' + resource_filename + '" -F "action=receive" '\
+           + '-F "iosessionid=' + job_dict['MIGSESSIONID'] + '" -F "queue='\
+           + queue + '" -F "output_format=file" ' + https_sid_url_arg\
+           + '/cgi-sid/mqueue.py'
     return cmd
 
 
@@ -331,6 +362,11 @@ class GenJobScriptSh:
                  + '.job', https_sid_url_arg)
         cmd += '''
 %s
+''' % curl_cmd_get_special('.getupdatefiles',
+                localjobname + '.getupdatefiles',
+                https_sid_url_arg)
+        cmd += '''
+%s
 ''' % curl_cmd_get_special('.sendupdatefiles',
                 localjobname + '.sendupdatefiles',
                 https_sid_url_arg)
@@ -384,6 +420,44 @@ class GenJobScriptSh:
 
 """ % result
 
+        return cmd
+
+    def get_io_files(self, result='get_io_status'):
+        """Get live files from server during job execution"""
+
+        cmd = '%s=0\n' % result
+        cmd += '# First parameter is target: liveio or mqueue\n'
+        cmd += 'target=$1\n'
+        cmd += 'shift\n'
+        cmd += '# All but last input args are sources and last is dest\n'
+        cmd += 'i=0\n'
+        cmd += 'last=$((${#@}-1))\n'
+        cmd += 'for name in $@; do\n'
+        cmd += '    if [ $i -lt $last ]; then\n'
+        cmd += '        src[$i]=$name\n'
+        cmd += '    else\n'
+        cmd += '        dst=$name\n'
+        cmd += '    fi\n'
+        cmd += '    i=$((i+1))\n'
+        cmd += 'done\n'
+        cmd += 'for name in ${src[@]}; do\n'
+        cmd += '    name_on_resource=$dst/`basename $name`\n'
+        cmd += '    if [ "$target" = "mqueue" ]; then\n'
+        cmd += '        %s\n' % curl_cmd_get_mqueue('$name', '$name_on_resource',
+                                                    https_sid_url_arg)
+        cmd += '    else\n'
+        cmd += '        %s\n' % curl_cmd_get('$name', '$name_on_resource',
+                                         https_sid_url_arg)
+        cmd += '    fi\n'
+        cmd += '    last_get_status=$?\n'
+        cmd += '    if [ $last_get_status -ne 0 ]; then\n'
+        cmd += '        %s=$last_get_status\n' % result
+        cmd += '    fi\n'
+        cmd += 'done\n'
+
+        cmd += """# Now 'return' status is available in %s
+
+""" % result
         return cmd
 
     def generate_input_filelist(self, result='generate_input_filelist'):
@@ -561,6 +635,39 @@ class GenJobScriptSh:
         cmd += """# Now 'return' status is available in %s
 
 """ % result
+        return cmd
+
+    def set_core_environments(self):
+        """Set missing core environments: LRMS may strip them during submit"""
+        requested = {'CPUTIME': job_dict['CPUTIME']}
+        requested['NODECOUNT'] = job_dict.get('NODECOUNT', 1)
+        requested['CPUCOUNT'] = job_dict.get('CPUCOUNT', 1)
+        requested['MEMORY'] = job_dict.get('MEMORY', 1)
+        requested['DISK'] = job_dict.get('DISK', 1)
+        requested['JOBID'] = job_dict.get('JOB_ID', 'UNKNOWN')
+        requested['LOCALJOBNAME'] = localjobname
+        requested['EXE'] = exe
+        requested['EXECUTION_DIR'] = ''
+        exe_list = resource_conf.get('EXECONFIG', [])
+        for exe_conf in exe_list:
+            if exe_conf['name'] == exe:
+                requested['EXECUTION_DIR'] = exe_conf['execution_dir']
+                break
+        requested['JOBDIR'] = '%(EXECUTION_DIR)s/job-dir_%(LOCALJOBNAME)s' % \
+                              requested
+        cmd = '''
+[ -z "$MIG_JOBNODES" ] && export MIG_JOBNODES="%(NODECOUNT)s"
+[ -z "$MIG_JOBNODECOUNT" ] && export MIG_JOBNODECOUNT="%(NODECOUNT)s"
+[ -z "$MIG_JOBCPUTIME" ] && export MIG_JOBCPUTIME="%(CPUTIME)s"
+[ -z "$MIG_JOBCPUCOUNT" ] && export MIG_JOBCPUCOUNT="%(CPUCOUNT)s"
+[ -z "$MIG_JOBMEMORY" ] && export MIG_JOBMEMORY="%(MEMORY)s"
+[ -z "$MIG_JOBDISK" ] && export MIG_JOBDISK="%(DISK)s"
+[ -z "$MIG_JOBID" ] && export MIG_JOBID="%(JOBID)s"
+[ -z "$MIG_LOCALJOBNAME" ] && export MIG_LOCALJOBNAME="%(LOCALJOBNAME)s"
+[ -z "$MIG_EXEUNIT" ] && export MIG_EXEUNIT="%(EXE)s"
+[ -z "$MIG_EXENODE" ] && export MIG_EXENODE="%(EXE)s"
+[ -z "$MIG_JOBDIR" ] && export MIG_JOBDIR="%(JOBDIR)s"
+''' % requested
         return cmd
 
     def set_environments(self, result='env_status'):
@@ -763,7 +870,7 @@ class GenJobScriptSh:
 """ % result
         return cmd
 
-    def send_io_files(self, files, result='send_io_status'):
+    def send_io_files(self, result='send_io_status'):
         """Send IO files:
         Existing files must be transferred with status 0, while
         non-existing files shouldn't lead to error.
@@ -772,16 +879,37 @@ class GenJobScriptSh:
         """
 
         cmd = '%s=0\n' % result
-        for name in files:
-            name_on_mig_server = os.path.join(output_dir, job_dict['JOB_ID'],
-                                              name)
-            cmd += '[ ! -e "%s" ] || ' % name
-            cmd += '%s\n' % curl_cmd_send(name, name_on_mig_server,
-                    https_sid_url_arg)
-            cmd += 'last_send_status=$?\n'
-            cmd += 'if [ $last_send_status -ne 0 ]; then\n'
-            cmd += '    %s=$last_send_status\n' % result
-            cmd += 'fi\n'
+        cmd += '# First parameter is target: result, liveio or mqueue\n'
+        cmd += 'target=$1\n'
+        cmd += 'shift\n'
+        cmd += '# All but last input args are sources and last is dest\n'
+        cmd += 'i=0\n'
+        cmd += 'last=$((${#@}-1))\n'
+        cmd += 'for name in $@; do\n'
+        cmd += '    if [ $i -lt $last ]; then\n'
+        cmd += '        # stored in flat structure on FE\n'
+        cmd += '        src[$i]=`basename $name`\n'
+        cmd += '    else\n'
+        cmd += '        dst=$name\n'
+        cmd += '    fi\n'
+        cmd += '    i=$((i+1))\n'
+        cmd += 'done\n'
+        cmd += 'for name in ${src[@]}; do\n'
+        cmd += '    name_on_mig_server=$dst/`basename $name`\n'
+        cmd += '    if [ "$target" = "mqueue" ]; then\n'
+        cmd += '        %s\n' % curl_cmd_send_mqueue('$name', '$dst',
+                                                     https_sid_url_arg)
+        cmd += '    else\n'
+
+        cmd += '        [ ! -e "$name" ] || '
+        cmd += '%s\n' % curl_cmd_send('$name', '$name_on_mig_server',
+                                      https_sid_url_arg)
+        cmd += '    fi\n'
+        cmd += '    last_send_status=$?\n'
+        cmd += '    if [ $last_send_status -ne 0 ]; then\n'
+        cmd += '        %s=$last_send_status\n' % result
+        cmd += '    fi\n'
+        cmd += 'done\n'
 
         cmd += """# Now 'return' status is available in %s
 

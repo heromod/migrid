@@ -248,12 +248,69 @@ io_log.flush()'''\
                  + '", "r")\n'
         return cmd
 
+    def get_io_files(self, result='get_io_status'):
+        """Get live files from server during job execution"""
+
+        cmd = ''
+        cmd += 'dst = sys.argv[-1]\n'
+        cmd += 'for name in sys.argv[1:-1]:\n'
+        cmd += '  name_on_resource = os.path.join(dst, os.path.basename(name))\n'
+        cmd += '  os.popen("' + curl_cmd_get('name',
+                                             'name_on_resource',
+                                             https_sid_url_arg)\
+                                             + '")\n'
+        return cmd
+
     def chmod_executables(self, result='chmod_status'):
         """Make sure EXECUTABLES are actually executable"""
 
         cmd = ''
         for executables in job_dict['EXECUTABLES']:
             cmd += 'os.chmod("' + executables + '", stat.S_IRWXU)'
+        return cmd
+
+    def set_core_environments(self):
+        """Set missing core environments: LRMS may strip them during submit"""
+        requested = {'CPUTIME': job_dict['CPUTIME']}
+        requested['NODECOUNT'] = job_dict.get('NODECOUNT', 1)
+        requested['CPUCOUNT'] = job_dict.get('CPUCOUNT', 1)
+        requested['MEMORY'] = job_dict.get('MEMORY', 1)
+        requested['DISK'] = job_dict.get('DISK', 1)
+        requested['JOBID'] = job_dict.get('JOB_ID', 'UNKNOWN')
+        requested['LOCALJOBNAME'] = localjobname
+        requested['EXE'] = exe
+        requested['EXECUTION_DIR'] = ''
+        exe_list = resource_conf.get('EXECONFIG', [])
+        for exe_conf in exe_list:
+            if exe_conf['name'] == exe:
+                requested['EXECUTION_DIR'] = exe_conf['execution_dir']
+                break
+        requested['JOBDIR'] = '%(EXECUTION_DIR)s/job-dir_%(LOCALJOBNAME)s' % \
+                              requested
+        cmd = '''
+if not os.environ.get("MIG_JOBNODES", ""):
+  os.putenv("MIG_JOBNODES", "%(NODECOUNT)s")
+if not os.environ.get("MIG_JOBNODECOUNT", ""):
+  os.putenv("MIG_JOBNODECOUNT", "%(NODECOUNT)s")
+if not os.environ.get("MIG_JOBCPUTIME", ""):
+  os.putenv("MIG_JOBCPUTIME", "%(CPUTIME)s")
+if not os.environ.get("MIG_JOBCPUCOUNT", ""):
+  os.putenv("MIG_JOBCPUCOUNT", "%(CPUCOUNT)s")
+if not os.environ.get("MIG_JOBMEMORY", ""):
+  os.putenv("MIG_JOBMEMORY", "%(MEMORY)s")
+if not os.environ.get("MIG_JOBDISK", ""):
+  os.putenv("MIG_JOBDISK", "%(DISK)s")
+if not os.environ.get("MIG_JOBID", ""):
+  os.putenv("MIG_JOBID", "%(JOBID)s")
+if not os.environ.get("MIG_LOCALJOBNAME", ""):
+  os.putenv("MIG_LOCALJOBNAME", "%(LOCALJOBNAME)s")
+if not os.environ.get("MIG_EXEUNIT", ""):
+  os.putenv("MIG_EXEUNIT", "%(EXE)s")
+if not os.environ.get("MIG_EXENODE", ""):
+  os.putenv("MIG_EXENODE", "%(EXE)s")
+if not os.environ.get("MIG_JOBDIR", ""):
+  os.putenv("MIG_JOBDIR", "%(JOBDIR)s")
+''' % requested
         return cmd
 
     def set_environments(self, result='env_result'):
@@ -342,8 +399,6 @@ io_log.flush()'''\
     def send_output_files(self, result='send_output_status'):
         """Send outputfiles"""
 
-        # call Kristens code and get outputfiles destination
-
         cmd = ''
 
         for outputfile in job_dict['OUTPUTFILES']:
@@ -353,23 +408,23 @@ io_log.flush()'''\
             cmd += '  os.popen("' + curl_cmd_send(outputfile) + '")\n'
         return cmd
 
-    def send_io_files(self, files, result='send_io_status'):
-        """Send .io-status, .stderr, .stdout"""
-
-        # Existing files must be transferred with status 0, while
-        # non-existing files shouldn't lead to error.
+    def send_io_files(self, result='send_io_status'):
+        """Send IO files:
+        Existing files must be transferred with status 0, while
+        non-existing files shouldn't lead to error.
+        Only react to curl transfer errors, not MiG put errors
+        since we can't handle the latter consistently anyway.
+        """
 
         cmd = ''
-        for name in files:
-            name_on_mig_server = os.path.join(output_dir, job_dict['JOB_ID'],
-                                              name)
-            cmd += 'if (os.path.isfile("' + name\
-                 + '") and os.path.getsize("' + name + '") > 0):\n'
-
-            # cmd += "  os.popen(\"" + curl_cmd_send(name) + "\")\n"
-
-            cmd += '  os.popen("' + curl_cmd_send(name,
-                    name_on_mig_server, https_sid_url_arg)\
+        cmd += 'dst = sys.argv[-1]\n'
+        cmd += 'for src in sys.argv[1:-1]:\n'
+        cmd += '  # stored in flat structure on FE\n'
+        cmd += '  name = os.path.basename(src)\n'
+        cmd += '  name_on_mig_server = os.path.join(dst, name)\n'
+        cmd += '  if (os.path.isfile(name) and os.path.getsize(name) > 0):\n'
+        cmd += '    os.popen("' + curl_cmd_send('name',
+                    'name_on_mig_server', https_sid_url_arg)\
                  + '")\n'
         return cmd
 

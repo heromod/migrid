@@ -34,14 +34,15 @@ send_pgid() {
     # TODO: can we supply ca-cert to avoid insecure here?
     command="curl --location --insecure --stderr $curllog --connect-timeout $contimeout -m $contimeout $migserver/cgi-sid/put_resource_pgid?type=$type&amp;unique_resource_name=${unique_resource_name}&amp;pgid=$pgid"
     
-    if [ $type == "EXE" ]; then
+    if [ "$type" = "EXE" ]; then
         exe=$3
         command="$command&amp;exe_name=$exe"
     fi
     
     echo $command >> $frontendlog
     status=`$command`
-    echo "\n$status" >> $frontendlog
+    echo "" >> $frontendlog
+    echo "$status" >> $frontendlog
     
     # return only exit_code
     return ${status:0:1}
@@ -77,9 +78,10 @@ sync_disk() {
     return $ret
 }
 
-execute_send_files_script(){
+execute_transfer_files_script(){
     localjobname=$1
     filesuffix=$2
+    shift; shift
     
     if [ ! -f ${localjobname}.${filesuffix} ]; then
         echo "${localjobname}.${filesuffix} not found!"
@@ -94,9 +96,9 @@ execute_send_files_script(){
     sent_output=0
     for i in `seq 1 $sendoutput_tries`; do
         # execute $localjobname$.{filesuffix}
-        echo "executing ${localjobname}.${filesuffix}" 1>> $frontendlog 2>> $frontendlog
+        echo "executing ${localjobname}.${filesuffix} $@" 1>> $frontendlog 2>> $frontendlog
         
-        ./${localjobname}.${filesuffix} 1>> $frontendlog 2>> $frontendlog
+        ./${localjobname}.${filesuffix} $@ 1>> $frontendlog 2>> $frontendlog
         
         send_ret=$?
         if [ $send_ret -eq 0 ]; then
@@ -113,8 +115,6 @@ execute_send_files_script(){
     if [ $sent_output -eq 0 ]; then
         echo "ERROR: ${filesuffix} failed: saving sendoutput for debugging" 1>> $frontendlog 2>> $frontendlog
         cp -dpR ${localjobname}.${filesuffix} ../${localjobname}.${filesuffix}.FAILED 1>> $frontendlog 2>> $frontendlog
-        cd ..
-        continue
     fi
 }
 
@@ -331,7 +331,7 @@ while [ 1 ]; do
     for e in *.leader_pgid; do
         # No matching expansion results in raw pattern value - just 
         # ignore
-        if [ "$e" == '*.leader_pgid' ]; then
+        if [ "$e" = '*.leader_pgid' ]; then
             continue
         fi
         
@@ -349,7 +349,7 @@ while [ 1 ]; do
     for e in *.jobdone; do
         # No matching expansion results in raw pattern value - just 
         # ignore
-        if [ "$e" == '*.jobdone' ]; then
+        if [ "$e" = '*.jobdone' ]; then
             continue
         fi
         
@@ -359,8 +359,6 @@ while [ 1 ]; do
         # Try to force disk flush - outputfiles *must* be written 
         # before jobname.sendoutput is executed
         force_refresh "job-dir_${localjobname}"
-        # TODO: do we still need this sync?
-        #sync_disk $frontendlog
         
         # localjobname is filename without .done
         localjobname=${e%\.jobdone}
@@ -369,7 +367,12 @@ while [ 1 ]; do
         if [ -d job-dir_${localjobname} ]; then
             cd job-dir_${localjobname} 1>> $frontendlog 2>> $frontendlog
             
-            execute_send_files_script $localjobname "sendoutputfiles"
+            reqjobid=`awk '/job_id/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' ../${localjobname}.jobdone`
+            reqtarget="result"
+            reqsrc="${reqjobid}.stdout ${reqjobid}.stderr"
+            reqdst="/job_output/${reqjobid}"
+
+            execute_transfer_files_script $localjobname "sendoutputfiles" $reqtarget $reqsrc $reqdst
             
             #echo "removing ${localjobname}.sendoutputfiles" 1>> $frontendlog 2>> $frontendlog
             $clean_command ${localjobname}.sendoutputfiles
@@ -389,61 +392,97 @@ while [ 1 ]; do
         sync_clean job-dir_${localjobname}
     done
     
-    # SEND UPDATEFILES
-    for e in *.updatedone; do
+    # Send updatefiles
+    for runrequest in *.runsendupdate; do
         # No matching expansion results in raw pattern value - just 
         # ignore
-        if [ "$e" == '*.updatedone' ]; then
+        if [ "$runrequest" = '*.runsendupdate' ]; then
             continue
         fi
         
         # Now make sure file was fully transferred
-        complete_file_available "$e" || continue
+        complete_file_available "$runrequest" || continue
         
         # Try to force disk flush - updatefiles *must* be written 
         # before jobname.sendupdatefiles is executed
         force_refresh "job-dir_${localjobname}"
-        # TODO: do we still need this sync?
-        #sync_disk $frontendlog
         
-        # localjobname is filename without .updatedone
-        localjobname=${e%\.updatedone}
+        # localjobname is filename without extension
+        localjobname=${runrequest%\.runsendupdate}
+        execution_user=`awk '/execution_user/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        execution_node=`awk '/execution_node/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        execution_dir=`awk '/execution_dir/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        exe_copy_command=`awk '/copy_command/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        exe_copy_execution_prefix=`awk '/copy_execution_prefix/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        exe_move_command=`awk '/move_command/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        echo "from $runrequest read values $localjobname $execution_user $execution_node $execution_dir $exe_copy_command $exe_copy_execution_prefix $exe_move_command" 1>> $frontendlog 2>> $frontendlog
+        # Override copy command and exe prefix if specified by exehost
+        if [ -z "$exe_copy_command" ]; then
+            # Fallback to legacy setup
+            copy_command="scp -B"
+            copy_execution_prefix="${execution_user}@${execution_node}:"
+        else
+            copy_command="$exe_copy_command"
+            copy_execution_prefix="$exe_copy_execution_prefix"
+        fi
+        reqjobid=`awk '/job_id/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        reqtarget=`awk '/target/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        reqsrc=`awk '/source/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        reqdst=`awk '/destination/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        if [ -z "$reqtarget" ]; then
+            reqtarget="liveio"
+        fi
+        if [ "$reqtarget" = 'liveio' ]; then
+            if [ -z "$reqsrc" ]; then
+		reqsrc="${reqjobid}.stdout ${reqjobid}.stderr ${reqjobid}.io-status"
+            fi
+            if [ -z "$reqdst" ]; then
+                reqdst="/job_output/${reqjobid}"
+            fi
+        fi
         
+        requestdone="${localjobname}.sendupdatedone"
+
         echo "Executing sendupdatefiles for job with localjobname: $localjobname" 1>> $frontendlog 2>> $frontendlog
         
         if [ -d job-dir_${localjobname} ]; then
             cd job-dir_${localjobname} 1>> $frontendlog 2>> $frontendlog
-            
-            execute_send_files_script $localjobname "sendupdatefiles"
-            
+            execute_transfer_files_script $localjobname "sendupdatefiles" $reqtarget $reqsrc $reqdst
             cd ..
+            echo "forwarding $runrequest done signal to exe" 1>> $frontendlog 2>> $frontendlog
+            $copy_command $runrequest ${copy_execution_prefix}${execution_dir}/job-dir_${localjobname}/$requestdone 1>> $frontendlog 2>> $frontendlog
+            available_ret=$?
+            if [ $available_ret -ne 0 ]; then
+                echo "send of $requestdone signal failed ($available_ret)" 1>> $frontendlog 2>> $frontendlog
+            fi
         else
             echo "dir job-dir_${localjobname} containing ${localjobname}.sendupdatefiles does not exists!"
         fi
-        
-        #echo "deleting file ${localjobname}.updatedone" >> $frontendlog
-        $clean_command ${localjobname}.updatedone
-        sync_clean ${localjobname}.updatedone
+
+        #echo "deleting file $runrequest" >> $frontendlog
+        $clean_command $runrequest
+        sync_clean $runrequest
     done
     
-    for updaterequest in *.update; do
+    # Get updatefiles
+    for runrequest in *.rungetupdate; do
         # No matching expansion results in raw pattern value - just 
         # ignore
-        if [ "$updaterequest" == '*.update' ]; then
+        if [ "$runrequest" = '*.rungetupdate' ]; then
             continue
         fi
-        # ignore partial update requests
-        complete_file_available $updaterequest || continue
-        echo "update found $updaterequest" 1>> $frontendlog 2>> $frontendlog
         
-        localjobname=`awk '/localjobname/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
-        execution_user=`awk '/execution_user/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
-        execution_node=`awk '/execution_node/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
-        execution_dir=`awk '/execution_dir/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
-        exe_copy_command=`awk '/copy_command/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
-        exe_copy_execution_prefix=`awk '/copy_execution_prefix/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
-        exe_move_command=`awk '/move_command/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
-        echo "from $updaterequest read values $localjobname $execution_user $execution_node $execution_dir $exe_copy_command $exe_copy_execution_prefix $exe_move_command" 1>> $frontendlog 2>> $frontendlog
+        # Now make sure file was fully transferred
+        complete_file_available "$runrequest" || continue
+        
+        localjobname=${runrequest%\.rungetupdate}
+        execution_user=`awk '/execution_user/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        execution_node=`awk '/execution_node/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        execution_dir=`awk '/execution_dir/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        exe_copy_command=`awk '/copy_command/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        exe_copy_execution_prefix=`awk '/copy_execution_prefix/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        exe_move_command=`awk '/move_command/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        echo "from $runrequest read values $localjobname $execution_user $execution_node $execution_dir $exe_copy_command $exe_copy_execution_prefix $exe_move_command" 1>> $frontendlog 2>> $frontendlog
         # Override copy command and exe prefix if specified by exehost
         if [ -z "$exe_copy_command" ]; then
             # Fallback to legacy setup
@@ -460,18 +499,92 @@ while [ 1 ]; do
         else
             move_command="$exe_move_command"
         fi
-        echo "sending ${localjobname}.update signal " 1>> $frontendlog 2>> $frontendlog
+
+        reqtarget=`awk '/target/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        reqsrc=`awk '/source/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        reqdst=`awk '/destination/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $runrequest`
+        if [ -z "$reqtarget" ]; then
+            reqtarget="liveio"
+        fi
+        requestdone="${localjobname}.getupdatedone"
+
+        echo "Executing getupdatefiles for job with localjobname: $localjobname" 1>> $frontendlog 2>> $frontendlog
+        
+        if [ -d job-dir_${localjobname} ]; then
+            cd job-dir_${localjobname} 1>> $frontendlog 2>> $frontendlog
+            tmpbase="updatetmp"
+            tmpdst="$tmpbase/$reqdst"
+            mkdir -p "$tmpdst"
+            execute_transfer_files_script $localjobname "getupdatefiles" $reqtarget $reqsrc $tmpdst
+
+            # Try to force disk flush - updatefiles *must* be written 
+            # before forwarding to exe
+            force_refresh $tmpdst
+
+            echo "moving getupdate files to exe" 1>> $frontendlog 2>> $frontendlog
+            cd $tmpbase
+            $move_command * ${copy_execution_prefix}${execution_dir}/job-dir_${localjobname}/ 1>> $frontendlog 2>> $frontendlog
+            available_ret=$?
+            if [ $available_ret -ne 0 ]; then
+                echo "copy of $runrequest files failed ($available_ret)" 1>> $frontendlog 2>> $frontendlog
+            fi
+            cd ..
+            $clean_command -r $tmpbase
+            sync_clean $tmpbase
+            cd ..
+            echo "forwarding $runrequest done signal to exe" 1>> $frontendlog 2>> $frontendlog
+            $copy_command $runrequest ${copy_execution_prefix}${execution_dir}/job-dir_${localjobname}/$requestdone 1>> $frontendlog 2>> $frontendlog
+            available_ret=$?
+            if [ $available_ret -ne 0 ]; then
+                echo "send of $requestdone signal failed ($available_ret)" 1>> $frontendlog 2>> $frontendlog
+            fi
+        else
+            echo "dir job-dir_${localjobname} containing ${localjobname}.getupdatefiles does not exists!"
+        fi
+
+        #echo "deleting file $runrequest" >> $frontendlog
+        $clean_command $runrequest
+        sync_clean $runrequest
+    done
+    
+    # Forward update requests to exe
+    for updaterequest in *.sendupdate *.getupdate; do
+        # No matching expansion results in raw pattern value - just 
+        # ignore
+        if [ "$updaterequest" = '*.sendupdate' -o "$updaterequest" = '*.getupdate' ]; then
+            continue
+        fi
+        # ignore partial update requests
+        complete_file_available $updaterequest || continue
+        echo "update found $updaterequest" 1>> $frontendlog 2>> $frontendlog
+        
+        job_id=`awk '/job_id/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
+        localjobname=`awk '/localjobname/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
+        execution_user=`awk '/execution_user/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
+        execution_node=`awk '/execution_node/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
+        execution_dir=`awk '/execution_dir/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
+        exe_copy_command=`awk '/copy_command/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
+        exe_copy_execution_prefix=`awk '/copy_execution_prefix/ {ORS=" " ; for(field=2;field<NF;++field) print $field; ORS=""; print $field}' $updaterequest`
+        echo "from $updaterequest read values $job_id $localjobname $execution_user $execution_node $execution_dir $exe_copy_command $exe_copy_execution_prefix" 1>> $frontendlog 2>> $frontendlog
+        # Override copy command and exe prefix if specified by exehost
+        if [ -z "$exe_copy_command" ]; then
+            # Fallback to legacy setup
+            copy_command="scp -B"
+            copy_execution_prefix="${execution_user}@${execution_node}:"
+        else
+            copy_command="$exe_copy_command"
+            copy_execution_prefix="$exe_copy_execution_prefix"
+        fi
+        echo "forwarding $updaterequest signal to exe" 1>> $frontendlog 2>> $frontendlog
         while [ 1 ]; do 
-            $copy_command ${localjobname}.update ${copy_execution_prefix}${execution_dir}/job-dir_${localjobname} 1>> $frontendlog 2>> $frontendlog
+            $copy_command $updaterequest ${copy_execution_prefix}${execution_dir}/job-dir_${localjobname} 1>> $frontendlog 2>> $frontendlog
             available_ret=$?
             if [ $available_ret -eq 0 ]; then
-                #echo "copy of ${localjobname}.update went ok ($available_ret)" 1>> $frontendlog 2>> $frontendlog
-                # TMP! do we need this sync?
-                #sync_disk $frontendlog
+                #echo "copy of $updaterequest went ok ($available_ret)" 1>> $frontendlog 2>> $frontendlog
                 break
             else
                 # continue until succesful
-                echo "copy of ${localjobname}.update failed ($available_ret)" 1>> $frontendlog 2>> $frontendlog
+                echo "copy of $updaterequest failed ($available_ret)" 1>> $frontendlog 2>> $frontendlog
                 sleep 13
             fi
         done
@@ -486,7 +599,7 @@ while [ 1 ]; do
     for givejobrequest in *.givejob; do
         # No matching expansion results in raw pattern value - just 
         # ignore
-        if [ "$givejobrequest" == '*.givejob' ]; then
+        if [ "$givejobrequest" = '*.givejob' ]; then
             continue
         fi
         
@@ -707,14 +820,14 @@ while [ 1 ]; do
             done
         done
         echo "rotating any big logs" 1>> $frontendlog 2>> $frontendlog
-	for log_file in `find . -name "$(basename frontendlog)" -size +32M| xargs`; do
+        for log_file in `find . -name "$(basename frontendlog)" -size +32M| xargs`; do
             # No matching expansion results in no loop because of 'find' 
             # execution so no need to check for raw pattern 
-	    echo "rotating $log_file" 1>> $frontendlog 2>> $frontendlog
-	    for i in `seq 7 -1 0`; do
-		[ -e "$log_file.$i" ] && mv "$log_file.$i" "$log_file.$((i+1))"
-	    done
-	    mv "${log_file}" "${log_file}.0";
+            echo "rotating $log_file" 1>> $frontendlog 2>> $frontendlog
+            for i in `seq 7 -1 0`; do
+                [ -e "$log_file.$i" ] && mv "$log_file.$i" "$log_file.$((i+1))"
+            done
+            mv "${log_file}" "${log_file}.0";
         done
         echo "finished clean up" 1>> $frontendlog 2>> $frontendlog
         clean_up_counter=0

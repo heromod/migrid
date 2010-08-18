@@ -3,8 +3,8 @@
 #
 # --- BEGIN_HEADER ---
 #
-# rmvgridowner - [insert a few words of module description on this line]
-# Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
+# rmvgridowner - remove a vgrid owner
+# Copyright (C) 2003-2010  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
 #
@@ -34,14 +34,16 @@ from shared.fileio import remove_rec, unpickle
 from shared.functional import validate_input_and_cert, REJECT_UNSET
 from shared.init import initialize_main_variables
 from shared.listhandling import remove_item_from_pickled_list
+from shared.parseflags import force
 from shared.useradm import client_id_dir
 from shared.vgrid import init_vgrid_script_add_rem, vgrid_is_owner, \
-       vgrid_members, vgrid_owners, vgrid_resources, vgrid_list_subvgrids
+       vgrid_owners, vgrid_list_subvgrids
 
 def signature():
     """Signature of the main function"""
 
-    defaults = {'vgrid_name': REJECT_UNSET, 'cert_id': REJECT_UNSET}
+    defaults = {'vgrid_name': REJECT_UNSET, 'cert_id': REJECT_UNSET,
+                'flags': []}
     return ['text', defaults]
 
 def unlink_shared_folders(user_dir, vgrid):
@@ -49,7 +51,7 @@ def unlink_shared_folders(user_dir, vgrid):
 
     user_dir: the full path to the user home where deletion should happen
 
-    vgrid: the name of the vgrid which is to delete   
+    vgrid: the name of the vgrid to delete   
 
     Returns boolean success indicator and potential messages as a pair.
 
@@ -64,16 +66,16 @@ def unlink_shared_folders(user_dir, vgrid):
     msg = ""
 
     for infix in ["", "private_base", "public_base"]:
-        p = os.path.join(user_dir, infix, vgrid)
+        path = os.path.join(user_dir, infix, vgrid)
         try:
-            if os.path.exists(p):
-                os.remove(p)
-                p = os.path.dirname(p)
-                if os.path.isdir(p) and os.listdir(p) == []: 
-                    os.removedirs(p)
+            if os.path.exists(path):
+                os.remove(path)
+                path = os.path.dirname(path)
+                if os.path.isdir(path) and os.listdir(path) == []: 
+                    os.removedirs(path)
         except Exception, err:
             success = False
-            msg += "\nCould not remove link %s: %s" % (p,err)
+            msg += "\nCould not remove link %s: %s" % (path, err)
 
     return (success, msg[1:])
 
@@ -107,12 +109,14 @@ def abandon_vgrid_files(vgrid, configuration):
     try:
         os.remove(os.path.join(configuration.wwwpublic, 'vgrid', vgrid))
     except Exception, err:
-        configuration.logger.debug('not removing soft link to public VGrid pages for %s: %s' % (vgrid, err))
+        configuration.logger.debug(
+            'not removing soft link to public VGrid pages for %s: %s' % \
+            (vgrid, err))
         pass
 
-    for prefix in [ configuration.vgrid_public_base, 
-                    configuration.vgrid_private_base, 
-                    configuration.vgrid_files_home]:
+    for prefix in [configuration.vgrid_public_base, 
+                   configuration.vgrid_private_base, 
+                   configuration.vgrid_files_home]:
         success_here = remove_rec(os.path.join(prefix, vgrid), configuration)
         if not success_here:
             msg += "Error while removing %s." % os.path.join(prefix, vgrid)
@@ -140,7 +144,8 @@ def remove_vgrid_entry(vgrid, configuration):
     configuration.logger.debug('Removing entry for VGrid %s' % vgrid)
 
     msg = ''
-    success = remove_rec(os.path.join(configuration.vgrid_home, vgrid), configuration)
+    success = remove_rec(os.path.join(configuration.vgrid_home, vgrid),
+                         configuration)
     if not success:
 
         configuration.logger.debug('Error while removing %s.' % vgrid)
@@ -183,6 +188,7 @@ def main(client_id, user_arguments_dict):
     if not validate_status:
         return (accepted, returnvalues.CLIENT_ERROR)
     vgrid_name = accepted['vgrid_name'][-1]
+    flags = ''.join(accepted['flags'])
     cert_id = accepted['cert_id'][-1]
     cert_dir = client_id_dir(cert_id)
 
@@ -197,7 +203,7 @@ def main(client_id, user_arguments_dict):
                               : msg})
         return (output_objects, returnvalues.CLIENT_ERROR)
 
-    # don't add if already an owner
+    # don't remove if not already an owner
 
     if not vgrid_is_owner(vgrid_name, cert_id, configuration):
         output_objects.append({'object_type': 'error_text', 'text'
@@ -216,7 +222,7 @@ def main(client_id, user_arguments_dict):
     owners_file = os.path.join(base_dir, 'owners')
     owners_direct = unpickle(owners_file, configuration.logger)
 
-    (status, owners)    = vgrid_owners(vgrid_name, configuration)
+    (status, owners) = vgrid_owners(vgrid_name, configuration)
 
     if not status:
         logger.error('Error loading owners for %s: %s'
@@ -291,6 +297,22 @@ Owner removal has to be performed at the topmost vgrid''' % cert_id})
         logger.debug('Last owner %s wants to leave %s. Attempting deletion' %
                      (cert_id, vgrid_name))
 
+        if not force(flags):
+            output_objects.append({'object_type': 'text', 'text' : '''
+You are the last owner of %s - leaving will result in the vgrid getting
+deleted. Please use either of the links below to confirm or cancel.
+''' % vgrid_name})
+            output_objects.append({'object_type': 'link', 'destination':
+                                   '?cert_id=%s;vgrid_name=%s;flags=f'
+                                   % (cert_id, vgrid_name), 'text':
+                                   'Really leave and delete %s' % vgrid_name})
+            output_objects.append({'object_type': 'text', 'text' : ''})
+            output_objects.append({'object_type': 'link', 'destination':
+                                   'adminvgrid.py?vgrid_name=%s' % vgrid_name,
+                                   'text': 'Back to administration for %s'
+                                   % vgrid_name})
+            return (output_objects, returnvalues.OK)
+
         # check if any resources participate or sub-vgrids depend on this one
 
         (status, subs) = vgrid_list_subvgrids(vgrid_name, configuration)
@@ -305,7 +327,7 @@ You can help us fix the problem by notifying the administrators
 via mail about what you wanted to do when the error happened.'''})
             return (output_objects, returnvalues.CLIENT_ERROR)
 
-        if not len(subs) == 0:
+        if len(subs) > 0:
 
             logger.debug('Cannot delete: still has sub-vgrids %s.'
                          % subs)
@@ -324,7 +346,7 @@ To leave (and delete) %s, first remove its sub-structures: %s.'''
         resources_direct = unpickle(os.path.join(base_dir, 'resources'), 
                                     configuration.logger)
 
-        if not len(resources_direct) == 0:
+        if len(resources_direct) > 0:
 
             logger.debug('Cannot delete: still has direct resources %s.'
                          % resources_direct)
@@ -336,7 +358,7 @@ To leave (and delete) %s, first remove the participating resources.'''
 
             return (output_objects, returnvalues.CLIENT_ERROR)
 
-        if not len(members_direct) == 0:
+        if len(members_direct) > 0:
 
             logger.debug('Cannot delete: still has direct members %s.'
                          % members_direct)

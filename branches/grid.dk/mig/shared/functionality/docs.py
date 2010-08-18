@@ -55,6 +55,7 @@ def display_topic(output_objects, subject, all_docs):
                                'class': 'urllink',
                                'title': '%s Help' % subject,
                                'text': subject,
+                               'plain_text': subject,
                                })
     else:
         output_objects.append({'object_type': 'text', 'text'
@@ -171,8 +172,8 @@ def license_information(output_objects, configuration):
                           : 'License'})
     output_objects.append({'object_type': 'html_form', 'text'
                           : """
-%s is based on the Minimum intrusion Grid (MiG) middleware. You can read about MiG at 
-<a class="urllink" href="http://code.google.com/p/migrid/">its web site</a>.<br />
+%s is based on the Minimum intrusion Grid (MiG) middleware. You can read about MiG at the
+<a class="urllink" href="http://code.google.com/p/migrid/">project web site</a>.<br />
 The MiG software license follows below.
 """ % configuration.site_title })
     output_objects.append({'object_type': 'text', 'text'
@@ -216,6 +217,18 @@ web interfaces additionally rely on JavaScript from:""" })
                            'class': 'urllink',
                            'title': 'JQuery Home Page',
                            'text': 'JQuery and extension modules (GPL/MIT and Creative Commons 3.0 licenses)'})
+    output_objects.append({'object_type': 'text', 'text' : ''})
+    output_objects.append({'object_type': 'link', 
+                           'destination' : 'http://marijn.haverbeke.nl/codemirror/',
+                           'class': 'urllink',
+                           'title': 'CodeMirror Home Page',
+                           'text': 'CodeMirror web code editor (BSD compatible license)'})
+    output_objects.append({'object_type': 'text', 'text' : ''})
+    output_objects.append({'object_type': 'link', 
+                           'destination' : 'http://markitup.jaysalvat.com/',
+                           'class': 'urllink',
+                           'title': 'markItUp! Home Page',
+                           'text': 'markItUp! web markup editor (GPL/MIT license)'})
     output_objects.append({'object_type': 'text', 'text' : """
 and icons from the following sources:""" })
 
@@ -281,10 +294,11 @@ def main(client_id, user_arguments_dict):
     if not show:
         output_objects.append({'object_type': 'text',
                                'text': '''
-This is the integrated help system for %s. You can search for a topic in the
-search field or select the particular section directly. Please note that the
-integrated help is rather limited to short overviews and technical
-specifications.''' % configuration.short_title })
+This is the integrated help system for %s.
+You can search for a documentation topic or select the particular
+section directly.
+Please note that the integrated help is rather limited to short overviews and
+technical specifications.''' % configuration.short_title })
 
         output_objects.append({'object_type': 'text',
                                'text': '''
@@ -294,7 +308,8 @@ official site support pages:''' })
                                configuration.site_external_doc,
                                'class': 'urllink', 'title': 'external documentation',
                                'text': 'external %s documentation' % \
-                               configuration.site_title })
+                               configuration.site_title,
+                               'plain_text': configuration.site_external_doc})
 
     html = '<p>Filter (using *,? etc.)'
     html += "<form method='post' action='docs.py'>"

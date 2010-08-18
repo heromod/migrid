@@ -4,7 +4,7 @@
 # --- BEGIN_HEADER ---
 #
 
-# deletere - Deletes a runtimeenvironment
+# deletere - delete a runtime environment
 # Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
@@ -26,25 +26,15 @@
 # -- END_HEADER ---
 #
 
-
-"""Deletion of  runtimeenvironments"""
-
-
-import time
-import base64
-import fcntl
-import os
+"""Deletion of runtime environments"""
 
 import shared.returnvalues as returnvalues
 from shared.functional import validate_input_and_cert, REJECT_UNSET
 from shared.init import initialize_main_variables, find_entry
 from shared.refunctions import is_runtime_environment, \
-     get_re_dict, del_re, is_re_active
-
-from shared.vgridaccess import user_visible_resources, \
-     get_resource_map,get_vgrid_map, OWNERS, CONF
-
-
+     get_re_dict, delete_runtimeenv
+from shared.validstring import valid_dir_input
+from shared.vgridaccess import resources_using_re
 
 
 def signature():
@@ -54,15 +44,16 @@ def signature():
     return ['runtimeenvironment', defaults]
 
 
-
 def main(client_id, user_arguments_dict):
     """Main function used by front end"""
 
     (configuration, logger, output_objects, op_name) = \
         initialize_main_variables(client_id, op_header=False)
 
-    
-
+    title_entry = find_entry(output_objects, 'title')
+    title_entry['text'] = 'Delete runtime environment'
+    output_objects.append({'object_type': 'header', 'text'
+                           : 'Delete runtime environment'})
     defaults = signature()[1]
     (validate_status, accepted) = validate_input_and_cert(
         user_arguments_dict,
@@ -74,87 +65,76 @@ def main(client_id, user_arguments_dict):
         )
     if not validate_status:
         return (accepted, returnvalues.CLIENT_ERROR)
-
+    
     re_name = accepted['re_name'][-1]
 
-    #Check whether re_name represents a runtimeenvironment.
-    if not is_runtime_environment(re_name, configuration):
-        output_objects.append({'object_type': 'error_text','text': \
-            'Runtime environment %s does not exists!'%re_name})
-        return (output_objects, returnvalues.SYSTEM_ERROR)
-    
-
-    re_dict = get_re_dict(re_name, configuration)
-
-
-    #Verifying that the RTE belongs to the user, that tries to delete it.
-    if not re_dict[0]:
-        output_objects.append({'object_type': 'error_text','text': \
-        'Could not read runtime environment details for runtime environment %s'%re_name})
-        return (output_objects, returnvalues.SYSTEM_ERROR)
-
-    
-    if not client_id == re_dict[0]['CREATOR']:
-        output_objects.append({'object_type': 'error_text','text': \
-        'You are not the owner of runtime environment "%s"' %re_name})
-        return (output_objects, returnvalues.SYSTEM_ERROR)
-
-    #getting a map of all resources
-    res_map = get_resource_map(configuration)
-
-
-    #Check if the RTE is used by resources. If so, it can not be deleted.
-    (status, actives) = is_re_active(res_map, re_name, configuration)
-
-    #If the RTE is active, an error message is printet, and a list of the
-    #resorces that uses the RTE is printet.
-    if status:
-        title_entry = find_entry(output_objects, 'title')
-        title_entry['text'] = 'Runtimeenviroment deletion failed.'
-        output_objects.append({'object_type': 'header', 'text'
-                           : 'Failed to delete runtimeenvironment ' + re_name})
-
-        output_objects.append({'object_type': 'text', 'text'
-                           : "Could not delete runtimeenvironment " + re_name
-                               + "because it is still used by resources:"})
-
-        output_objects.append({'object_type': 'list', 'list'
-                           : actives})
-
-        output_objects.append({'object_type': 'link', 'destination': 'redb.py',
-                               'class': 'infolink', 'title': 'Show runtime enviroments',
-                               'text': 'Show runtime enviroments'})
-                
-        return (output_objects, returnvalues.OK)
-        
-
-
-    #The RTE re_name is deleted.
-    (status, msg) = del_re(re_name, configuration)
-    
-    #If something goes wrong when trying to delete RTE re_name,
-    #an error is displayed.
-    if not status:
-        title_entry = find_entry(output_objects, 'title')
-        title_entry['text'] = 'Runtimeenviroment deletion failed.'
-        output_objects.append({'object_type': 'header', 'text'
-                           : 'Failed to delete runtimeenvironment ' + re_name})
+    if not valid_dir_input(configuration.re_home, re_name):
+        logger.warning(
+            "possible illegal directory traversal attempt re_name '%s'"
+            % re_name)
         output_objects.append({'object_type': 'error_text', 'text'
-                               : 'Could not read existing runtime environment details. %s' % msg})
+                               : 'Illegal runtime environment name: "%s"'
+                               % re_name})
+        return (output_objects, returnvalues.CLIENT_ERROR)
+
+    # Check whether re_name represents a runtime environment
+    if not is_runtime_environment(re_name, configuration):
+        output_objects.append({'object_type': 'error_text',
+                               'text': "No such runtime environment: '%s'"
+                               % re_name})
+        return (output_objects, returnvalues.CLIENT_ERROR)
+    
+    re_dict = get_re_dict(re_name, configuration)
+    if not re_dict[0]:
+        output_objects.append(
+            {'object_type': 'error_text',
+             'text': 'Could not read runtime environment details for %s'
+             % re_name})
         return (output_objects, returnvalues.SYSTEM_ERROR)
 
-    #If deletion of RTE re_name is successfull, we just returns OK
+    # Make sure the runtime environment belongs to the user trying to delete it
+    if client_id != re_dict[0]['CREATOR']:
+        output_objects.append({'object_type': 'error_text', 'text': \
+        'You are not the owner of runtime environment "%s"' % re_name})
+        return (output_objects, returnvalues.CLIENT_ERROR)
+
+    # Prevent delete if the runtime environment is used by any resources
+    actives = resources_using_re(configuration, re_name)
+
+    # If the runtime environment is active, an error message is printed, along
+    # with a list of the resources using the runtime environment
+    if actives:
+        output_objects.append(
+            {'object_type': 'error_text', 'text':
+             "Can't delete runtime environment '%s' in use by resources:"
+             % re_name})
+        output_objects.append({'object_type': 'list', 'list'
+                               : actives})
+        output_objects.append({'object_type': 'link', 'destination': 'redb.py',
+                               'class': 'infolink', 'title':
+                               'Show runtime environments',
+                               'text': 'Show runtime environments'})
+        return (output_objects, returnvalues.CLIENT_ERROR)
+
+    # Delete the runtime environment
+    (status, msg) = delete_runtimeenv(re_name, configuration)
+    
+    # If something goes wrong when trying to delete runtime environment
+    # re_name, an error is displayed.
+    if not status:
+        output_objects.append({'object_type': 'error_text', 'text'
+                               : 'Could not remove %s runtime environment: %s'
+                               % (re_name, msg)})
+        return (output_objects, returnvalues.SYSTEM_ERROR)
+
+    # If deletion of runtime environment re_name is successful, we just
+    # return OK
     else:
-
-         title_entry = find_entry(output_objects, 'title')
-         title_entry['text'] = 'Runtimeenviroment has been deleted'
-         output_objects.append({'object_type': 'header', 'text'
-                           : 'Succesfully deleted runtime enviroment ' + re_name})
-
-         output_objects.append({'object_type': 'link', 'destination': 'redb.py',
-                               'class': 'infolink', 'title': 'Show runtime enviroments',
-                               'text': 'Show runtime enviroments'})
-
-           
-         return (output_objects, returnvalues.OK) 
- 
+        output_objects.append(
+            {'object_type': 'text', 'text'
+             : 'Successfully deleted runtime environment: "%s"' % re_name})
+        output_objects.append({'object_type': 'link', 'destination': 'redb.py',
+                               'class': 'infolink',
+                               'title': 'Show runtime environments',
+                               'text': 'Show runtime environments'})
+        return (output_objects, returnvalues.OK) 

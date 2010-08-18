@@ -34,6 +34,7 @@ import shared.returnvalues as returnvalues
 from shared.functional import validate_input_and_cert, REJECT_UNSET
 from shared.init import initialize_main_variables, find_entry
 from shared.refunctions import is_runtime_environment, get_re_dict
+from shared.validstring import valid_dir_input
 
 
 def signature():
@@ -43,7 +44,7 @@ def signature():
     return ['runtimeenvironment', defaults]
 
 
-def build_reitem_object_from_re_dict(re_dict):
+def build_reitem_object(re_dict):
     """Build a runtimeenvironment object based on input re_dict"""
 
     software_list = []
@@ -120,11 +121,6 @@ def main(client_id, user_arguments_dict):
     (configuration, logger, output_objects, op_name) = \
         initialize_main_variables(client_id, op_header=False)
 
-    title_entry = find_entry(output_objects, 'title')
-    title_entry['text'] = 'Runtime environment details'
-    output_objects.append({'object_type': 'header', 'text'
-                          : 'Show runtime environment details'})
-
     defaults = signature()[1]
     (validate_status, accepted) = validate_input_and_cert(
         user_arguments_dict,
@@ -138,49 +134,31 @@ def main(client_id, user_arguments_dict):
         return (accepted, returnvalues.CLIENT_ERROR)
     re_name = accepted['re_name'][-1]
 
-    if not is_runtime_environment(re_name, configuration):
+    if not valid_dir_input(configuration.re_home, re_name):
+        logger.warning(
+            "possible illegal directory traversal attempt re_name '%s'"
+            % re_name)
         output_objects.append({'object_type': 'error_text', 'text'
-                              : "re_name ('%s') is not a valid existing runtime environment!"
+                               : 'Illegal runtime environment name: "%s"'
                                % re_name})
         return (output_objects, returnvalues.CLIENT_ERROR)
 
-    (re_dict, msg) = get_re_dict(re_name, configuration)
-    if not re_dict:
+    if not is_runtime_environment(re_name, configuration):
         output_objects.append({'object_type': 'error_text', 'text'
-                              : 'Could not read existing runtime environment details. %s'
-                               % msg})
-        return (output_objects, returnvalues.SYSTEM_ERROR)
-
-    output_objects.append(build_reitem_object_from_re_dict(re_dict))
-
-    if client_id ==  re_dict['CREATOR']:
-        
-        output_objects.append({'object_type': 'link',
-                                       'destination':
-                                       "javascript:runConfirmDialog('%s','%s');" % \
-                                       ("Really delete runtime environment " + re_name + "?", 
-                                        'deletere.py?re_name=%s'\
-                                        % (re_name)),
-                                       'class': 'removelink',
-                                       'title': 'Delete runtime environment %s' % re_name, 
-                                       'text': 'Delete'})
-
+                               : "'%s' is not an existing runtime environment!"
+                               % re_name})
+        return (output_objects, returnvalues.CLIENT_ERROR)
 
     title_entry = find_entry(output_objects, 'title')
     title_entry['text'] = 'Runtime environment details'
-
-    # jquery support for tablesorter and confirmation on "leave":
-
     title_entry['javascript'] = '''
 <link rel="stylesheet" type="text/css" href="/images/css/jquery.managers.css" media="screen"/>
 <link rel="stylesheet" type="text/css" href="/images/css/jquery-ui-1.7.2.custom.css" media="screen"/>
 
 <script type="text/javascript" src="/images/js/jquery-1.3.2.min.js"></script>
-<script type="text/javascript" src="/images/js/jquery.tablesorter.js"></script>
 <script type="text/javascript" src="/images/js/jquery-ui-1.7.2.custom.min.js"></script>
 
 <script type="text/javascript" >
-
 var runConfirmDialog = function(text, link, textFieldName) {
 
     if (link == undefined) {
@@ -189,7 +167,7 @@ var runConfirmDialog = function(text, link, textFieldName) {
     if (text == undefined) {
         text = "Are you sure?";
     }
-    $( "#confirm_text").html(text);
+    $("#confirm_text").html(text);
 
     var addField = function() { /* doing nothing... */ };
     if (textFieldName != undefined) {
@@ -199,7 +177,7 @@ var runConfirmDialog = function(text, link, textFieldName) {
         }
     }
 
-    $( "#confirm_dialog").dialog("option", "buttons", {
+    $("#confirm_dialog").dialog("option", "buttons", {
               "No": function() { $("#confirm_input").hide();
                                  $("#confirm_text").html("");
                                  $("#confirm_dialog").dialog("close");
@@ -208,51 +186,56 @@ var runConfirmDialog = function(text, link, textFieldName) {
                                   window.location = link;
                                 }
             });
-    $( "#confirm_dialog").dialog("open");
+    $("#confirm_dialog").dialog("open");
 }
 
 $(document).ready(function() {
 
           // init confirmation dialog
-          $( "#confirm_dialog" ).dialog(
+          $("#confirm_dialog").dialog(
               // see http://jqueryui.com/docs/dialog/ for options
               { autoOpen: false,
                 modal: true, closeOnEscape: true,
                 width: 500,
                 buttons: {
-                   "Cancel": function() { $( "#" + name ).dialog("close"); }
+                   "Cancel": function() { $("#" + name).dialog("close"); }
 	        }
               });
-
-          // table initially sorted by col. 2 (admin), then 1 (member), then 0
-          var sortOrder = [[2,1],[1,1],[0,0]];
-
-          // use image path for sorting if there is any inside
-          var imgTitle = function(contents) {
-              var key = $(contents).find("a").attr("class");
-              if (key == null) {
-                  key = $(contents).html();
-              }
-              return key;
-          }
-
-          $("#vgridtable").tablesorter({widgets: ["zebra"],
-                                        sortList:sortOrder,
-                                        textExtraction: imgTitle
-                                       });
      }
 );
 </script>
 '''
-
+    output_objects.append({'object_type': 'header', 'text'
+                          : 'Show runtime environment details'})
     output_objects.append({'object_type': 'html_form',
                            'text':'''
  <div id="confirm_dialog" title="Confirm" style="background:#fff;">
   <div id="confirm_text"><!-- filled by js --></div>
    <textarea cols="40" rows="4" id="confirm_input" style="display:none;"/></textarea>
  </div>
-'''                       })
+'''
+                           })
 
+    (re_dict, msg) = get_re_dict(re_name, configuration)
+    if not re_dict:
+        output_objects.append({'object_type': 'error_text', 'text'
+                               : 'Could not read details for "%s"' % msg})
+        return (output_objects, returnvalues.SYSTEM_ERROR)
+
+    output_objects.append(build_reitem_object(re_dict))
+
+    if client_id ==  re_dict['CREATOR']:
+        
+        output_objects.append({'object_type': 'link',
+                               'destination':
+                               "javascript:runConfirmDialog('%s','%s');" % \
+                               ("Really delete runtime environment %s?"
+                                % re_name, 
+                                'deletere.py?re_name=%s'\
+                                % (re_name)),
+                               'class': 'removelink',
+                               'title': 'Delete runtime environment %s'
+                               % re_name,
+                               'text': 'Delete %s' % re_name})
     
     return (output_objects, returnvalues.OK) 
- 

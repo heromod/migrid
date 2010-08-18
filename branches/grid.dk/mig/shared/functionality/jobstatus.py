@@ -356,14 +356,15 @@ def main(client_id, user_arguments_dict):
                                     % job_id, 'text': 'Resubmit job'}
 
         job_obj['cancellink'] = {'object_type': 'link',
-                                 'destination': 'canceljob.py?job_id=%s'\
+                                 'destination':
+                                 'jobaction.py?action=cancel;job_id=%s'\
                                   % job_id, 'text': 'Cancel job'}
         job_obj['jobschedulelink'] = {'object_type': 'link',
                 'destination': 'jobschedule.py?job_id=%s' % job_id,
                 'text': 'Request schedule information'}
-        job_obj['liveoutputlink'] = {'object_type': 'link',
-                'destination': 'liveoutput.py?job_id=%s' % job_id,
-                'text': 'Request live update'}
+        job_obj['liveiolink'] = {'object_type': 'link',
+                'destination': 'liveio.py?job_id=%s' % job_id,
+                'text': 'Request live I/O'}
         job_list['jobs'].append(job_obj)
     output_objects.append(job_list)
 

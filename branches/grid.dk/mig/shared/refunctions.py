@@ -256,8 +256,6 @@ def delete_runtimeenv(re_name, configuration):
     lock_handle = open(lock_path, 'a')
     fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX)
 
-
-    # TODO: catch if re_name is a relative path outside of re_home
     filename = os.path.join(configuration.re_home, re_name)
     if os.path.isfile(filename):
         try:
@@ -267,7 +265,7 @@ def delete_runtimeenv(re_name, configuration):
                   % (re_name, err)
             status = False
     else:
-        msg = "Tried to delete unexisting runtime enviroment '%s'" % re_name
+        msg = "Tried to delete non-existing runtime enviroment '%s'" % re_name
         configuration.logger.warning(msg)
         status = False
     lock_handle.close()

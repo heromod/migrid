@@ -1,7 +1,8 @@
 <!--
 Name: Pie chart
-Description: Pie chart using JQuery Google Charts plugin (modification
-of default demo)
+Author: Jonas Bardino <bardino AT diku DOT dk>
+License: GPLv2
+Description: Pie chart using JQuery Google Charts plugin (modification of default demo)
 Requires: jquery.js, jquery.jgcharts.js
 -->
 <script type="text/javascript">

@@ -83,6 +83,11 @@ def list_runtime_environments(configuration):
     return (True, re_list)
 
 
+    if not valid_dir_input(configuration.re_home, re_name):
+        configuration.logger.warning("Registered possible illegal directory traversal attempt re_name '%s'"
+                 % re_name)
+        return False
+    if os.path.isfile(configuration.re_home + re_name):
 def is_runtime_environment(re_name, configuration):
     """Check that re_name is an existing runtime environment"""
     if os.path.isfile(os.path.join(configuration.re_home, re_name)):
@@ -256,7 +261,6 @@ def delete_runtimeenv(re_name, configuration):
     lock_handle = open(lock_path, 'a')
     fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX)
 
-    # TODO: the following code leaves status==True (wrong)
 
     # TODO: catch if re_name is a relative path outside of re_home
     filename = os.path.join(configuration.re_home, re_name)
@@ -266,9 +270,11 @@ def delete_runtimeenv(re_name, configuration):
         except Exception, err:
             msg = "Exception during deletion of runtime enviroment '%s': %s"\
                   % (re_name, err)
+            status = False
     else:
         msg = "Tried to delete unexisting runtime enviroment '%s'" % re_name
         configuration.logger.warning(msg)
+        status = False
     lock_handle.close()
     return (status, msg)
     

@@ -83,11 +83,6 @@ def list_runtime_environments(configuration):
     return (True, re_list)
 
 
-    if not valid_dir_input(configuration.re_home, re_name):
-        configuration.logger.warning("Registered possible illegal directory traversal attempt re_name '%s'"
-                 % re_name)
-        return False
-    if os.path.isfile(configuration.re_home + re_name):
 def is_runtime_environment(re_name, configuration):
     """Check that re_name is an existing runtime environment"""
     if os.path.isfile(os.path.join(configuration.re_home, re_name)):

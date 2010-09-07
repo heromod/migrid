@@ -35,7 +35,7 @@ import fnmatch
 import shared.mrslkeywords as mrslkeywords
 import shared.resconfkeywords as resconfkeywords
 import shared.returnvalues as returnvalues
-from shared.functional import validate_input, validate_input_and_cert
+from shared.functional import validate_input
 from shared.init import initialize_main_variables
 from shared.output import get_valid_outputformats
 
@@ -276,18 +276,12 @@ def main(client_id, user_arguments_dict):
     (configuration, logger, output_objects, op_name) = \
         initialize_main_variables(client_id, op_header=False, op_menu=client_id)
     defaults = signature()[1]
-    
-    if not client_id:
-        (validate_status, accepted) = validate_input(
-            user_arguments_dict, defaults, output_objects,
-            allow_rejects=False,
-            )
-    else:
-        (validate_status, accepted) = validate_input_and_cert(
-            user_arguments_dict, defaults, output_objects,  
-            client_id, configuration,
-            allow_rejects=False,)
-        
+    (validate_status, accepted) = validate_input(
+        user_arguments_dict,
+        defaults,
+        output_objects,
+        allow_rejects=False,
+        )
     if not validate_status:
         return (accepted, returnvalues.CLIENT_ERROR)
     show = accepted['show'][-1].lower()

@@ -45,7 +45,7 @@ except:
 
 import shared.returnvalues as returnvalues
 from shared.init import initialize_main_variables, find_entry
-from shared.functional import validate_input, validate_input_and_cert
+from shared.functional import validate_input
 import shared.vgrid as vgrid
 
 # allowed parameters, first value is default
@@ -71,16 +71,8 @@ def main(client_id, user_arguments_dict):
         initialize_main_variables(client_id, op_header=False)
 
     defaults = signature()[1]
-    if not client_id:
-        (validate_status, accepted) = validate_input(
-            user_arguments_dict, defaults, output_objects,
-            allow_rejects=False,
-            )
-    else:
-        (validate_status, accepted) = validate_input_and_cert(
-            user_arguments_dict, defaults, output_objects,  
-            client_id, configuration,
-            allow_rejects=False,)
+    (validate_status, accepted) = validate_input(user_arguments_dict,
+            defaults, output_objects, allow_rejects=False)
 
     if not validate_status:
         return (accepted, returnvalues.CLIENT_ERROR)
@@ -454,7 +446,7 @@ The query you have requested did not return any data.
         include_viz += "$('.stats').visualize({" + v + "});"
     include_viz +="""
                  });
-         </script>         
+         </script>
 """
 
 

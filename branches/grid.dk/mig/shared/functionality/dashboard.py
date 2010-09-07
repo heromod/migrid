@@ -87,6 +87,23 @@ $(document).ready(function() {
           $("#disk_stats").html("Loading disk stats...");
           $("#cert_stats").addClass("spinner").css("padding-left", "20px");
           $("#cert_stats").html("Loading certificate information...");
+          /* Run certificate request in the background and handle as soon as results come in */
+          $.getJSON("userstats.py?output_format=json;stats=certificate", {}, function(jsonRes, textStatus) {
+            var i = 0;
+            var certificate = null;
+            // Grab results from json response and place them in resource status.
+            for(i=0; i<jsonRes.length; i++) {
+                if (jsonRes[i].object_type == "user_stats") {    
+                    certificate = jsonRes[i].certificate;
+                    //alert("inspect certificate stats result: " + certificate);
+                    $("#cert_stats").removeClass("spinner").css("padding-left", "0px");
+                    $("#cert_stats").empty();
+                    $("#cert_stats").append("Your user certificate expires on " +
+                    certificate.expire + ".");
+                    break;
+                }
+            }
+          });
           /* Run jobs request in the background and handle as soon as results come in */
           $.getJSON("userstats.py?output_format=json;stats=jobs", {}, function(jsonRes, textStatus) {
             var i = 0;
@@ -97,7 +114,7 @@ $(document).ready(function() {
                     jobs = jsonRes[i].jobs;
                     //alert("inspect stats result: " + jobs);
                     $("#jobs_stats").removeClass("spinner").css("padding-left", "0px");
-                    $("#jobs_stats").html("");
+                    $("#jobs_stats").empty();
                     $("#jobs_stats").append("You have submitted a total of " + jobs.total +
                     " jobs: " + jobs.parse + " parse, " + jobs.queued + " queued, " +
                     jobs.executing + " executing, " + jobs.finished + " finished, " + jobs.retry +
@@ -118,7 +135,7 @@ $(document).ready(function() {
                     resources = jsonRes[i].resources;
                     //alert("inspect resources stats result: " + resources);
                     $("#res_stats").removeClass("spinner").css("padding-left", "0px");
-                    $("#res_stats").html("");
+                    $("#res_stats").empty();
                     $("#res_stats").append(resources.resources + " resources providing " +
                     resources.exes + " execution units in total allow execution of your jobs.");
                     break;
@@ -135,29 +152,12 @@ $(document).ready(function() {
                     disk = jsonRes[i].disk;
                     //alert("inspect disk stats result: " + disk);
                     $("#disk_stats").removeClass("spinner").css("padding-left", "0px");
-                    $("#disk_stats").html("");
+                    $("#disk_stats").empty();
                     $("#disk_stats").append("Your own " + disk.own_files +" files and " +
                     disk.own_directories + " directories take up " + roundNumber(disk.own_megabytes, 2) +
                     " MB in total and you additionally share " + disk.vgrid_files +
                     " files and " + disk.vgrid_directories + " directories of " +
                     roundNumber(disk.vgrid_megabytes, 2) + " MB in total.");
-                    break;
-                }
-            }
-          });
-          /* Run certificate request in the background and handle as soon as results come in */
-          $.getJSON("userstats.py?output_format=json;stats=certificate", {}, function(jsonRes, textStatus) {
-            var i = 0;
-            var certificate = null;
-            // Grab results from json response and place them in resource status.
-            for(i=0; i<jsonRes.length; i++) {
-                if (jsonRes[i].object_type == "user_stats") {    
-                    certificate = jsonRes[i].certificate;
-                    //alert("inspect certificate stats result: " + certificate);
-                    $("#cert_stats").removeClass("spinner").css("padding-left", "0px");
-                    $("#cert_stats").html("");
-                    $("#cert_stats").append("Your user certificate expires on " +
-                    certificate.expire + ".");
                     break;
                 }
             }

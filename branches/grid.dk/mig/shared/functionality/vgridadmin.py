@@ -3,8 +3,8 @@
 #
 # --- BEGIN_HEADER ---
 #
-# vgridadmin - [insert a few words of module description on this line]
-# Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
+# vgridadmin - manage vgrids
+# Copyright (C) 2003-2010  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
 #
@@ -28,7 +28,7 @@
 """VGrid administration back end functionality"""
 
 import shared.returnvalues as returnvalues
-from shared.defaults import default_vgrid
+from shared.defaults import default_vgrid, default_pager_entries
 from shared.functional import validate_input_and_cert
 from shared.init import initialize_main_variables, find_entry
 from shared.vgrid import vgrid_list_vgrids, vgrid_is_owner, \
@@ -214,13 +214,13 @@ Please write a message to the owners (field below).""",
                                              'title': 'Administrate %s' % vgrid_name,
                                              'text': ''}
             vgrid_obj['editprivatelink'] = {'object_type': 'link',
-                                            'destination': 'editor.py?path=private_base/%s/index.html'\
+                                            'destination': 'fileman.py?path=private_base/%s/'\
                                             % vgrid_name,
                                             'class': 'editlink',
                                             'title': 'Edit private %s web page' % vgrid_name,
                                             'text': 'Edit'}
             vgrid_obj['editpubliclink'] = {'object_type': 'link',
-                                           'destination': 'editor.py?path=public_base/%s/index.html'\
+                                           'destination': 'fileman.py?path=public_base/%s/'\
                                            % vgrid_name,
                                            'class': 'editlink',
                                            'title': 'Edit public %s web page' % vgrid_name,
@@ -228,7 +228,6 @@ Please write a message to the owners (field below).""",
 
 
         member_list['vgrids'].append(vgrid_obj)
-
 
     title_entry = find_entry(output_objects, 'title')
     title_entry['text'] = 'Virtual Organization administration'
@@ -241,6 +240,7 @@ Please write a message to the owners (field below).""",
 
 <script type="text/javascript" src="/images/js/jquery.js"></script>
 <script type="text/javascript" src="/images/js/jquery.tablesorter.js"></script>
+<script type="text/javascript" src="/images/js/jquery.tablesorter.pager.js"></script>
 <script type="text/javascript" src="/images/js/jquery-ui.js"></script>
 
 <script type="text/javascript" >
@@ -265,7 +265,7 @@ var runConfirmDialog = function(text, link, textFieldName) {
 
     $( "#confirm_dialog").dialog("option", "buttons", {
               "No": function() { $("#confirm_input").hide();
-                                 $("#confirm_text").html("");
+                                 $("#confirm_text").empty();
                                  $("#confirm_dialog").dialog("close");
                                },
               "Yes": function() { addField();
@@ -285,11 +285,11 @@ $(document).ready(function() {
                 width: 500,
                 buttons: {
                    "Cancel": function() { $( "#" + name ).dialog("close"); }
-	        }
+                }
               });
 
-          // table initially sorted by col. 2 (admin), then 1 (member), then 0
-          var sortOrder = [[2,1],[1,1],[0,0]];
+          // table initially sorted by col. 1 (admin), then 2 (member), then 0 (name)
+          var sortOrder = [[1,1],[2,1],[0,0]];
 
           // use image path for sorting if there is any inside
           var imgTitle = function(contents) {
@@ -303,11 +303,14 @@ $(document).ready(function() {
           $("#vgridtable").tablesorter({widgets: ["zebra"],
                                         sortList:sortOrder,
                                         textExtraction: imgTitle
-                                       });
+                                        })
+                          .tablesorterPager({ container: $("#pager"),
+                                        size: %s
+                                        });
      }
 );
 </script>
-'''
+''' % default_pager_entries
 
     output_objects.append({'object_type': 'html_form',
                            'text':'''
@@ -327,6 +330,8 @@ and resources. Members can access web pages, files and resources, owners can als
 
     output_objects.append({'object_type': 'sectionheader', 'text'
                           : 'Virtual Organizations managed on this server'})
+    output_objects.append({'object_type': 'table_pager', 'entry_name': 'VGrids',
+                           'default_entries': default_pager_entries})
     output_objects.append(member_list)
 
     output_objects.append({'object_type': 'sectionheader', 'text'
@@ -340,16 +345,15 @@ and resources. Members can access web pages, files and resources, owners can als
                            })
 
     output_objects.append({'object_type': 'sectionheader', 'text'
-                          : 'Create a new Virtual Organization'})
+                          : 'Additional VGrids'})
+    output_objects.append({'object_type': 'text', 'text'
+                          : 'Please enter a name for the new VGrid to add, using slashes to specify nesting. I.e. if you own a VGrid called ABC, you can create a sub-VGrid called DEF by entering ABC/DEF below.'})
     output_objects.append({'object_type': 'html_form', 'text'
                           : '''<form method="get" action="createvgrid.py">
     <input type="text" size=40 name="vgrid_name" />
     <input type="hidden" name="output_format" value="html" />
     <input type="submit" value="Create Virtual Organization" />
     </form>
-    <br />
     '''})
-
-    # print "DEBUG: %s" % output_objects
 
     return (output_objects, status)

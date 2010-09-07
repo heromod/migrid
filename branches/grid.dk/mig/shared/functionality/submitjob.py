@@ -243,11 +243,10 @@ def main(client_id, user_arguments_dict):
     title_entry['javascript'] = '''
 <link rel="stylesheet" type="text/css" href="/images/css/jquery.managers.css" media="screen"/>
 <link rel="stylesheet" type="text/css" href="/images/css/jquery.contextmenu.css" media="screen"/>
-<link rel="stylesheet" type="text/css" href="/images/css/jquery-ui-1.7.2.custom.css" media="screen"/>
+<link rel="stylesheet" type="text/css" href="/images/css/jquery-ui.css" media="screen"/>
 
 <script type="text/javascript" src="/images/js/jquery.js"></script>
-
-<script type="text/javascript" src="/images/js/jquery-ui-1.7.2.custom.min.js"></script>
+<script type="text/javascript" src="/images/js/jquery-ui.js"></script>
 <script type="text/javascript" src="/images/js/jquery.form.js"></script>
 <script type="text/javascript" src="/images/js/jquery.prettyprint.js"></script>
 <script type="text/javascript" src="/images/js/jquery.filemanager.js"></script>
@@ -257,7 +256,13 @@ def main(client_id, user_arguments_dict):
 
 <script type="text/javascript">
   
-    $.ui.dialog.defaults.bgiframe = true;
+    try {
+        /* jquery-ui-1.8.x option format */
+        $.ui.dialog.prototype.options.bgiframe = true;
+    } catch(err) {
+        /* jquery-ui-1.7.x option format */
+        $.ui.dialog.defaults.bgiframe = true;
+    }
 
     // global var for opening the dialog
     var open_chooser = function() {alert("Error: no handler installed");}

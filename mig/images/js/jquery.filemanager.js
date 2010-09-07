@@ -72,26 +72,26 @@ if (jQuery) (function($){
         //       The stated workaround is used in jsonWrapper.
         var dialogOptions = { width: '800px', autoOpen: false, 
                               closeOnEscape: true, modal: true };
-        var okDialog      = { buttons: {Ok: function() 
-                                        {$(this).dialog('close');} },
-                              width: '800px', autoOpen: false, 
-                              closeOnEscape: true, modal: true};
-        var closeDialog   = { buttons: {Close: function() 
-                                        {$(this).dialog('close');} }, 
-                              width: '800px', autoOpen: false, 
-                              closeOnEscape: true, modal: true};
+        var okDialog = { buttons: {Ok: function() 
+                                   {$(this).dialog('close');} },
+                         width: '800px', autoOpen: false, 
+                         closeOnEscape: true, modal: true};
+        var closeDialog = { buttons: {Close: function() 
+                                      {$(this).dialog('close');} }, 
+                            width: '800px', autoOpen: false, 
+                            closeOnEscape: true, modal: true};
         
         function doubleClickEvent(el) {
             if (clickaction != undefined) {
                 clickaction(el);
                 return;
             } 
-            // if no clickaction is provided, default to opening and editing
+            // if no clickaction is provided, default to opening and showing
             if ($(el).hasClass('directory')) {
                 $('.fm_folders li [rel_path='+$(el).attr(pathAttribute)+']').click();
             } else {
                 // Do stuff with files.
-                callbacks['edit']('action', el, null);              
+                callbacks['show']('action', el, null);
             }
         }
 
@@ -196,9 +196,13 @@ if (jQuery) (function($){
         var callbacks = {
             
             show:   function (action, el, pos) { 
+		window.open('/cert_redirect/'+$(el).attr(pathAttribute))
+	    },
+            download:   function (action, el, pos) { 
                 document.location = 
                     'cat.py?path='
-                    +$(el).attr(pathAttribute)+'&output_format=file' },
+                    +$(el).attr(pathAttribute)+'&output_format=file'
+	    },
             edit:   function (action, el, pos) {
                 
                 $("#editor_dialog textarea[name=editarea]").val('');
@@ -497,7 +501,7 @@ if (jQuery) (function($){
           // Root node                    
           if (t == '/') {
              folders += '<ul class="jqueryFileTree">' +
-                  '<li class="directory expanded userhome" rel_path="" title="Home"><div>/</div>';
+                  '<li class="directory expanded userhome recent" rel_path="" title="Home"><div>/</div>';
           }
 
           // Regular nodes from here on after
@@ -514,10 +518,7 @@ if (jQuery) (function($){
           var dir_prefix = '';
           var path = '';
           
-          // .html('') is extremely slow with >1000 entries in filelisting!
-          // use DOM innerHTML instead to avoid unresponsive script warnings
-          //$('.fm_files table tbody').html('');
-          document.getElementById('fm_filelistbody').innerHTML = '';
+          $('.fm_files table tbody').empty();
           $(".jqueryFileTree.start").remove();
           $('.fm_files div').remove();
           for (i = 0; i < listing.length; i++) {
@@ -529,8 +530,9 @@ if (jQuery) (function($){
               }
               
               is_dir = listing[i]['type'] == 'directory';
-              base_css_style  = 'file';
-              dir_prefix      = '__';
+              base_css_style = 'file';
+              extra_css_style = '';
+              dir_prefix = '__';
                         
               // Stats for the statusbar
               file_count++;
@@ -620,21 +622,24 @@ if (jQuery) (function($){
             /* UI stuff: contextmenu, drag'n'drop. */
             
             // Create an element for the whitespace below the list of files in the file pane
-            var spacerHeight = $("#fm_filelisting").height() - $(".fm_files").height();
-            if (spacerHeight < 0) {
-                spacerHeight = $(".fm_files").height() - $("#fm_filelisting").height()-20;
-                if (t != '/') { // Do not prepend the fake-root.
-                    $('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;" rel_path="'+t+'" title="'+t+'"+></div>');
-                } else {
-                    $('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;" rel_path="" title=""></div>');  
-                }
+            // Always preserve a small space for pasting into the folder, etc
+            var headerHeight = 20;
+            var spacerHeight = 40;
+            if ($("#fm_filelisting").height() + spacerHeight < $(".fm_files").height() - headerHeight) {
+                spacerHeight = $(".fm_files").height() - $("#fm_filelisting").height() - headerHeight;
+	    }
 
-                $("div.filespacer").contextMenu(
+            if (t != '/') { // Do not prepend the fake-root.
+                $('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;" rel_path="'+t+'" title="'+t+'"+></div>');
+            } else {
+                $('.fm_files').append('<div class="filespacer" style="height: '+spacerHeight+'px ;" rel_path="" title=""></div>');  
+            }
+
+            $("div.filespacer").contextMenu(
                     { menu: 'folder_context'},
                     function(action, el, pos) {
                         (options['actions'][action])(action, el, pos);                                            
                     });
-            }
             
             // Bind actions to entries in a non-blocking way to avoid 
             // unresponsive script warnings with many entries

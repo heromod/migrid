@@ -109,8 +109,11 @@ def html_tmpl():
   </ul>
   
   <ul id="file_context" class="contextMenu">        
+    <li class="show">
+      <a href="#show">Show</a>
+    </li>
     <li class="download">
-      <a href="#show">Download</a>
+      <a href="#download">Download</a>
     </li>
     <li class="edit">
       <a href="#edit">Edit</a>
@@ -258,10 +261,21 @@ def js_tmpl(entry_path='/'):
   js += lock_info('this file', -1)
   js += '''
   <script type="text/javascript">
-  
-  $.ui.dialog.defaults.bgiframe = true;
+
+  try {
+      /* jquery-ui-1.8.x option format */
+      $.ui.dialog.prototype.options.bgiframe = true;
+  } catch(err) {
+      /* jquery-ui-1.7.x option format */
+      $.ui.dialog.defaults.bgiframe = true;
+  }
 
   $(document).ready( function() {
+
+  /* wrap in try/catch for debugging - disabled in prodution */
+  /*
+  try {
+  */
   
     $("#fm_filemanager").filemanager({
                                       root: "/",
@@ -273,10 +287,15 @@ def js_tmpl(entry_path='/'):
                                       subPath: "%s"
                                       }
     );
-  
-  });
 
-  </script>
+  /*
+  } catch(err) {
+      alert("Internal error in file manager: " + err);
+  }
+  */
+
+  });
+</script>
   ''' % entry_path
   return js
     
@@ -324,5 +343,5 @@ def main(client_id, user_arguments_dict):
       output_objects.append({'object_type': 'link', 'text': path,
                              'destination': 'fileman.py?path=%s' % path})
       output_objects.append({'object_type': 'text', 'text': ''})
-      
+
   return (output_objects, status)

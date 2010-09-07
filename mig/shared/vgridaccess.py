@@ -28,6 +28,7 @@
 """User access to VGrids"""
 
 import os
+import time
 import fcntl
 
 from shared.base import sandbox_resource
@@ -43,6 +44,14 @@ MAP_SECTIONS = (RESOURCES, VGRIDS) = ("__resources__", "__vgrids__")
 RES_SPECIALS = (ALLOW, ASSIGN, RESID, OWNERS, CONF, MODTIME) = \
                ('__allow__', '__assign__', '__resid__', '__owners__',
                 '__conf__', '__modtime__')
+
+# Never repeatedly refresh maps within this number of seconds in same process
+# Used to avoid refresh floods with e.g. runtime envs page calling
+# refresh for each env when extracting providers.
+MAP_CACHE_SECONDS = 30
+
+last_refresh = {RESOURCES: 0, VGRIDS: 0}
+last_map = {RESOURCES: {}, VGRIDS: {}}
 
 def refresh_resource_map(configuration):
     """Refresh map of resources and their configuration. Uses a pickled
@@ -114,6 +123,7 @@ def refresh_resource_map(configuration):
         except Exception, exc:
             configuration.logger.error("Could not save resource map: %s" % exc)
 
+    last_refresh[RESOURCES] = time.time()
     lock_handle.close()
 
     return resource_map
@@ -232,17 +242,28 @@ def refresh_vgrid_map(configuration):
         except Exception, exc:
             configuration.logger.error("Could not save vgrid map: %s" % exc)
 
+    last_refresh[VGRIDS] = time.time()
     lock_handle.close()
 
     return vgrid_map
 
 def get_resource_map(configuration):
     """Returns the current map of resources and their configurations"""
-    return refresh_resource_map(configuration)
+    if last_refresh[RESOURCES] + MAP_CACHE_SECONDS > time.time():
+        resource_map = last_map[RESOURCES]
+    else:
+        resource_map = refresh_resource_map(configuration)
+        last_map[RESOURCES] = resource_map
+    return resource_map
 
 def get_vgrid_map(configuration):
     """Returns the current map of resources and their vgrid participations"""
-    return refresh_vgrid_map(configuration)
+    if last_refresh[VGRIDS] + MAP_CACHE_SECONDS > time.time():
+        vgrid_map = last_map[VGRIDS]
+    else:
+        vgrid_map = refresh_vgrid_map(configuration)
+        last_map[VGRIDS] = vgrid_map
+    return vgrid_map
 
 def user_owned_resources(configuration, client_id):
     """Extract a list of resources that client_id owns.

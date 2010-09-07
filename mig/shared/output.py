@@ -835,21 +835,35 @@ Exit code: %s Description: %s<br />
             lines.append('</table>')
         elif i['object_type'] == 'runtimeenvironments':
             runtimeenvironments = i['runtimeenvironments']
-            if len(runtimeenvironments) == 0:
-                lines.append('No runtime environments found!')
-            else:
-                lines.append('<table class="runtimeenvs"><tr><th>Name</th><th>Description</th><th>Details</th><th>Creator</th></tr>'
-                             )
-                row_number = 1
-                for single_re in runtimeenvironments:
-                    row_class = row_name[row_number % 2]
-                    lines.append('<tr class=%s><td>%s</td><td>%s</td><td><a class="viewlink" href="showre.py?re_name=%s">View</a></td><td>%s</td></tr>'
-                                  % (row_class, single_re['name'],
-                                 single_re['description'],
-                                 single_re['name'], single_re['creator'
-                                 ]))
-                    row_number += 1
-                lines.append('</table>')
+            lines.append('''<table class="runtimeenvs columnsort" id="runtimeenvtable">
+<thead class="title">
+    <tr>
+        <th>Name</th>
+        <th width="8"><!-- View --></th>
+        <th width="8"><!-- Owner --></th>
+        <th>Description</th>
+        <th width="8">Resources</th>
+        <th>Created</th>
+    </tr>
+</thead>
+<tbody>
+'''
+                         )
+            for single_re in runtimeenvironments:
+                viewlink = html_link(single_re['viewruntimeenvlink'])
+                ownerlink = single_re.get('ownerlink', '')
+                if ownerlink:
+                    ownerlink = html_link(ownerlink)
+                lines.append('''
+<tr>
+<td>%s</td><td>%s</td><td>%s</td><td>%s</td><td title="%s">%s</td><td>%s</td>
+</tr>''' % (single_re['name'], viewlink, ownerlink, single_re['description'],
+            ', '.join(single_re['providers']), single_re['resource_count'],
+            single_re['created']))
+                
+            lines.append('''
+</tbody>
+</table>''')
         elif i['object_type'] == 'runtimeenvironment':
 
             software_html = \
@@ -909,17 +923,50 @@ Exit code: %s Description: %s<br />
                           % i['creator'])
             lines.append('<tr><td>Job&nbsp;count</td><td>%s</td></tr>'
                           % i['job_count'])
-            lines.append('<tr><td>Resource&nbsp;count</td><td>%s</td></tr>'
-                          % i['resource_count'])
+            lines.append('<tr><td>Resources</td><td>%s</td></tr>'
+                          % ', '.join(i['providers']))
             lines.append('</table>')
+        elif i['object_type'] == 'table_pager':
+            page_entries = i.get('page_entries', [5, 10, 20, 25, 40, 50, 80,
+                                                  100, 250, 500, 1000])
+            default_entries = i.get('default_entries', 20)
+            if not default_entries in page_entries:
+                page_entries.append(default_entries)
+            toolbar = '''
+  <div>
+    <div class="toolbar">        
+      <div class="pager" id="pager">
+      <form style="display: inline;" action="">
+        <img class="first" src="/images/icons/arrow_left.png"/>
+        <img class="prev" src="/images/icons/arrow_left.png"/>
+        <input type="text" class="pagedisplay" size=5 />
+        <img class="next" src="/images/icons/arrow_right.png"/>
+        <img class="last" src="/images/icons/arrow_right.png"/>
+        <select class="pagesize">
+'''
+            for value in page_entries:
+                selected = ''
+                if value == default_entries:
+                    selected = 'selected'
+                toolbar += '<option %s value="%d">%d %s per page</option>\n'\
+                           % (selected, value, value, '%(entry_name)s')
+            toolbar += '''
+        </select>
+      </form>
+      </div>
+    </div>
+  </div>
+'''
+            lines.append(toolbar % {'entry_name': i['entry_name']})
         elif i['object_type'] == 'resource_list':
             if len(i['resources']) > 0:
                 res_fields = ['PUBLICNAME', 'NODECOUNT', 'CPUCOUNT', 'MEMORY', 'DISK',
                               'ARCHITECTURE']
                 resources = i['resources']
-                lines.append("<table class='resources' id='resourcetable'>")
+                lines.append("<table class='resources columnsort' id='resourcetable'>")
                 lines.append('''
 <thead class="title">
+<tr>
   <th>Name</th>
   <th width="8"><!-- View / Admin --></th>
   <th width="8"><!-- Remove owner --></th>
@@ -930,6 +977,7 @@ Exit code: %s Description: %s<br />
   <th class=centertext>Mem (MB)</th>
   <th class=centertext>Disk (GB)</th>
   <th class=centertext>Arch</th>
+</tr>
 </thead>
 <tbody>
 '''
@@ -991,7 +1039,7 @@ Exit code: %s Description: %s<br />
         elif i['object_type'] == 'vgrid_list':
             if len(i['vgrids']) > 0:
                 vgrids = i['vgrids']
-                lines.append("<table class='vgrids' id='vgridtable'>")
+                lines.append("<table class='vgrids columnsort' id='vgridtable'>")
                 # Hide public wiki column as it is disabled
                 #public_wiki = '<th class=centertext colspan="1">Public Wiki</th>'
                 public_wiki = ''
@@ -1011,9 +1059,10 @@ Exit code: %s Description: %s<br />
 
                 lines.append('''
 <thead class="title">
+<tr>
   <th>Name</th>
-  <th width="8"><!-- Member --></th>
   <th width="8"><!-- Owner --></th>
+  <th width="8"><!-- Member --></th>
   <th class=centertext colspan="2">Private web pages</th>
   <th class=centertext colspan="2">Public web pages</th>
   <th class=centertext colspan="1">Owner Wiki</th>
@@ -1021,6 +1070,7 @@ Exit code: %s Description: %s<br />
   %s
   %s
   <th class=centertext colspan="1">Monitor</th>
+</tr>
 </thead>
 <tbody>
 ''' % (public_wiki, scm)
@@ -1029,15 +1079,15 @@ Exit code: %s Description: %s<br />
                     lines.append('<tr>')
                     lines.append('<td>%s</td>' % obj['name'])
                     lines.append('<td>')
+                    if obj.has_key('administratelink'):
+                        lines.append('%s'
+                                 % html_link(obj['administratelink']))
+                    lines.append('</td>')
+                    lines.append('<td>')
                     # membership links: should be there in any case
                     if obj.has_key('memberlink'):
                         lines.append('%s'
                                  % html_link(obj['memberlink']))
-                    lines.append('</td>')
-                    lines.append('<td>')
-                    if obj.has_key('administratelink'):
-                        lines.append('%s'
-                                 % html_link(obj['administratelink']))
                     lines.append('</td>')
                     lines.append('<td class=centertext>')
                     if obj.has_key('editprivatelink'):

@@ -345,9 +345,9 @@ and resources. Members can access web pages, files and resources, owners can als
                            })
 
     output_objects.append({'object_type': 'sectionheader', 'text'
-                          : 'Additional VGrids'})
+                          : 'Additional Virtual Organizations'})
     output_objects.append({'object_type': 'text', 'text'
-                          : 'Please enter a name for the new VGrid to add, using slashes to specify nesting. I.e. if you own a VGrid called ABC, you can create a sub-VGrid called DEF by entering ABC/DEF below.'})
+                          : 'Please enter a name for the Virtual Organization to add, using slashes to specify nesting. I.e. if you own a Virtual Org. called ABC, you can create a subordinate Virtual Org. called DEF by entering ABC/DEF below.'})
     output_objects.append({'object_type': 'html_form', 'text'
                           : '''<form method="get" action="createvgrid.py">
     <input type="text" size=40 name="vgrid_name" />

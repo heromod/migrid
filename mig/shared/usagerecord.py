@@ -469,12 +469,12 @@ class UsageRecord:
         self.project_name = job.get('PROJECT',None)
 
         self.node_count = job.get('NODECOUNT', None)
-        self.vgrid = job.get('VGRID', None)[0]
+        self.vgrid = job.get('VGRID', [None])[0]
 
         # global JOB_ID should always be there if we get here...
         self.global_job_id = job.get('JOB_ID', None)
 
-        self.local_job_id = job.get('LOCALJOBNAME', None)[0]
+        self.local_job_id = job.get('LOCALJOBNAME', None)
 
         # compute timing values:
         # QUEUED_TIMESTAMP - Start time (???)

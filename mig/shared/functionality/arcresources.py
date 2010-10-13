@@ -73,7 +73,11 @@ def display_arc_queue(queue):
     # number_of_cores -> number_of_nodes. There we only use the first
     # of possibly several values
 
-    cores = dict(queue.cluster.cpu_distribution).keys()[0]
+    d = dict(queue.cluster.cpu_distribution)
+    if d.keys():
+        cores = d.keys()[0]
+    else:
+        cores = 1
 
     def row(col1, col2=None, col3=None):
         if col2 and col3:

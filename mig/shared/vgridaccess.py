@@ -328,10 +328,16 @@ def user_visible_resources(configuration, client_id):
     This is a wrapper combining user_owned_resources and
     user_allowed_resources.
     
-    Resources are anonymized unless explicitly configured otherwise.
+    Returns: dictionary resource name-> list of allowed execution node names
+    Resources (keys) are anonymized unless explicitly configured otherwise.
     """
     visible = user_allowed_resources(configuration, client_id)
-    visible.update(user_owned_resources(configuration, client_id))
+    owned = user_owned_resources(configuration, client_id)
+
+    # select exe node names from the configuration part
+    def get_name(x): return(x['name'])
+    visible.update(dict([(name, map(get_name,stuff[CONF]['EXECONFIG'])) \
+              for (name,stuff) in owned.items() ]))
     return visible
 
 def resources_using_re(configuration, re_name):

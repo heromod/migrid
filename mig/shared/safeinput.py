@@ -74,6 +74,7 @@ valid_dn_chars = letters + digits + dn_extras
 VALID_PASSWORD_CHARACTERS = valid_password_chars
 VALID_NAME_CHARACTERS = valid_name_chars
 VALID_DN_CHARACTERS = valid_dn_chars
+VALID_RESOURCE_ID_CHARACTERS = VALID_FQDN_CHARACTERS + '_/'
 
 # Helper functions
 
@@ -298,6 +299,22 @@ def valid_job_id(
     __valid_contents(job_id, valid_chars, min_length, max_length)
 
 
+def valid_resource_id(
+    job_id,
+    min_length=1,
+    max_length=255,
+    extra_chars='',
+    ):
+    """Verify that supplied job ID, only contains characters that we
+    consider valid. Job IDs are generated using time and fqdn of server,
+    so it only contains FQDN chars and underscores.
+    """
+
+    valid_chars = VALID_RESOURCE_ID_CHARACTERS + extra_chars
+    __valid_contents(job_id, valid_chars, min_length, max_length)
+
+
+
 def valid_path_pattern(
     pattern,
     min_length=1,
@@ -354,6 +371,21 @@ def valid_job_id_patterns(
 
     for pattern in pattern_list:
         valid_job_id(pattern, min_length, max_length, extra_chars)
+
+
+def valid_resource_id_pattern(
+    pattern,
+    min_length=1,
+    max_length=255,
+    extra_chars='.*?/',
+    ):
+    """Verify that supplied pattern only contains characters that
+    we consider valid in paths. Valid wild card characters are added
+    by default.
+    """
+
+    valid_resource_id(pattern, min_length, max_length, extra_chars)
+
 
 
 def valid_email_address(addr):
@@ -729,7 +761,7 @@ def guess_type(name):
     elif name.lower().find('unique_resource_name') != -1:
         return valid_fqdn
     elif name.lower().find('resource') != -1:
-        return valid_job_id_pattern
+        return valid_resource_id_pattern
     elif name.lower().find('hosturl') != -1:
         return valid_fqdn
     elif name.lower().find('exe_name') != -1:

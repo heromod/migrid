@@ -27,6 +27,8 @@
 
 """Resource management back end functionality"""
 
+import os
+
 import shared.returnvalues as returnvalues
 from shared.base import sandbox_resource
 from shared.defaults import default_pager_entries
@@ -36,11 +38,19 @@ from shared.resource import anon_to_real_res_map
 from shared.vgridaccess import user_visible_resources, get_resource_map, \
      OWNERS, CONF
 
+try:
+    import shared.arcwrapper as arc
+except: # let it crash if ARC is enabled without the library
+    pass
+from shared.useradm import client_id_dir
+from shared.functionality.arcresources import \
+     display_arc_queue, queue_resource
 
 def signature():
     """Signature of the main function"""
 
-    defaults = {'show_sandboxes': ['false']}
+    defaults = {'show_sandboxes': ['false'],
+                'topic'         : ['mig']}
     return ['resources', defaults]
 
 
@@ -63,6 +73,207 @@ def main(client_id, user_arguments_dict):
         return (accepted, returnvalues.CLIENT_ERROR)
 
     show_sandboxes = (accepted['show_sandboxes'][-1] != 'false')
+
+    valid_topics = ['mig','arc']
+    topic = (['mig'] + [t for t in accepted['topic'] if t in valid_topics])[-1]
+
+    # common: jquery js and title
+
+    title_entry = find_entry(output_objects, 'title')
+    title_entry['text'] = 'Resource management'
+
+    # jquery support for tablesorter and confirmation on "leave":
+
+    title_entry['javascript'] = '''
+<link rel="stylesheet" type="text/css" href="/images/css/jquery.managers.css" media="screen"/>
+<link rel="stylesheet" type="text/css" href="/images/css/jquery-ui.css" media="screen"/>
+
+<script type="text/javascript" src="/images/js/jquery.js"></script>
+<script type="text/javascript" src="/images/js/jquery.tablesorter.js"></script>
+<script type="text/javascript" src="/images/js/jquery.tablesorter.pager.js"></script>
+<script type="text/javascript" src="/images/js/jquery-ui.js"></script>
+
+<script type="text/javascript" >
+
+var runConfirmDialog = function(text, link, textFieldName) {
+
+    if (link == undefined) {
+        link = "#";
+    }
+    if (text == undefined) {
+        text = "Are you sure?";
+    }
+    $( "#confirm_text").html(text);
+
+    var addField = function() { /* doing nothing... */ };
+    if (textFieldName != undefined) {
+        $("#confirm_input").show();
+        addField = function() {
+            link += textFieldName + "=" + $("#confirm_input")[0].value;
+        }
+    }
+
+    $( "#confirm_dialog").dialog("option", "buttons", {
+              "No": function() { $("#confirm_input").hide();
+                                 $("#confirm_text").empty();
+                                 $("#confirm_dialog").dialog("close");
+                               },
+              "Yes": function() { addField();
+                                  window.location = link;
+                                }
+            });
+    $( "#confirm_dialog").dialog("open");
+}
+
+// ARC resources: helpers to show/hide details for queues
+function noDetails() {
+    $(".queue").addClass("hidden");
+}
+function allDetails() {
+    $(".queue").removeClass("hidden");
+}
+function detailsFor(queue) {
+    noDetails();
+    $("#" + queue).removeClass("hidden");
+}
+
+$(document).ready(function() {
+
+          // mangle "details" links for ARC resource views
+          // (replace anchor by js call)
+          $(".arclink").each(function(index) {
+              target = $(this).attr("href").replace("#","");
+              $(this).attr("href","javascript:detailsFor(\'"+ target + "\')");
+              return(true)
+          });
+          noDetails();
+
+          // init confirmation dialog
+          $( "#confirm_dialog" ).dialog(
+              // see http://jqueryui.com/docs/dialog/ for options
+              { autoOpen: false,
+                modal: true, closeOnEscape: true,
+                width: 500,
+                buttons: {
+                   "Cancel": function() { $( "#" + name ).dialog("close"); }
+                }
+              });
+
+          // table initially sorted by col. 1 (admin), then 0 (name)
+          var sortOrder = [[1,0],[0,0]];
+
+          // use image path for sorting if there is any inside
+          var imgTitle = function(contents) {
+              var key = $(contents).find("a").attr("class");
+              if (key == null) {
+                  key = $(contents).html();
+              }
+              return key;
+          }
+          
+          $("#resourcetable").tablesorter({widgets: ["zebra"],
+                                        sortList:sortOrder,
+                                        textExtraction: imgTitle
+                                        })
+                             .tablesorterPager({ container: $("#pager"),
+                                        size: %s
+                                        });
+     }
+);
+</script>
+''' % default_pager_entries
+
+    output_objects.append({'object_type': 'html_form',
+                           'text':'''
+ <div id="confirm_dialog" title="Confirm" style="background:#fff;">
+  <div id="confirm_text"><!-- filled by js --></div>
+   <textarea cols="40" rows="4" id="confirm_input" style="display:none;"/></textarea>
+ </div>
+'''                       })
+
+    # topic links
+    links = []
+    for name in valid_topics:
+        links.append({'object_type': 'link', 
+                      'destination': "?topic=%s" % name,
+                      'class': '%ssettingslink' % name,
+                      'title': 'Switch to %s Resources' % name.title(),
+                      'text' : '%s Resources' % name.title(),
+                      })
+    output_objects.append({'object_type': 'multilinkline', 'links': links})
+    output_objects.append({'object_type': 'text', 'text': ''})
+
+
+    # topic = arc:
+
+    if topic == 'arc':
+
+        output_objects.append({'object_type': 'header', 'text'
+                               : 'Available ARC queues'})
+
+        if not configuration.arc_clusters:
+            output_objects.append({'object_type': 'error_text', 'text':
+                                   'No ARC support!'})
+            return (output_objects, returnvalues.ERROR)
+        try:
+            session = arc.Ui(os.path.join(configuration.user_home, 
+                                          client_id_dir(client_id)))
+            queues = session.getQueues()
+
+        except arc.NoProxyError, err:
+            output_objects.append({'object_type': 'error_text', 'text'
+                                   : 'Error while retrieving: %s' % err.what()
+                                   })
+            output_objects += arc.askProxy()
+            return (output_objects, returnvalues.ERROR)
+        except Exception, err:
+            logger.error('Exception while retrieving ARC resources\n%s' % err) 
+            output_objects.append({'object_type':'warning', 'text'
+                                 :'Could not retrieve information: %s' % err})
+            return(output_objects, returnvalues.ERROR)
+    
+        res_list = {'object_type': 'resource_list', 'resources':[]}
+
+        for q in queues:
+            res_list['resources'].append(queue_resource(q))
+
+        # all well, assemble page
+        
+        output_objects.append({'object_type': 'table_pager',
+                               'entry_name': 'resources',
+                               'default_entries': default_pager_entries,
+                               'page_entries': [default_pager_entries]})
+        output_objects.append(res_list)
+            
+        output_objects.append({'object_type': 'sectionheader', 'text'
+                               : 'Queue details'})
+
+        # show/hide all links, always visible:
+        output_objects.append({'object_type': 'multilinkline',
+                               'links': \
+        [{'object_type': 'link', 
+          'destination': "javascript:allDetails();",
+          'class': 'additemlink',
+          'title': 'Show details for all queues',
+          'text' : 'Show details for all queues'},
+         {'object_type': 'link', 
+          'destination': "javascript:noDetails();",
+          'class': 'removeitemlink',
+          'title': 'Hide all queue details',
+          'text' : 'Hide all queue details'}
+         ]})
+
+        output_objects.append({'object_type': 'text', 'text': ''})
+
+        # queue details (current usage and some machine information) 
+        for q in queues:
+            output_objects.append({'object_type': 'html_form', 'text' 
+                                   : display_arc_queue(q) })
+
+        return (output_objects, returnvalues.OK)
+
+
+    # topic = mig:
 
     visible = user_visible_resources(configuration, client_id)
     res_map = get_resource_map(configuration)
@@ -125,97 +336,6 @@ def main(client_id, user_arguments_dict):
         # Use runtimeenvironment names instead of actual definitions
         res_obj['RUNTIMEENVIRONMENT'] = [i[0] for i in res_obj['RUNTIMEENVIRONMENT']]
         res_list['resources'].append(res_obj)
-
-    title_entry = find_entry(output_objects, 'title')
-    title_entry['text'] = 'Resource management'
-
-    # jquery support for tablesorter and confirmation on "leave":
-
-    title_entry['javascript'] = '''
-<link rel="stylesheet" type="text/css" href="/images/css/jquery.managers.css" media="screen"/>
-<link rel="stylesheet" type="text/css" href="/images/css/jquery-ui.css" media="screen"/>
-
-<script type="text/javascript" src="/images/js/jquery.js"></script>
-<script type="text/javascript" src="/images/js/jquery.tablesorter.js"></script>
-<script type="text/javascript" src="/images/js/jquery.tablesorter.pager.js"></script>
-<script type="text/javascript" src="/images/js/jquery-ui.js"></script>
-
-<script type="text/javascript" >
-
-var runConfirmDialog = function(text, link, textFieldName) {
-
-    if (link == undefined) {
-        link = "#";
-    }
-    if (text == undefined) {
-        text = "Are you sure?";
-    }
-    $( "#confirm_text").html(text);
-
-    var addField = function() { /* doing nothing... */ };
-    if (textFieldName != undefined) {
-        $("#confirm_input").show();
-        addField = function() {
-            link += textFieldName + "=" + $("#confirm_input")[0].value;
-        }
-    }
-
-    $( "#confirm_dialog").dialog("option", "buttons", {
-              "No": function() { $("#confirm_input").hide();
-                                 $("#confirm_text").empty();
-                                 $("#confirm_dialog").dialog("close");
-                               },
-              "Yes": function() { addField();
-                                  window.location = link;
-                                }
-            });
-    $( "#confirm_dialog").dialog("open");
-}
-
-$(document).ready(function() {
-
-          // init confirmation dialog
-          $( "#confirm_dialog" ).dialog(
-              // see http://jqueryui.com/docs/dialog/ for options
-              { autoOpen: false,
-                modal: true, closeOnEscape: true,
-                width: 500,
-                buttons: {
-                   "Cancel": function() { $( "#" + name ).dialog("close"); }
-                }
-              });
-
-          // table initially sorted by col. 1 (admin), then 0 (name)
-          var sortOrder = [[1,0],[0,0]];
-
-          // use image path for sorting if there is any inside
-          var imgTitle = function(contents) {
-              var key = $(contents).find("a").attr("class");
-              if (key == null) {
-                  key = $(contents).html();
-              }
-              return key;
-          }
-          
-          $("#resourcetable").tablesorter({widgets: ["zebra"],
-                                        sortList:sortOrder,
-                                        textExtraction: imgTitle
-                                        })
-                             .tablesorterPager({ container: $("#pager"),
-                                        size: %s
-                                        });
-     }
-);
-</script>
-''' % default_pager_entries
-
-    output_objects.append({'object_type': 'html_form',
-                           'text':'''
- <div id="confirm_dialog" title="Confirm" style="background:#fff;">
-  <div id="confirm_text"><!-- filled by js --></div>
-   <textarea cols="40" rows="4" id="confirm_input" style="display:none;"/></textarea>
- </div>
-'''                       })
 
     output_objects.append({'object_type': 'header', 'text': 'Available Resources'
                           })

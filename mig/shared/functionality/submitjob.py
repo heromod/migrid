@@ -253,6 +253,7 @@ def main(client_id, user_arguments_dict):
 <script type="text/javascript" src="/images/js/jquery.tablesorter.js"></script>
 <script type="text/javascript" src="/images/js/jquery.tablesorter.pager.js"></script>
 <script type="text/javascript" src="/images/js/jquery.contextmenu.js"></script>
+<script type="text/javascript" src="/images/js/jquery.submitjob.js"></script>
 
 <script type="text/javascript">
   
@@ -287,37 +288,6 @@ def main(client_id, user_arguments_dict):
         }
     }
 
-    function update_re(jobtype){
-        $("select[name=RUNTIMEENVIRONMENT] option").show();
-        
-        if ("arc"==jobtype){
-            $("select[name=RUNTIMEENVIRONMENT] option").filter(
-                function(){
-                    return (zeroinstall_RTE.indexOf($(this).val())==-1);
-                }
-            ).hide();
-        }
-    }
-    
-    // See if the user has a proxy certificate
-    function validate_proxy_certificate(){
-        $.getJSON('settings.py?output_format=json;topic=arc',{}, 
-                      function(jsonRes, textStatus){
-                         for(i=0; i<jsonRes.length; i++){
-                            if(jsonRes[i].object_type=="warning"){
-                                alert("Could not find a valid proxy certificate. \\nPlease go to 'Setting->arc settings' and upload one. \\nError: "+jsonRes[i].text);
-                            }
-                    };
-                });
-    }
-    
-    // show the specified fields
-    function show_fields(fields){
-        $(".job_fields").filter(
-            function(){
-                return (fields.indexOf($(this).attr("id")) != -1);
-            }).show();
-    }
 
     $(document).ready( function() {
          // submit style display
@@ -334,48 +304,9 @@ def main(client_id, user_arguments_dict):
         // make sure the default fields are always shown
         show_fields(simple_view); 
     
-    
-    // When the job type is changed we update the RE options
-     $("select[name=JOBTYPE] option").click(
-        function(){
-            update_re($(this).val());
-            // if the user wants to run on arc we check if she has uploaded an arc proxy cert
-            if($(this).val()=="arc"){
-                validate_proxy_certificate();
-            }
-        }
-     );
-     
-     // Events relating to simple/advance view
-    $("#advanced").hover(
-        function(){
-            $(this).css('cursor','pointer');
-            //$(this).css({"color":"red"});
-            $(this).css({"font-size":"101%%"});
-        },
-        function(){
-            $(this).css('cursor','pointer');
-            //$(this).css({"color":"black"});
-            $(this).css({"font-size":"100%%"});
-        }
-    );
-    $("#advanced").toggle(
-        function () {
-            $(this).html("<b><u>Show less options</u></b>");
-            $(".job_fields").show();
-            //show_fields(simple_view);
-            },
-        function () {
-            $(this).html("<b><u>Show more options</u></b>");
-            $(".job_fields").hide();
-            show_fields(simple_view);
-            }
-        );
-      
-    
-     // launch the file chooser                           
+   
+    // launch the file chooser 
     $( ".file_chooser" ).click( function() {
-        
         var field = $(this).attr("field");
         // we define the callback function to contain the value of the field we eventually wish to update
         var callback = function(path) {
@@ -383,8 +314,10 @@ def main(client_id, user_arguments_dict):
                                 };
         open_chooser("Select "+$(this).attr("name"),
                              callback, false);
-          });
+          }); 
     });      
+    
+    // NOTE: Other events and functions are loaded from jquery.submitjob.js
     
 </script>
 ''' % {"submit_interfaces": submit_options, "runtime_environments":zeroinstall_run_envs, "selected_style":submit_style + "_form", "default_fields":simple_view_fields}

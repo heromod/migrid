@@ -64,11 +64,17 @@
     	if(jobtype == "arc"){
 		load_arc_resources(); // update and show the arc resources
 		$("div#RESOURCE div[id!=arcresources]").hide(); // hide mig resources
+		
 	    
 	}else{
 		$("div#RESOURCE div[id!=arcresources]").show(); // show mig resources
 		$("div#RESOURCE #arcresources").hide(); // hide the arc resource list	
 	}
+	
+	// uncheck the target resources
+	$("input[name=RESOURCE]").each(function(i){
+		$(this).attr("checked",false);
+	});
     }
 
 $(document).ready( function() {

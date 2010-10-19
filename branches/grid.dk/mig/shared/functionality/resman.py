@@ -74,7 +74,9 @@ def main(client_id, user_arguments_dict):
 
     show_sandboxes = (accepted['show_sandboxes'][-1] != 'false')
 
-    valid_topics = ['mig','arc']
+    valid_topics = ['mig']
+    if configuration.arc_clusters:
+        valid_topics.append('arc')
     topic = (['mig'] + [t for t in accepted['topic'] if t in valid_topics])[-1]
 
     # common: jquery js and title

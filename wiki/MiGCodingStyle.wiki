@@ -95,3 +95,11 @@ We use HTML formatting quite a lot in the wsgi/cgi scripts at the time of writin
 = Other Programming Languages =
 MiG coding style guidelines mostly apply to python code, as one of the [MiGRules] specifies the intent to write as much of the code as possible in python. However, in some situations it may not be possible or reasonable to implement one or more features in python. In those situations coding style should either try to follow the same guidelines or an official coding standard for the specific language. Sub projects like the transparent remote on-demand file access system that need to be implemented in a low level language like C could for example use the coding style proposed by the original C developers Kernighan and Ritchie. The [http://indent.isidore-it.eu/beautify.html GNU indent] program makes this easy to achieve.
 If in doubt please talk this issue over with the other MiG developers.
+
+
+= Code Submission =
+Please try to make sure that any code additions or modifications you create doesn't break anything before submitting or sending them to us. It is a good rule of thumb to always test the code in practice first and maybe even run a small statical analysis before submitting. Using the PyLint one-liner:
+{{{
+for i in $(svn status|egrep '^M'|awk '{print $2; }'); do echo Checking $i; pylint -e $i; echo; done
+}}}
+should catch at least some obvious errors.

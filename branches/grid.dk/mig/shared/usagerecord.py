@@ -356,7 +356,7 @@ class UsageRecord:
                     set_element(vo, 'Name', self.vgrid, \
                                 SGAS_VO_NAMESPACE,SGAS_VO_PREFIX )
 
-            user_identity.appendChild(vo)
+                    user_identity.appendChild(vo)
             record.appendChild(user_identity)
             
 
@@ -617,6 +617,5 @@ if __name__ == '__main__':
             target = sys.argv[2]
         else:
             target = '.'.join([fname,'xml'])
-
             
         usage_record.write_xml(target)

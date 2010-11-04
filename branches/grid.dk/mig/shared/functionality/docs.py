@@ -204,14 +204,40 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                           : 'Acknowledgements' })
 
     output_objects.append({'object_type': 'text', 'text' : """
-This software is mainly implemented in Python:""" })
+This software is mainly implemented in Python and extension modules:""" })
     output_objects.append({'object_type': 'link', 
                            'destination' : 'http://python.org/',
                            'class': 'urllink',
                            'title': 'Python Home Page',
-                           'text': 'Python and extension modules (PSF license)'})
+                           'text': 'Python (PSF license)'})
+    output_objects.append({'object_type': 'text', 'text' : ''})
+    output_objects.append({'object_type': 'link', 
+                           'destination' : 'http://sourceforge.net/projects/json-py/',
+                           'class': 'urllink',
+                           'title': 'Python JSON Module Home Page',
+                           'text': 'Python JSON Module (LGPL license)'})
+    output_objects.append({'object_type': 'text', 'text' : ''})
+    output_objects.append({'object_type': 'link', 
+                           'destination' : 'http://pyenchant.sourceforge.net/',
+                           'class': 'urllink',
+                           'title': 'Python Enchant Module Home Page',
+                           'text': 'Python Enchant Module (LGPL license)'})
+    output_objects.append({'object_type': 'text', 'text' : ''})
     output_objects.append({'object_type': 'text', 'text' : """
-web interfaces additionally rely on JavaScript from:""" })
+Web interfaces are served with the Apache web server:""" })
+    output_objects.append({'object_type': 'link', 
+                           'destination' : 'http://httpd.apache.org/',
+                           'class': 'urllink',
+                           'title': 'Apache HTTP Server Home Page',
+                           'text': 'Apache HTTP Server with included modules (Apache 2.0 license)'})
+    output_objects.append({'object_type': 'text', 'text' : ''})
+    output_objects.append({'object_type': 'link', 
+                           'destination' : 'http://code.google.com/p/modwsgi/',
+                           'class': 'urllink',
+                           'title': 'Apache WSGI Module Home Page',
+                           'text': 'Apache WSGI Module (Apache 2.0 license)'})
+    output_objects.append({'object_type': 'text', 'text' : ''})
+    output_objects.append({'object_type': 'text', 'text' : """relying on JavaScript from:""" })
     output_objects.append({'object_type': 'link', 
                            'destination' : 'http://jquery.com/',
                            'class': 'urllink',
@@ -252,14 +278,31 @@ and icons from the following sources:""" })
                            'title': 'KDE Crystal Icons HomePage',
                            'text': 'KDE Crystal Icons, LGPL'})
     output_objects.append({'object_type': 'text', 'text' : ''})
+    output_objects.append({'object_type': 'text', 'text' : """
+Core communication with dedicated resources use OpenSSH client utilities:""" })
 
+    output_objects.append({'object_type': 'link', 
+                           'destination' : 'http://openssh.org/',
+                           'class': 'urllink',
+                           'title': 'OpenSSH HomePage',
+                           'text': 'OpenSSH secure remote shell and file transfer, BSD'})
+    output_objects.append({'object_type': 'text', 'text' : ''})
+
+    if configuration.moin_share and configuration.site_enable_sftp:
+        output_objects.append({'object_type': 'text', 'text' :
+                               """SFTP access is delivered using Paramiko:""" })
+        output_objects.append({'object_type': 'link', 
+                               'destination' : 'http://www.lag.net/paramiko/',
+                               'class': 'urllink',
+                               'title': 'Paramiko Home Page',
+                               'text': 'Paramiko SSH2 Module (LGPL)' })
     if configuration.moin_share and configuration.moin_etc:
         output_objects.append({'object_type': 'text', 'text' :
                                """Wikis are delivered using MoinMoin:""" })
         output_objects.append({'object_type': 'link', 
                                'destination' : 'http://moinmo.in/',
                                'class': 'urllink',
-                               'title': 'MoinMoin Wiki Home Page',                           
+                               'title': 'MoinMoin Wiki Home Page',
                                'text': 'MoinMoin Wiki Engine (GPL)' })
     if configuration.hg_path and configuration.hgweb_path:
         output_objects.append({'object_type': 'text', 'text' :
@@ -267,7 +310,7 @@ and icons from the following sources:""" })
         output_objects.append({'object_type': 'link', 
                                'destination' : 'http://mercurial.selenic.com/',
                                'class': 'urllink',
-                               'title': 'Mercurial SCM Home Page',                           
+                               'title': 'Mercurial SCM Home Page',
                                'text': 'Mercurial SCM (GPLv2)' })
 
 def main(client_id, user_arguments_dict):

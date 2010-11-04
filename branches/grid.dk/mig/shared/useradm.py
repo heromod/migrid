@@ -31,6 +31,7 @@ import os
 import sys
 import shutil
 import fnmatch
+import datetime
 
 from shared.base import client_id_dir, old_id_format, sandbox_resource
 from shared.conf import get_configuration_object
@@ -41,6 +42,8 @@ from shared.serial import load, dump
 db_name = 'MiG-users.db'
 mrsl_template = '.default.mrsl'
 css_template = '.default.css'
+ssh_conf_dir = '.ssh'
+ssh_authkeys = os.path.join(ssh_conf_dir, 'authorized_keys')
 cert_field_order = [
     ('country', 'C'),
     ('state', 'ST'),
@@ -206,7 +209,9 @@ def create_user(
     mrsl_dir = os.path.join(configuration.mrsl_files_dir, client_dir)
     pending_dir = os.path.join(configuration.resource_pending,
                                client_dir)
+    ssh_dir = os.path.join(home_dir, ssh_conf_dir)
     htaccess_path = os.path.join(home_dir, '.htaccess')
+    settings_path = os.path.join(home_dir, '.settings')
     css_path = os.path.join(home_dir, css_template)
     if not renew:
         if verbose:        
@@ -236,10 +241,15 @@ def create_user(
             if not force:
                 raise Exception('Error: could not create resource dir: %s' % \
                                 pending_dir)
-    else:
+        try:
+            os.mkdir(ssh_dir)
+        except:
+            if not force:
+                raise Exception('Error: could not create ssh conf dir: %s' % \
+                                ssh_dir)
 
+    elif os.path.exists(htaccess_path):
         # Allow temporary write access
-
         os.chmod(htaccess_path, 0644)
 
     # Always write htaccess to catch any updates
@@ -277,6 +287,24 @@ def create_user(
             raise Exception('Error: could not create htaccess file: %s' % \
                             htaccess_path)
 
+    # Always write basic settings with email to support various mail requests
+    # and to avoid log errors.
+    # Please note that we rely on anything from shared.settings here since it
+    # would introduce a module import cycle
+
+    try:
+        settings_dict = {}
+        user_email = user.get('email', '')
+        if user_email:
+            settings_dict['EMAIL'] = [user_email]
+        settings_dict['CREATOR'] = client_id
+        settings_dict['CREATED_TIMESTAMP'] = datetime.datetime.now()
+        dump(settings_dict, settings_path)
+    except:
+        if not force:
+            raise Exception('Error: could not create settings file: %s' % \
+                            settings_path)
+        
     # Always write default css to avoid apache error log entries
 
     try:
@@ -667,5 +695,18 @@ def get_default_css(template_path):
         default_css = '/* No changes - use default */'
 
     return default_css
+
+def get_ssh_authkeys(authkeys_path):
+    """Return the ssh authorized keys from authkeys_path"""
+
+    try:
+        authkeys_fd = open(authkeys_path, 'rb')
+        authorized_keys = authkeys_fd.readlines()
+        authkeys_fd.close()
+        # Remove extra space and skip blank lines
+        authorized_keys = [i.strip() for i in authorized_keys if i.strip()]
+    except:
+        authorized_keys = []
+    return authorized_keys
 
 

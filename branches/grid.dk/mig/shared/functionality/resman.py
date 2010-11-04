@@ -35,7 +35,7 @@ from shared.defaults import default_pager_entries
 from shared.functional import validate_input_and_cert
 from shared.init import initialize_main_variables, find_entry
 from shared.resource import anon_to_real_res_map
-from shared.vgridaccess import user_visible_resources, get_resource_map, \
+from shared.vgridaccess import user_visible_res_exes, get_resource_map, \
      OWNERS, CONF
 
 try:
@@ -277,7 +277,7 @@ $(document).ready(function() {
 
     # topic = mig:
 
-    visible = user_visible_resources(configuration, client_id)
+    visible = user_visible_res_exes(configuration, client_id)
     res_map = get_resource_map(configuration)
     anon_map = anon_to_real_res_map(configuration.resource_home)
 

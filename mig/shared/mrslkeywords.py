@@ -332,7 +332,7 @@ Compares JOB_ID.status from the job against the file called EXPECTED.status from
    
     specs.append(('JOBNAME', {
         'Title': 'Job Name',
-        'Description': 'Name identifying the job',
+        'Description': 'Name identifying the job (white space is not allowed)',
         'Example': 'JOB23',
         'Type': 'string',
         'Value': '',

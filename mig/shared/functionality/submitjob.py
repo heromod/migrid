@@ -39,7 +39,7 @@ from shared.refunctions import list_runtime_environments
 from shared.settings import load_settings
 from shared.useradm import mrsl_template, get_default_mrsl, client_id_dir
 from shared.vgrid import user_allowed_vgrids
-from shared.vgridaccess import user_allowed_resources
+from shared.vgridaccess import user_allowed_res_exes
 from shared.refunctions import list_0install_res
 
 def signature():
@@ -390,8 +390,7 @@ accompanied by a help link providing further details about the field."""})
             
     configuration.runtimeenvironments = allowed_run_envs
 
-    user_res = user_allowed_resources(configuration, client_id)
-    
+    user_res = user_allowed_res_exes(configuration, client_id)
     
     # Allow any exe unit on all allowed resources
         

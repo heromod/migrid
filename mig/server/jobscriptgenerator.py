@@ -4,7 +4,7 @@
 # --- BEGIN_HEADER ---
 #
 # jobscriptgenerator - [insert a few words of module description on this line]
-# Copyright (C) 2003-2009  The MiG Project lead by Brian Vinter
+# Copyright (C) 2003-2010  The MiG Project lead by Brian Vinter
 #
 # This file is part of MiG.
 #
@@ -27,16 +27,17 @@
 
 """Job script generator"""
 
-import copy
 import os
 import time
 from binascii import hexlify
+from copy import deepcopy
 
 import genjobscriptpython
 import genjobscriptsh
 import genjobscriptjava
-from shared.ssh import copy_file_to_resource
 from shared.fileio import write_file, pickle, make_symlink
+from shared.mrslparser import expand_variables
+from shared.ssh import copy_file_to_resource
 from shared.useradm import client_id_dir
 
 from shared.refunctions import zero_install_replace
@@ -166,7 +167,6 @@ def create_job_script(
     logger,
     ):
 
-    job_dict = {'': ''}
     sessionid = hexlify(open('/dev/urandom').read(32))
     iosessionid = hexlify(open('/dev/urandom').read(32))
     helper_dict_filename = os.path.join(configuration.resource_home,
@@ -176,21 +176,13 @@ def create_job_script(
     logger.debug('create Job script, session ID: %s' % sessionid)
     logger.debug('Job is this: %s' % job)
 
-    # TODO: What decides that only these fields should be copied???
-    #  Since job_dict is used to generate the job script we may very
-    #  well loose some job fields here!
+    # Deep copy job for local changes
+    job_dict = deepcopy(job)
 
-    job_dict['JOB_ID'] = job['JOB_ID']
-    job_dict['EXECUTE'] = job['EXECUTE']
-    job_dict['INPUTFILES'] = job['INPUTFILES']
-    job_dict['OUTPUTFILES'] = job['OUTPUTFILES']
-    job_dict['EXECUTABLES'] = job['EXECUTABLES']
-    job_dict['CPUTIME'] = job['CPUTIME']
-    job_dict['JOBNAME'] = job['JOBNAME']
-    job_dict['ENVIRONMENT'] = job['ENVIRONMENT']
-    job_dict['RUNTIMEENVIRONMENT'] = job['RUNTIMEENVIRONMENT']
     job_dict['MIGSESSIONID'] = sessionid
     job_dict['MIGIOSESSIONID'] = iosessionid
+    if not job_dict.has_key('MAXPRICE'):
+        job_dict['MAXPRICE'] = '0'
 
     # replace requested REs by env. variables if zero-install configured
     if configuration.zero_install_re:
@@ -200,21 +192,10 @@ def create_job_script(
         job_dict['RUNTIMEENVIRONMENT'] = real_res
         job_dict['ENVIRONMENT'].extend(zi_env)
 
-    if job.has_key('JOBTYPE'):
-        job_dict['JOBTYPE'] = job['JOBTYPE']
-
-    # ... Recently added missing fields here, but others may still be missing!
-    # -Jonas
-
-    for field in ['CPUCOUNT', 'NODECOUNT', 'MEMORY', 'DISK']:
-        if job.has_key(field):
-            job_dict[field] = job[field]
-
-    if job_dict.has_key('MAXPRICE'):
-        job_dict['MAXPRICE'] = job['MAXPRICE']
-    else:
-        job_dict['MAXPRICE'] = '0'
-    client_id = str(job['USER_CERT'])
+    # Finally expand reserved job variables like +JOBID+ and +JOBNAME+
+    job_dict = expand_variables(job_dict)
+    # ... no more changes to job_dict from here on
+    client_id = str(job_dict['USER_CERT'])
     client_dir = client_id_dir(client_id)
 
     logger.debug('Modified Job dict: %s' % job_dict)
@@ -428,7 +409,7 @@ def create_arc_job(
         return ('No ARC support!', None)
     if not job['JOBTYPE'] == 'arc':
         return ('Error. This is not an ARC job', None)
-    
+
     client_id = str(job['USER_CERT'])
 
     # we do not want to see empty jobs here. Test as done in create_job_script.
@@ -442,10 +423,10 @@ def create_arc_job(
 
     client_dir = client_id_dir(client_id)
 
+    # Deep copy job for local changes
+    job_dict = deepcopy(job)
+
     # replace requested REs by env.var.s if zero-install configured.
-    # For this purpose, we need to copy the job dictionary (would
-    # otherwise modify it in-place and return it to grid_script).
-    job_copy = copy.deepcopy(job)
 
     if configuration.zero_install_re:
 
@@ -466,7 +447,7 @@ def create_arc_job(
         # end of HARDCODED STRINGS
 
         (zi_env, real_res) = \
-             zero_install_replace(job_copy['RUNTIMEENVIRONMENT'],
+             zero_install_replace(job_dict['RUNTIMEENVIRONMENT'],
                                   arc_provides,
                                   configuration)
 
@@ -476,18 +457,22 @@ def create_arc_job(
             return ('Cannot satisfy runtime env. requirements (ARC+ZI)',
                     None)
         if real_res == [zi_re]:
-        	real_res = [arc_zi_re]
+            real_res = [arc_zi_re]
 
-        job_copy['RUNTIMEENVIRONMENT'] = real_res
-        job_copy['ENVIRONMENT'].extend(zi_env)
+        job_dict['RUNTIMEENVIRONMENT'] = real_res
+        job_dict['ENVIRONMENT'].extend(zi_env)
+
+    # Finally expand reserved job variables like +JOBID+ and +JOBNAME+
+    job_dict = expand_variables(job_dict)
 
     # make symbolic links inside webserver_home:
     #  
     # we need: link to owner's dir. to receive results, 
     #          job mRSL inside sessid_to_mrsl_link_home
     linklist = [(configuration.user_home + client_dir, 
-                 configuration.webserver_home + sessionid)
-               ,(configuration.mrsl_files_dir + client_dir + '/' + str(job['JOB_ID']) + '.mRSL',
+                 configuration.webserver_home + sessionid),
+                (configuration.mrsl_files_dir + client_dir + '/' + \
+                 str(job_dict['JOB_ID']) + '.mRSL',
                  configuration.sessid_to_mrsl_link_home + sessionid + '.mRSL')
                ]
 
@@ -499,7 +484,7 @@ def create_arc_job(
     # be uploaded to sid_redirect/sessionid/job_output/job_id  
 
     try:
-        (xrsl, script, script_name) = mrsltoxrsl.translate(job_copy, sessionid)
+        (xrsl, script, script_name) = mrsltoxrsl.translate(job_dict, sessionid)
 
     except Exception, err:
         # error during translation, pass a message

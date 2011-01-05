@@ -377,7 +377,7 @@ def valid_resource_id_pattern(
     pattern,
     min_length=1,
     max_length=255,
-    extra_chars='.*?/',
+    extra_chars='.*?:',
     ):
     """Verify that supplied pattern only contains characters that
     we consider valid in paths. Valid wild card characters are added

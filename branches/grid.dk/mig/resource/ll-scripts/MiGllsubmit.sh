@@ -3,7 +3,7 @@
 # submit a MiG job to LoadLeveler using llsubmit
 
 # the submit command. A custom path can be specified here:
-SUBMIT="./my_llsubmit -q "
+SUBMIT="llsubmit -q "
 
 ############################################################
 #######            nothing serviceable below             ###
@@ -20,13 +20,12 @@ function usage() {
     echo "file and should have form name=value (otherwise ignored)."
 }
 
-if [ -z $1 -o -z $2 ]; then 
+# MiG will automatically append JOB_SCRIPT argument to the call. We require it
+# to be the second argument, after a class name as the 1st one.
+if [ $# -le 1 ]; then 
     usage
     exit 1
 fi
-
-# MiG will automatically append JOB_SCRIPT argument to the call. We require it
-# to be the second argument, after a class name as the 1st one.
 
 JOB_CLASS=$1
 shift

@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# submit a MiG job to LoadLeveler using llsubmit
+# delete a MiG job from LoadLeveler using llq and llcancel
 
-# the submit command. A custom path can be specified here:
-CANCEL="./my_llcancel "
-QUERY="./my_llq "
+# the needed commands. A custom path can be specified here:
+CANCEL="llcancel"
+QUERY="llq"
 
 ############################################################
 #######            nothing serviceable below             ###
@@ -26,10 +26,11 @@ fi
 
 CLASS=$1
 
-# Find job in queue - prints alphanumeric job PID if not yet done
-job_id=`$QUERY -c "$CLASS" -u "$MIG_SUBMITUSER" -f %jn %id | \
+# Find job in queue - print alphanumeric job PID if still present
+# the command might return several jobs in several lines, we take only one
+job_id=`$QUERY -c "$CLASS" -u "$MIG_SUBMITUSER" -f %st %jn %id | \
         grep -e "$MIG_JOBNAME" | \
-        awk '{print $2}' `
+        awk '{print $3}' | head -1`
 # Delete job if found in queue
 if [ ! -z "$job_id" ]; then
     $CANCEL "$job_id"

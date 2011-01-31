@@ -223,13 +223,12 @@ def create_grid_proxy(cert_path, key_path):
     """
     try:
         
-        import imp
-        csubprocess = imp.load_dynamic("csubprocess", "../java-bin/csubprocess.so")
+              
+        shell_cmd = "../java-bin/generate_proxy %s %s" % (cert_path, key_path)
+        proc = subprocess.Popen(shell_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        (out,_) = proc.communicate()
         
-        shell_cmd = "grid-proxy-init -cert %s -key %s" % (cert_path, key_path)
-        out = csubprocess.cPopen(shell_cmd, 0) # (COMMAND, UID) we need to be able to access server cert 
-        
-        logger.debug(out.replace("\n", "."))
+        logger.info(out.replace("\n", "."))
         path = grid_proxy_path()
         return path
     
@@ -302,7 +301,7 @@ class Ui:
             if not require_user_proxy and \
                 ( not os.path.exists(proxy_path) or Proxy(proxy_path).IsExpired() ):
                 
-                logger.debug("Using the shared default proxy certificate.")
+                logger.info("Using default proxy certificate.")
                                                
                 # Check if there is already a default proxy certificate and get its location
                 proxy_path = grid_proxy_path()
@@ -314,7 +313,7 @@ class Ui:
                     # generate a new one
                     proxy_path = create_grid_proxy(cert_path, key_path)
             else:
-                logger.debug("Using the uploaded personal proxy certificate.")
+                logger.info("Using personal proxy certificate.")
                 
             # proxy constructor might raise an exception as well
             self._proxy = Proxy(proxy_path)

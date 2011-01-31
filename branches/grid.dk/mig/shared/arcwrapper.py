@@ -214,9 +214,9 @@ voms-proxy-init, and can be found in /tmp/x509up_u&lt;your UID&gt;.<br>
         return output_objects
 
 
-def create_grid_proxy(cert_path, key_path):
+def create_grid_proxy(cert_path, key_path, proxy_path):
     """
-    Call the system executable grid-proxy-init to create a minimal proxy cert. 
+    Create a default proxy cert. Uses grid-proxy-init. 
     In this way no additional voms information is added.  
     
     Returns the absolute path of the generated proxy. By standard placed in the /tmp/ folder.
@@ -224,33 +224,15 @@ def create_grid_proxy(cert_path, key_path):
     try:
         
               
-        shell_cmd = "../java-bin/generate_proxy %s %s" % (cert_path, key_path)
+        shell_cmd = "../java-bin/generate_proxy %s %s %s" % (cert_path, key_path, proxy_path)
         proc = subprocess.Popen(shell_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (out,_) = proc.communicate()
-        
         logger.info(out.replace("\n", "."))
-        path = grid_proxy_path()
-        return path
-    
+
     except Exception, e: 
         logger.error("Could not generate a proxy certificate: \n"+str(e))
-        raise e
+        raise
     
-
-def grid_proxy_path():
-    """
-    Call the system executable grid-proxy-info to check if there is a proxy and get its location.
-    
-    Returns the absolute path to the proxy or an empty string if no valid proxy is found.  
-    """
-    
-    shell_cmd = "grid-proxy-info -path"
-    proc = subprocess.Popen(shell_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    (out,_) = proc.communicate()
-    
-    return out.strip()
-
-
 class Ui:
 
     """ARC middleware user interface class."""
@@ -304,14 +286,14 @@ class Ui:
                 logger.info("Using default proxy certificate.")
                                                
                 # Check if there is already a default proxy certificate and get its location
-                proxy_path = grid_proxy_path()
+                proxy_path = config.nordugrid_proxy
                 
                 # it there is no default proxy or it is expired
-                if not proxy_path or Proxy(proxy_path).IsExpired():
+                if not os.path.exists(proxy_path) or Proxy(proxy_path).IsExpired():
                     cert_path = config.nordugrid_cert
                     key_path = config.nordugrid_key
                     # generate a new one
-                    proxy_path = create_grid_proxy(cert_path, key_path)
+                    create_grid_proxy(cert_path, key_path, proxy_path)
             else:
                 logger.info("Using personal proxy certificate.")
                 

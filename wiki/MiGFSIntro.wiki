@@ -1,16 +1,36 @@
-#summary Introduction to MiGFS FUSE based file access
+#summary Introduction to MiG FUSE based remote file access
 #labels Phase-Deploy
 
 = Introduction =
-Once you start seriously using MiG as a user you may end up deciding that that manipulating and using the files in your MiG home directory is cumbersome whether you use the web interface or user scripts. There's a third option available to Linux/UNIX users in that case: the [http://fuse.sourceforge.net/ FUSE] based MiG file system, MiGFS. With FUSE and MiGFS you can locally mount your miG home directory like any other file system and manipulate files and directories with the tools you prefer. This may include moving files around in your file manager or editing your input files in Emacs.
+Once you start seriously using MiG as a user you may end up deciding that that manipulating and using the files in your MiG home directory is cumbersome whether you use the web interface or user scripts. There's a third option available to Linux/UNIX users in that case: the [http://fuse.sourceforge.net/ FUSE] based SSHFS and MiGFS.
+With FUSE and SSHFS or MiGFS you can _locally_ mount your MiG home directory like any other file system and manipulate files and directories with the tools you prefer. This may include moving files around in your file manager or editing your input files in Emacs or other editors.
 
-= Requirements =
-You need a Linux/UNIX operating system with FUSE support and a working (python) MiG user scripts setup to get MiGFS running. For Mac OS X users there's the [http://code.google.com/p/macfuse/ MacFUSE] which should technically work with MiGFS, although that setup has *not* been tested.
+
+= SSHFS (recommended) =
+We recommend the new SSHFS solution for mounting your MiG home even though it is not that well tested with MiG!
+
+== Requirements ==
+You need a Linux/UNIX operating system with FUSE support and a working sshfs installation to get MiG sshfs-mounted: 
+[http://fuse.sourceforge.net/sshfs.html SSHFS]
+
+For Mac OS X users there's the [http://code.google.com/p/macfuse/ MacFUSE] which should technically work with SSHFS, although that setup has *not* been tested.
 Please refer to the FUSE page for instructions on setting up FUSE if you haven't already got it working in e.g. [http://richard.jones.name/google-hacks/gmail-filesystem/gmail-filesystem.html GMailFS] or [http://fuse.sourceforge.net/sshfs.html SSHFS].
 With most recent Linux distributions you simply need to install a fuse-utils package if it is not already installed and load the `fuse` kernel module .
 
-= Getting the code =
+== Instructions ==
+First make sure sshfs works with any UNIX account you have with remote ssh access. 
+All the remaining instructions for setting up and using sshfs with MiG are included in the _ssh settings_ section of your MiG Settings page.
+
+
+= MiGFS (deprecated) =
+If you have problems with sshfs access to MiG you can try out the old fuse and MiG user scripts based MiGFS instead. We recommend using the newer sshfs solution as sshfs is more efficient and widely used, but the instructions for MiGFS are kept as a fall back solution.
+
+== Requirements ==
+You need a Linux/UNIX operating system with FUSE support and a working (python) MiG user scripts setup to get MiGFS running. Please refer to the FUSE instructions in the corresponding sshfs section above.
+
+== Getting the code ==
 Stable releases of MiGFS are available from [http://code.google.com/p/migrid/downloads/list Downloads], but for the more adventurous it is also possible to grab the latest development version directly from [http://code.google.com/p/migrid/source/browse/#svn/trunk/mig/migfs-fuse Source].
 
+== Instructions ==
 Simply download the version that you want and unpack it if necessary.
 Now all the detailed instructions for setting up and testing the code is available in the included README file.

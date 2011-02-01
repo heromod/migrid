@@ -302,4 +302,4 @@ The example above does *not* consider the actual availability of the unzip comma
 
 
 == Remote mounting of MiG home ==
-Please refer to the MiGFSIntro page for details about working with your MiG home files directly on your own computer.
+Please refer to the page about [MiGFSIntro remote Fuse mounting] for details about working with your MiG home files directly on your own computer.

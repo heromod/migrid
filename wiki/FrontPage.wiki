@@ -22,7 +22,7 @@ The following sections provide links to pages ordered by topic, but you can also
  * [SandboxResourceCoding Coding MiG Sandbox Jobs]
  * [MiGInterfaces Overview of available MiG interfaces]
  * [CustomizeWebInterfaces Customizing your MiG web interfaces]
- * [MiGFSIntro Introduction to MiGFS Fuse based file access]
+ * [MiGFSIntro Introduction to Fuse based remote file access]
  * [http://code.google.com/p/cspbuilder/wiki/MiGHowto CSP on MiG with CSPBuilder]
 
 = Resource Owner Topics =

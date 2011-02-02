@@ -130,7 +130,7 @@ $(document).ready( function() {
     			 var index = $("select[name=JOBTYPE]").attr("selectedIndex");
     			 var selected_jobtype = $("select[name=JOBTYPE]").attr("options")[index].value;
     			 if (selected_jobtype == "arc"){
-    				 if($("input[name=RESOURCE]:checked").length){ // Check the number of selected resources
+    				 if(!$("input[name=RESOURCE]:checked").length){ // Check the number of selected resources
     					alert("Please select an ARC cluster to target.")
     					return false;
     				  }

@@ -42,7 +42,7 @@
                 		if(jsonRes[i].object_type=="warning"){
                 			msg = "No valid ARC proxy certificate."+jsonRes[i].text +
                 			"\n\n Do you wish to submit the job using a default proxy "+ 
-                			"certificate with limited priviliges?"; 
+                			"certificate with limited privileges?"; 
                 			submit_without_proxy = confirm(msg);
                 		}
                     };
@@ -124,13 +124,17 @@ $(document).ready( function() {
      );
 
      
-     
   // When clicking the submit job button. If it is an arc job check the proxy.
      $("form#miginput").submit(
     		 function(){
     			 var index = $("select[name=JOBTYPE]").attr("selectedIndex");
     			 var selected_jobtype = $("select[name=JOBTYPE]").attr("options")[index].value;
     			 if (selected_jobtype == "arc"){
+    				 if($("input[name=RESOURCE]:checked").length){ // Check the number of selected resources
+    					alert("Please select an ARC cluster to target.")
+    					return false;
+    				  }
+    				 
        				return check_proxy(); 
     			 }				 
     		 });

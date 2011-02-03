@@ -71,8 +71,15 @@
                 for(i=0; i<jsonRes.length; i++){
                     if(jsonRes[i].object_type=="resource_list"){ 
                         resource_list = jsonRes[i].resources;
+                        //var arc_queue =  new array();
                         for(j=0; j < resource_list.length; j++){
-                            html_resource_list += "<input type='checkbox' name='RESOURCE' value='"+resource_list[j].name+"'>"+resource_list[j].name+"<br />";
+                        	var arc_queue = resource_list[j];
+                        	if(arc_queue.STATUS == "active"){ // if the queue is active put in front
+                        		html_resource_list = "<input type='checkbox' name='RESOURCE' value='"+arc_queue.name+"'>"+arc_queue.name+"<br />"+html_resource_list;
+                        	}
+                        	else{ // else disable it 
+                        		html_resource_list += "<font color='silver' title='"+arc_queue.STATUS+"'><input type='checkbox' name='RESOURCE' value='"+arc_queue.name+"' disabled >"+arc_queue.name+"</font><br />";
+                        	}
                         }
                     }
                 };

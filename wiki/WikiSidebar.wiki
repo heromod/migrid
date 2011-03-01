@@ -1,6 +1,6 @@
 #summary left margin overview
 
-* [FrontPage_new Welcome]
+  * [FrontPage_new Welcome]
   * [GettingStarted Getting started with MiG]
   * [MiGTerminology MiG Terminology]
   * [ContactUs Contact Information]

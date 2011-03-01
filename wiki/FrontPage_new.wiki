@@ -1,5 +1,5 @@
 #summary Wiki front page
-#sidebar FrontPage
+#sidebar WikiSidebar
 
 Welcome to the public MiG Wiki!
 

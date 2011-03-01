@@ -1,4 +1,4 @@
-#summary User-related topics
+#summary User related topics
 
  * [UserFAQ Frequently Asked Questions - users]
  * [UsingJobFiles Using Files in MiG Jobs]

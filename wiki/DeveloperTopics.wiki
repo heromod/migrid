@@ -1,5 +1,8 @@
 #summary Developer topics
 
+= Developer topics =
+This section contains information relevant to MiG developers.
+
  * [MiGRules MiG Project Rules]
  * [MiGCodingStyle MiG Coding Style]
  * [MiGDeveloperAccounts MiG Developer Accounts]

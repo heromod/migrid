@@ -2,7 +2,6 @@
 
   * [GettingStarted Getting started with MiG]
   * [MiGTerminology MiG Terminology]
-  * [MiGDays MiG Days]
   * [ContactUs Contact Information]
   * [UserTopics User Topics]
     * [UserFAQ Frequently Asked Questions - users]
@@ -24,5 +23,7 @@
     * [MiGJobFlow MiG Job Flow]
     * [MiGInterfaceSecurity MiG Interface Security]
   * [http://www.migrid.org Visit the MiG web site]
+  * [MiGDays MiG Days]
+
 
 [http://code.google.com/p/migrid/w/list full page index]

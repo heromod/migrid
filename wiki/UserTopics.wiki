@@ -1,5 +1,7 @@
 #summary User related topics
 
+= User related topics = 
+
  * [UserFAQ Frequently Asked Questions - users]
  * [UsingJobFiles Using Files in MiG Jobs]
  * [MiGOneClickCoding Coding MiG One-Click Jobs]

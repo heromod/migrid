@@ -24,7 +24,6 @@
     * [MiGDeveloperAccounts MiG Developer Accounts]
     * [MiGJobFlow MiG Job Flow]
     * [MiGInterfaceSecurity MiG Interface Security]
-
-[http://www.migrid.org Go to MiG website]
+  * [http://www.migrid.org Visit the MiG web site]
 
 [http://code.google.com/p/migrid/w/list full page index]

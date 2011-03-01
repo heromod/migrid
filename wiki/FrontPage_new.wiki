@@ -7,14 +7,8 @@ On these pages you can communicate with the MiG team and find information about 
 The following sections provide links to pages ordered by topic, but you can also take a look at the [http://code.google.com/p/migrid/w/list full page index].
 
 * [GettingStarted Getting started with MiG]
-* [MiGTerminology MiG Terminology]
-* [MiGDays MiG Days]
-* [ContactUs Contact Information]
-
 * [UserTopics User Topics]
-
 * [ResourceOwnerTopics Resource Owner Topics]
- 
 * [DeveloperTopics Developer topics]
  
 

@@ -27,4 +27,4 @@
 
 [http://code.google.com/p/migrid/w/list full page index]
 
-[http://www.migrid.org the migrid website]
+[http://www.migrid.org Go to MiG website]

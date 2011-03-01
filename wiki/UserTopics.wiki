@@ -1,6 +1,7 @@
 #summary User related topics
 
 = User related topics = 
+This section focuses MiG user projects and issues.
 
  * [UserFAQ Frequently Asked Questions - users]
  * [UsingJobFiles Using Files in MiG Jobs]

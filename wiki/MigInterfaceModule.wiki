@@ -20,7 +20,7 @@ expecting an output file `output.txt`.
 create_job("./my_script.py data_file.txt", input_files="data_file.txt", executables="my_script.py", resource_specifications={"RUNTIMEENVIRONMENT":"PYTHON-2"}) 
 }}}
 The script `my_script.py` is a customised python executable script that takes `data_file.txt` as input. To ensure that python is installed on 
-the target grid resource we specify a runtime environment *PYTHON-2* in the `resource_specifications` dictionary. The dictionary contains fields corresponding to entries in the mRSL file format.     
+the target grid resource we specify a runtime environment `PYTHON-2` in the `resource_specifications` dictionary. The dictionary contains fields corresponding to entries in the mRSL file format.     
 
 
 ==Job management==

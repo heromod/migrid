@@ -1,7 +1,17 @@
-#summary Wiki Welcom to the MiG Wiki
+#summary Wiki Welcome to the MiG Wiki
 
-= Introduction =
-Welcome to the public Minimum intrusion Grid wiki. On these pages you can communicate with the MiG team and find information about the project.
-You can use the sidebar in the left margin to navigate the wiki, but you can also take a look at the [http://code.google.com/p/migrid/w/list full page index].
+= Welcome =
+This is the public Minimum intrusion Grid wiki. On these pages you can communicate with the MiG team and find information about the project.
 
-There's additional information available at the [http://www.migrid.org MiG web site].
+Please use the sidebar to navigate through the pages. You can also take a look at the [http://code.google.com/p/migrid/w/list full page index]. 
+There is additional information available at the [http://www.migrid.org MiG web site].
+
+[GettingStarted Here is how you get started]
+
+[ContactUs Contact information]
+
+
+
+<br>
+<br>
+The MiG crew

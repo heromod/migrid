@@ -1,4 +1,4 @@
-#summary How to use mig interface module
+#summary How to use the mig interface module
 
 =Using the miginterface module=
 To find descriptions of the methods in the mig interface module please use `pydoc miginterface.py`. 

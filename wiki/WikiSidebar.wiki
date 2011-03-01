@@ -23,6 +23,7 @@
     * [MiGDeveloperAccounts MiG Developer Accounts]
     * [MiGJobFlow MiG Job Flow]
     * [MiGInterfaceSecurity MiG Interface Security]
+    * [MigInterfaceModule The MiG Interface Module Developer API]
   * [http://www.migrid.org Visit the MiG web site]
   * [MiGDays MiG Days]
 

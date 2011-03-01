@@ -1,10 +1,9 @@
 #summary left margin overview
 
   * [GettingStarted Getting started with MiG]
-  * [FrontPage General Topics]
-    * [MiGTerminology MiG Terminology]
-    * [MiGDays MiG Days]
-    * [ContactUs Contact Information]
+  * [MiGTerminology MiG Terminology]
+  * [MiGDays MiG Days]
+  * [ContactUs Contact Information]
   * [UserTopics User Topics]
     * [UserFAQ Frequently Asked Questions - users]
     * [UsingJobFiles Using Files in MiG Jobs]

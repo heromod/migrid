@@ -1,4 +1,4 @@
-#summary Wiki front page
+#summary Wiki Welcom to the MiG Wiki
 
 = Introduction =
 Welcome to the public Minimum intrusion Grid wiki. On these pages you can communicate with the MiG team and find information about the project.

@@ -6,34 +6,16 @@ Welcome to the public MiG Wiki!
 On these pages you can communicate with the MiG team and find information about the project.
 The following sections provide links to pages ordered by topic, but you can also take a look at the [http://code.google.com/p/migrid/w/list full page index].
 
-
-* [FrontPage General Topics]
- * [GettingStarted Getting started with MiG]
- * [MiGTerminology MiG Terminology]
- * [MiGDays MiG Days]
- * [ContactUs Contact Information]
+* [GettingStarted Getting started with MiG]
+* [MiGTerminology MiG Terminology]
+* [MiGDays MiG Days]
+* [ContactUs Contact Information]
 
 * [UserTopics User Topics]
- * [UserFAQ Frequently Asked Questions - users]
- * [UsingJobFiles Using Files in MiG Jobs]
- * [MiGOneClickCoding Coding MiG One-Click Jobs]
- * [SandboxResourceCoding Coding MiG Sandbox Jobs]
- * [MiGInterfaces Overview of available MiG interfaces]
- * [CustomizeWebInterfaces Customizing your MiG web interfaces]
- * [MiGFSIntro Introduction to Fuse based remote file access]
- * [http://code.google.com/p/cspbuilder/wiki/MiGHowto CSP on MiG with CSPBuilder]
 
 * [ResourceOwnerTopics Resource Owner Topics]
- * [ResourceOwnerFAQ Frequently Asked Questions - resource owners]
- * [SimpleLocalResource Setting Up Resources]
- * [SettingUpRuntimeEnvironments Setting Up Runtime Environments]
-
+ 
 * [DeveloperTopics Developer topics]
- * [MiGRules MiG Project Rules]
- * [MiGCodingStyle MiG Coding Style]
- * [MiGDeveloperAccounts MiG Developer Accounts]
- * [MiGJobFlow MiG Job Flow]
- * [MiGInterfaceSecurity MiG Interface Security]
-
+ 
 
 There's additional information available at our [http://www.migrid.org main project page].

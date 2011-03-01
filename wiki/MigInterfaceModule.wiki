@@ -5,6 +5,14 @@ The mig interface module is a python API for developing grid applications. Pleas
 
 In this section we will focus on usage of the API.
 
+  * [MigInterfaceModule#create_a_job Creating a job]
+  * [MigInterfaceModule#job_managment Job management]
+  * [MigInterfaceModule#local_mode Local mode]
+  * [MigInterfaceModule#logging Logging]
+  * [MigInterfaceModule#debug_mode Debug mode]
+  * [MigInterfaceModule#examples Examples]
+
+
 ==Using the miginterface module==
 To find descriptions of the methods in the mig interface module please use `pydoc miginterface.py`. 
 

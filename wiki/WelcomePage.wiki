@@ -32,4 +32,4 @@ This is the public Minimum intrusion Grid wiki. On these pages you can communica
   * [http://www.migrid.org Visit the MiG web site]
 
 
-[http://code.google.com/p/migrid/w/list full page index].
+[http://code.google.com/p/migrid/w/list full page index]

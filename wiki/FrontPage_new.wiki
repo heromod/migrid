@@ -1,15 +1,16 @@
 #summary Wiki front page
-#sidebar WikiSidebar
 
-Welcome to the public MiG Wiki!
+Welcome to the public Minimum intrusion Grid Wiki!
 
 On these pages you can communicate with the MiG team and find information about the project.
-The following sections provide links to pages ordered by topic, but you can also take a look at the [http://code.google.com/p/migrid/w/list full page index].
+You can use the sidebar in the left margin to navigate the wiki, but you can also take a look at the [http://code.google.com/p/migrid/w/list full page index].
 
   * [GettingStarted Getting started with MiG]
+  * [MiGTerminology MiG Terminology]
+  * [ContactUs Contact Information] 
   * [UserTopics User Topics]
   * [ResourceOwnerTopics Resource Owner Topics]
   * [DeveloperTopics Developer topics]
  
 
-There's additional information available at our [http://www.migrid.org main project page].
+There's additional information available at the [http://www.migrid.org MiG web site].

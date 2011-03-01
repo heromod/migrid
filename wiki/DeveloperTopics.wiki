@@ -8,3 +8,4 @@ This section contains information relevant to MiG developers.
  * [MiGDeveloperAccounts MiG Developer Accounts]
  * [MiGJobFlow MiG Job Flow]
  * [MiGInterfaceSecurity MiG Interface Security]
+ * [MiGInterfaceModule The MiG Interface Module Developer API]

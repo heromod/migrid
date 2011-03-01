@@ -1,5 +1,4 @@
 #summary left margin overview
-#sidebar FronPage_new
 
 * [FrontPage General Topics]
  * [GettingStarted Getting started with MiG]

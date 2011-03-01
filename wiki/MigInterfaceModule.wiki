@@ -1,6 +1,11 @@
 #summary How to use the mig interface module
 
-=Using the miginterface module=
+=The mig interface module=
+The mig interface module is a python API for developing grid applications. Please refer to the [http://code.google.com/p/migrid/source/browse/trunk/user-projects/miginterface/README README] for a more in depth introduction. It is available for svn checkout in the repository subfolder [http://code.google.com/p/migrid/source/browse/trunk/user-projects/#user-projects%2Fmiginterface miginterface].
+
+In this section we will focus on usage of the API.
+
+==Using the miginterface module==
 To find descriptions of the methods in the mig interface module please use `pydoc miginterface.py`. 
 
 ==Creating a job==

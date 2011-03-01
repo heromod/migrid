@@ -3,12 +3,19 @@
 = Welcome =
 This is the public Minimum intrusion Grid wiki. On these pages you can communicate with the MiG team and find information about the project.
 
-Please use the sidebar to navigate through the pages. You can also take a look at the [http://code.google.com/p/migrid/w/list full page index]. 
+Please use the sidebar to navigate through the pages. You can also take a look at the [http://code.google.com/p/migrid/w/list full page index].
 
 
 [GettingStarted Here is how you get started]
 
-[ContactUs Contact information]
+[UserTopics User topics] Here you can see information related to user projects.
+
+[ResourceOwnerTopics Resource owner topics] This section covers information about resource configuration on MiG.
+
+[DeveloperTopics Developer topics] Relevant information for grid developers.
+
+
+[ContactUs Contact information] 
 
 
 

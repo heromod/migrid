@@ -1,7 +1,7 @@
 #summary left margin overview
 
+  * [GettingStarted Getting started with MiG]
   * [FrontPage General Topics]
-    * [GettingStarted Getting started with MiG]
     * [MiGTerminology MiG Terminology]
     * [MiGDays MiG Days]
     * [ContactUs Contact Information]

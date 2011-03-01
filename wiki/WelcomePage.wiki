@@ -5,20 +5,31 @@ This is the public Minimum intrusion Grid wiki. On these pages you can communica
 
 Please use the sidebar to navigate through the pages. You can also take a look at the [http://code.google.com/p/migrid/w/list full page index].
 
+  * [FrontPage_new Welcome to MiG]
+  * [GettingStarted Getting started with MiG]
+  * [MiGTerminology MiG Terminology]
+  * [ContactUs Contact Information]
+  * [UserTopics User Topics]
+    * [UserFAQ Frequently Asked Questions - users]
+    * [UsingJobFiles Using Files in MiG Jobs]
+    * [MiGOneClickCoding Coding MiG One-Click Jobs]
+    * [SandboxResourceCoding Coding MiG Sandbox Jobs]
+    * [MiGInterfaces Overview of available MiG interfaces]
+    * [CustomizeWebInterfaces Customizing your MiG web interfaces]
+    * [MiGFSIntro Introduction to Fuse based remote file access]
+    * [http://code.google.com/p/cspbuilder/wiki/MiGHowto CSP on MiG with CSPBuilder]
+  * [ResourceOwnerTopics Resource Owner Topics]
+    * [ResourceOwnerFAQ Frequently Asked Questions - resource owners]
+    * [SimpleLocalResource Setting Up Resources]
+    * [SettingUpRuntimeEnvironments Setting Up Runtime Environments]
+  * [DeveloperTopics Developer topics]
+    * [MiGRules MiG Project Rules]
+    * [MiGCodingStyle MiG Coding Style]
+    * [MiGDeveloperAccounts MiG Developer Accounts]
+    * [MiGJobFlow MiG Job Flow]
+    * [MiGInterfaceSecurity MiG Interface Security]
+    * [MigInterfaceModule The MiG Interface developer API] 
+  * [MiGDays MiG Days]
+  * [http://www.migrid.org Visit the MiG web site]
 
-[GettingStarted Here is how you get started]
-
-[UserTopics User topics] Here you can see information related to user projects.
-
-[ResourceOwnerTopics Resource owner topics] This section covers information about resource configuration on MiG.
-
-[DeveloperTopics Developer topics] Relevant information for grid developers.
-
-
-[ContactUs Contact information] 
-
-
-
-<br>
-<br>
-The MiG crew
+[http://code.google.com/p/migrid/w/list full page index]

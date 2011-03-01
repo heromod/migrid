@@ -4,7 +4,7 @@
 This is the public Minimum intrusion Grid wiki. On these pages you can communicate with the MiG team and find information about the project.
 
 Please use the sidebar to navigate through the pages. You can also take a look at the [http://code.google.com/p/migrid/w/list full page index]. 
-There is additional information available at the [http://www.migrid.org MiG web site].
+
 
 [GettingStarted Here is how you get started]
 

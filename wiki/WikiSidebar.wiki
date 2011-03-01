@@ -1,4 +1,4 @@
-#summary left margin overview
+#summary MiG wiki overview
 
   * [FrontPage_new Welcome to MiG]
   * [GettingStarted Getting started with MiG]
@@ -23,9 +23,8 @@
     * [MiGDeveloperAccounts MiG Developer Accounts]
     * [MiGJobFlow MiG Job Flow]
     * [MiGInterfaceSecurity MiG Interface Security]
-    * [MigInterfaceModule The MiG Interface Developer API]
-  * [http://www.migrid.org Visit the MiG web site]
+    * [MigInterfaceModule The MiG Interface Developer API] 
   * [MiGDays MiG Days]
-
+  * [http://www.migrid.org Visit the MiG web site]
 
 [http://code.google.com/p/migrid/w/list full page index]

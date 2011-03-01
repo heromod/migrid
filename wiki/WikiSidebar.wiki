@@ -5,7 +5,6 @@
     * [MiGTerminology MiG Terminology]
     * [MiGDays MiG Days]
     * [ContactUs Contact Information]
-
   * [UserTopics User Topics]
     * [UserFAQ Frequently Asked Questions - users]
     * [UsingJobFiles Using Files in MiG Jobs]
@@ -15,12 +14,10 @@
     * [CustomizeWebInterfaces Customizing your MiG web interfaces]
     * [MiGFSIntro Introduction to Fuse based remote file access]
     * [http://code.google.com/p/cspbuilder/wiki/MiGHowto CSP on MiG with CSPBuilder]
-
   * [ResourceOwnerTopics Resource Owner Topics]
     * [ResourceOwnerFAQ Frequently Asked Questions - resource owners]
     * [SimpleLocalResource Setting Up Resources]
     * [SettingUpRuntimeEnvironments Setting Up Runtime Environments]
-
   * [DeveloperTopics Developer topics]
     * [MiGRules MiG Project Rules]
     * [MiGCodingStyle MiG Coding Style]
@@ -28,6 +25,5 @@
     * [MiGJobFlow MiG Job Flow]
     * [MiGInterfaceSecurity MiG Interface Security]
 
-
-  * [http://code.google.com/p/migrid/w/list full page index]
-  * [http://www.migrid.org main project page]
+[http://code.google.com/p/migrid/w/list full page index]
+[http://www.migrid.org main project page]

@@ -25,6 +25,6 @@
     * [MiGJobFlow MiG Job Flow]
     * [MiGInterfaceSecurity MiG Interface Security]
 
-[http://code.google.com/p/migrid/w/list full page index]
-
 [http://www.migrid.org Go to MiG website]
+
+[http://code.google.com/p/migrid/w/list full page index]

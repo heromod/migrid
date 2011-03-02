@@ -1,6 +1,6 @@
 #summary MiG wiki overview
 
-  * [FrontPage_new Welcome to MiG]
+  * [WelcomePage Welcome to MiG]
   * [GettingStarted Getting started with MiG]
   * [MiGTerminology MiG Terminology]
   * [ContactUs Contact Information]

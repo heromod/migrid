@@ -5,9 +5,9 @@
 
 MiG is developed mainly by people from the E-science center at the University of Copenhagen (KU). We are always available through email but if you happen to be anyway near Copenhagen and want to talk we can probably set up a real life meeting, too. 
 
-Please contact Project leader Brian Vinter (brian.vinter AT gmail.com) to make an appointment or to get more information about getting your own new or existing project on MiG.
+Please contact Project leader Brian Vinter (brian DOT vinter AT gmail DOT com) to make an appointment or to get more information about getting your own new or existing project on MiG.
 
 Bug reports and specific technical questions about the MiG middleware or support for our production Grid, are more efficiently handled on our [http://groups.google.com/group/migrid Google Group]
 We recommend using the group for questions in order to track the discussions and let the community around MiG evolve: You are probably not alone with your question!
 
-If you don't want to use the list it or don't think that your topic belongs there, you are welcome to contact one of the MiG developers directly instead. If You just send an email to e.g. Jonas Bardino (jonas.bardino AT gmail.com), we will forward it to the appropriate developer.
+If you don't want to use the list it or don't think that your topic belongs there, you are welcome to contact one of the MiG developers directly instead. If You just send an email to e.g. Jonas Bardino (jonas DOT bardino AT gmail DOT com), we will forward it to the appropriate developer.

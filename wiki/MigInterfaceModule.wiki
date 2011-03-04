@@ -3,6 +3,11 @@
 =The mig interface module=
 The mig interface module is a python API for developing grid applications. Please refer to the [http://code.google.com/p/migrid/source/browse/trunk/user-projects/miginterface/README README] for a more in depth introduction. It is available for svn checkout in the repository subfolder [http://code.google.com/p/migrid/source/browse/trunk/user-projects/#user-projects%2Fmiginterface miginterface].
 
+
+==Using the miginterface module==
+To find descriptions of the methods in the mig interface module please use `pydoc miginterface.py`. 
+
+Here we will cover the following areas:
   * [MigInterfaceModule#Create_a_job Creating a job]
   * [MigInterfaceModule#Job_managment Job management]
   * [MigInterfaceModule#Local_mode Local mode]
@@ -10,9 +15,6 @@ The mig interface module is a python API for developing grid applications. Pleas
   * [MigInterfaceModule#Debug_mode Debug mode]
   * [MigInterfaceModule#Examples Examples]
 
-
-==Using the miginterface module==
-To find descriptions of the methods in the mig interface module please use `pydoc miginterface.py`. 
 
 ==Creating a job==
 A new job grid job is created by the method `create_job()` which returns a job id.

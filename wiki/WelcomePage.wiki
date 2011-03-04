@@ -4,7 +4,7 @@
 This is the public Minimum intrusion Grid wiki. On these pages you can communicate with the MiG team and find information about the project.
 
 
-  * [FrontPage_new Welcome to MiG]
+  * Welcome to MiG
   * [GettingStarted Getting started with MiG]
   * [MiGTerminology MiG Terminology]
   * [ContactUs Contact Information]

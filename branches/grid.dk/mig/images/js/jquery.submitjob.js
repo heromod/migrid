@@ -109,8 +109,7 @@
 
 $(document).ready( function() {
    
-// load arc resource queues
-	load_arc_resources();
+
 	
 // When the job type is changed we update the RE options
      $("select[name=JOBTYPE] option").click(
@@ -171,6 +170,10 @@ $(document).ready( function() {
             show_fields(simple_view);
             }
         );
+    
+ // load arc resource queues
+	load_arc_resources();
+    
   });
   
   /*    

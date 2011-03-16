@@ -58,7 +58,7 @@ cancel_job(job_id)
 cancel_jobs(job_ids)
 }}}
 
-Download file. Destination is optional.
+Download file. Target destination is optional.
 {{{
 get_file(filename, [destination])
 }}}

@@ -45,7 +45,7 @@ Then you can send us the generated public key, ~/.mig/key.pub , and use you MiG 
 
 
 = Server specs =
-Most of our servers run Debian Stable on AMD64 systems:
+Our developer servers run Debian Stable on AMD64 systems:
 
  * AMD Athlon(tm) 64 Processor 3000+
  * 1 GB RAM

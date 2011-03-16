@@ -25,9 +25,10 @@ This tells the grid job to execute the shell command `echo hello grid > output.t
 expecting an output file `output.txt`.  
 
 {{{
-create_job("./my_script.py data_file.txt", input_files="data_file.txt", executables="my_script.py", resource_specifications={"RUNTIMEENVIRONMENT":"PYTHON-2"}) 
+create_job("$PYTHON my_script.py data_file.txt", input_files=["data_file.txt","my_script.py"],
+resource_specifications={"RUNTIMEENVIRONMENT":"PYTHON-2"}) 
 }}}
-The script `my_script.py` is a customised python executable script that takes `data_file.txt` as input. To ensure that python is installed on 
+The script `my_script.py` is a customised python script that takes `data_file.txt` as input. To ensure that python is installed on 
 the target grid resource we specify a runtime environment `PYTHON-2` in the `resource_specifications` dictionary. The dictionary contains fields corresponding to entries in the mRSL file format.     
 
 

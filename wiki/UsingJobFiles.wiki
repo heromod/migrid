@@ -301,5 +301,9 @@ The same methods can be applied for output files by packing them up as the last 
 The example above does *not* consider the actual availability of the unzip command on the resource. In principle it should request an UNZIP runtime environment, which is not yet available, though.
 
 
+== SFTP Access to your MiG home ==
+We provide sftp access to MiG homes as a part of our sshfs support mentioned below. Thus it is possible to open your MiG home through any sftp client that supports ssh-keys. Please refer to the instructions on the ssh settings tab on your Settings page.
+
+
 == Remote mounting of MiG home ==
 Please refer to the page about [MiGFSIntro remote Fuse mounting] for details about working with your MiG home files directly on your own computer.

@@ -37,5 +37,5 @@ You can of course still change the password yourself as soon as you receive the 
 
 If you submit a request with different fields it will result in a new account and thus no access to your old jobs, files and permissions and if you use the same fields but a different password we will have to reject the request.
 
-Please refer to the standard procedure in case you forgot your original password: ForgottenPassword.
+Please refer to the standard procedure in case you [ForgottenPassword forgot your original password].
  

@@ -11,3 +11,4 @@ This section focuses MiG user projects and issues.
  * [CustomizeWebInterfaces Customizing your MiG web interfaces]
  * [MiGFSIntro Introduction to Fuse based remote file access]
  * [http://code.google.com/p/cspbuilder/wiki/MiGHowto CSP on MiG with CSPBuilder]
+ * [RenewCertificate Instructions for renewing your MiG certificate]

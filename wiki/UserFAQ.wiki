@@ -84,6 +84,12 @@ access on the Resources page or on the resource monitors.
 
 After downloading the user scripts from your private MiG pages you may experience problems actually using the scripts if you haven't got the necessary tools or configuration. Please refer to the [http://sites.google.com/site/minimumintrusiongrid/tutorials-and-talks user scripts intro] for full information about the prerequisites and configuration.
 
+
+== I forgot my MiG certificate password - what do I do? ==
+
+You need your password for at least the user scripts and for renewing your certificate when it expires. Please refer to ForgottenPassword for further information.
+
+
 ----
 
 Please [ContactUs contact us] if your question is not answered above!

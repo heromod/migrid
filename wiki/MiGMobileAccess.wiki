@@ -42,3 +42,10 @@ Untested but the procedure for Android should be usable again, only with a diffe
 Now you can fire up Firefox on the device and surf to the certificate protected MiG pages. Enjoy!
 
 Please note that Mobile Firefox does _not_ yet support password protecting the certificate store, so you need to leave the password empty for now. Hopefully Mozilla will include the certificate management interface and master password support at some point, but until then the above should be a work around. Please beware of the security implications of this store without a password and [ReportAbuse report any potential abuse].
+
+
+== Background ==
+Additional information can be found at:
+http://groups.google.com/group/migrid/browse_thread/thread/46d0ea995beb6904?hl=en
+http://code.google.com/p/android/issues/detail?id=8196
+http://code.google.com/p/chromium/wiki/LinuxCertManagement

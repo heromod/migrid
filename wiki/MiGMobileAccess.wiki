@@ -46,6 +46,6 @@ Please note that Mobile Firefox does _not_ yet support password protecting the c
 
 == Background ==
 Additional information can be found at:
-http://groups.google.com/group/migrid/browse_thread/thread/46d0ea995beb6904?hl=en
-http://code.google.com/p/android/issues/detail?id=8196
-http://code.google.com/p/chromium/wiki/LinuxCertManagement
+ * http://groups.google.com/group/migrid/browse_thread/thread/46d0ea995beb6904?hl=en
+ * http://code.google.com/p/android/issues/detail?id=8196
+ * http://code.google.com/p/chromium/wiki/LinuxCertManagement

@@ -11,7 +11,7 @@ Instructions for each supported platform follows here. Feel free to add more if 
 == Android ==
 These step-by-step instructions were tested on a HTC Desire connected to a Linux box but they should work on other recent Android devices and computers with minor changes.
 
- * install Firefox from the market (may require Android 2.2 or later)
+ * install Firefox from the market (may require Android 2.2 or later) and move it to SD card for write access
  * connect android device with a usb cable to e.g. a linux box with p12util and certutil installed (libnss3-tools package on deb based systems).
  * select disk drive mode on the device and mount it on the computer when it shows up (this example assumes mount at $MNT)
  * open a shell, change to firefox profile dir and import user and CA certificate directly on the device disk:

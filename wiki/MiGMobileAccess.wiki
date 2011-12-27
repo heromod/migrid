@@ -14,13 +14,14 @@ These step-by-step instructions were tested on a HTC Desire connected to a Linux
  * install Firefox from the market (may require Android 2.2 or later) and move it to SD card for write access
  * connect android device with a usb cable to e.g. a linux box with p12util and certutil installed (libnss3-tools package on deb based systems).
  * select disk drive mode on the device and mount it on the computer when it shows up (this example assumes mount at $MNT)
- * open a shell, change to firefox profile dir and import user and CA certificate directly on the device disk:
+ * open a shell, change to firefox profile dir and import user and CA certificate directly on the device disk. Hit enter twice if you don't use master password or enter the master password once:
 {{{
 cd $MNT/Android/data/org.mozilla.firefox/files/mozilla/*.default/
 pk12util -i ~/.mig/cert.p12 -d sql:.
-[no password (twice) and then your MiG certificate password]
+[optional master password mentioned above and then your MiG certificate password]
 certutil -A -d sql:. -n 'MiG CA' -t "CT,," -i ~/.mig/cacert.pem
 }}}
+or enter the Firefox master password once and your MiG certificate password if you enabled master password in your mobile Firefox.
  * optionally verify that certificates are now in the certificate store:
 {{{
 certutil -L -d sql:.
@@ -41,7 +42,8 @@ Untested but the procedure for Android should be usable again, only with a diffe
 == Conclusion ==
 Now you can fire up Firefox on the device and surf to the certificate protected MiG pages. Enjoy!
 
-Please note that Mobile Firefox does _not_ yet support password protecting the certificate store, so you need to leave the password empty for now. Hopefully Mozilla will include the certificate management interface and master password support at some point, but until then the above should be a work around. Please beware of the security implications of this store without a password and [ReportAbuse report any potential abuse].
+Please note that old Firefox versions did _not_ support password protecting the certificate store, so you needed to leave the password empty there. With recent versions you can enable master password in Firefox and use it during import.
+Hopefully Mozilla will include the full certificate management interface   at some point, but until then the above should be a work around. Please beware of the security implications of storing without a password and [ContactUs report any potential abuse].
 
 
 == Background ==

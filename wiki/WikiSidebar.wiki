@@ -15,7 +15,7 @@
     * [ResourceOwnerFAQ Frequently Asked Questions - resource owners]
     * [SimpleLocalResource Setting Up Resources]
     * [SettingUpRuntimeEnvironments Setting Up Runtime Environments]
-  * [DeveloperTopics Developer topics]
+  * [DeveloperTopics Developer Topics]
     * [MiGRules MiG Project Rules]
     * [MiGCodingStyle MiG Coding Style]
     * [MiGDeveloperAccounts MiG Developer Accounts]

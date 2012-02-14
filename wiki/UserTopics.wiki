@@ -1,6 +1,6 @@
 #summary User related topics
 
-= User related topics = 
+= User Related Topics = 
 This section focuses MiG user projects and issues.
 
  * [UserFAQ Frequently Asked Questions - users]

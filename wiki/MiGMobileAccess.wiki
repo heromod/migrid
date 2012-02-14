@@ -43,7 +43,10 @@ Untested but the procedure for Android should be usable again, only with a diffe
 Now you can fire up Firefox on the device and surf to the certificate protected MiG pages. Enjoy!
 
 Please note that old Firefox versions did _not_ support password protecting the certificate store, so you needed to leave the password empty there. With recent versions you can enable master password in Firefox and use it during import.
-Hopefully Mozilla will include the full certificate management interface   at some point, but until then the above should be a work around. Please beware of the security implications of storing without a password and [ContactUs report any potential abuse].
+Hopefully Mozilla will include the full certificate management interface   at some point, but until then the above should be a work around. 
+Recently a [https://addons.mozilla.org/en-US/mobile/addon/cert-manager/ certificate manager add-on] was released for Android. If it works as describred it may be a simpler solution to getting your mobile Firefox on MiG.
+
+Please *beware* of the security implications of storing without a password and [ContactUs report any potential abuse].
 
 
 == Background ==

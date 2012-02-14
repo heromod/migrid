@@ -1,6 +1,6 @@
 #summary Resource owner topics
 
-= Resource owner topics=
+= Resource Owner Topics=
 This section provides information related to MiG resource configuration.
 
  * [ResourceOwnerFAQ Frequently Asked Questions - resource owners]

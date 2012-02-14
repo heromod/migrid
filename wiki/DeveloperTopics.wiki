@@ -1,6 +1,6 @@
 #summary Developer topics
 
-= Developer topics =
+= Developer Topics =
 This section contains information relevant to MiG developers.
 
  * [MiGRules MiG Project Rules]

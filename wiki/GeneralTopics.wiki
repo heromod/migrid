@@ -1,0 +1,9 @@
+#summary General topics
+
+= General topics =
+This section contains general MiG information.
+
+ * [CustomizeWebInterfaces Customizing your MiG web interfaces]
+ * [MiGInterfaces Overview of available MiG interfaces]
+ * [RenewCertificate Renewing your MiG certificate]
+ * [MiGMobileAccess Mobile Access to MiG]

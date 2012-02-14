@@ -27,7 +27,6 @@
     * [MiGInterfaces Overview of available MiG interfaces]
     * [RenewCertificate Renewing your MiG certificate]
     * [MiGMobileAccess Mobile Access to MiG]
-
   * [MiGDays MiG Days]
   * [http://www.migrid.org Visit the MiG web site]
 

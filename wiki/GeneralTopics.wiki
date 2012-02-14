@@ -1,6 +1,6 @@
 #summary General topics
 
-= General topics =
+= General Topics =
 This section contains general MiG information.
 
  * [CustomizeWebInterfaces Customizing your MiG web interfaces]

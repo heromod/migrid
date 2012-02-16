@@ -24,6 +24,22 @@ It is not uncommon to experience problems with input and output files not showin
 File handling is actually simpler in MiG than in most other Grids, because files can simply be referenced directly from your MiG home directory. However, there still are a few pitfalls when trying to handle e.g. directories. Please take a look at UsingJobFiles and the different MiG user tutorials for detailed examples of the possible file handling methods. If you still can't manage to get your files into the desired locations for jobs, please [ContactUs contact us] so that we can help you and possibly expand the documentation.
 
 
+== Why do my jobs fail with `error while loading shared libraries: XYZ: failed to map segment from shared object: Cannot allocate memory` ==
+MiG resources generally enforce time, memory and disk limits requested in the job. Thus you likely need to request enough memory to allow the the job to run.
+If in doubt you may be able to experiment with a local bash shell and the built-in ulimit command:
+{{{
+bash
+MEMORY=10
+ulimit -v $((MEMORY*1024))
+python
+}}}
+It will fail with more or less obvious memory allocation errors if your MEMORY value is too small:
+{{{
+python: error while loading shared libraries: libssl.so.1.0.0: failed to map segment from shared object: Cannot allocate memory
+}}}
+Exit and keep bumping the value until you are some megs above what your command needs to make sure it will run even with a little overhead.
+
+
 == Why do my jobs sometimes finish with output like `bash: command not found: XYZ`? ==
 
 You most likely experience the fact that jobs can't expect any particular software to be available on the resources unless explicitly advertised. If you need e.g. Java in your jobs you may be lucky to find it on a random resource, but there is no guaranty unless your job requested a corresponding Runtime Environment so that the job will only end up on resources advertising that Runtime Environment.

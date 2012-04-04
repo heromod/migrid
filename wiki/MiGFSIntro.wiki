@@ -13,7 +13,7 @@ We recommend the new SSHFS solution for mounting your MiG home even though it is
 You need a Linux/UNIX operating system with FUSE support and a working sshfs installation to get MiG sshfs-mounted: 
 [http://fuse.sourceforge.net/sshfs.html SSHFS]
 
-For Mac OS X users there's the [http://code.google.com/p/macfuse/ MacFUSE] which should technically work with SSHFS, although that setup has *not* been tested.
+For Mac OS X users there's the [http://code.google.com/p/macfuse/ MacFUSE] which should work with SSHFS.
 Please refer to the FUSE page for instructions on setting up FUSE if you haven't already got it working in e.g. [http://richard.jones.name/google-hacks/gmail-filesystem/gmail-filesystem.html GMailFS] or [http://fuse.sourceforge.net/sshfs.html SSHFS].
 With most recent Linux distributions you simply need to install a fuse-utils package if it is not already installed and load the `fuse` kernel module .
 

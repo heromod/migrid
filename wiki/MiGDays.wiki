@@ -22,8 +22,28 @@ We expect to start with coffee at 10 and will invite a number of speakers to tel
 
 Those interested will visit the Beer Festival afterwards.
 
+=== Topics ===
+
+Meeting Topics (at 10):
+ # Welcome and coffee
+ # Short presentation of each participant and active projects
+ # Presentations of active or related projects (see below)
+ # Other topics that may come up
+ # Planning for the future
+
+_Proposed Presentations:_
+ * Short status on current and future MiG projects (Brian Vinter)
+ * VM integration in MiG with VNC access
+ * VGrid collaboration tools
+ * MiG sftp/sshfs support
+ * a DropBox/SpiderOak/...-like synchronized storage service for MiG
+ * The MiG user interface library
+ * ...
+
 _Further details will be announced later._
 
+
+= Previous MiG working Days =
 
 == Friday the 7th of May 2010 at the E-Science Center / DIKU ==
 
@@ -40,7 +60,7 @@ Meeting Topics (at 10):
  # Other topics that may come up
  # Planning for the future
 
-_Proposed presentations:_
+Presentations:
  * Short status on current and future MiG projects (Brian Vinter)
  * Distributed File System for failover MiG servers (Jan Wiberg)
  * ESS Portal using VGrid (Jost Berthold)
@@ -58,8 +78,6 @@ Working groups (e.g. at 14)
  * Other topics?
  * Release new version of the code on Google Code Project
 
-
-= Previous MiG working Days =
 
 == Friday the 6th of March 2009 at the E-Science Center / DIKU ==
 

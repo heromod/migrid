@@ -38,6 +38,7 @@ _Proposed Presentations:_
  * MiG sftp/sshfs support
  * a DropBox/SpiderOak/...-like synchronized storage service for MiG
  * The MiG user interface library
+ * CphVB service in MiG
  * ...
 
 _Further details will be announced later._

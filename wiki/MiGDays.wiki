@@ -11,25 +11,31 @@ On a previous MiG Working Day, we discussed the future collaboration possibiliti
 
 However, there is no requirement whatsoever that you participate at all even if you are a core member of the MiG team, and the participation can be limited or full time as you see fit.
 
-We are planning the next MiG Day to take place on the 11th of May. 
+We are planning the next MiG Day to take place on the 11th of May at NBI. 
 
 As usual we will go to the [http://www.beerfestival.dk/ Beer Festival] afterwards.
 
 
 == Friday the 11th of May 2012 at the NBI ==
-We are working on hosting the next MiG Day  at NBI and it will take place at the 11th of May.
-We expect to start with coffee at 10 and will invite a number of speakers to tell about recent developments in MiG as well as the ongoing and future projects.
+We are hosting the next MiG Day at NBI, Auditorium A, and it will take place at the 11th of May. 
+We've invited a number of speakers to tell about the latest developments in relation to MiG as well as the ongoing and future projects.
+
+We are not allowed to drink or eat in the auditorium so coffee and lunch will be served elsewhere. Meet us at Brian's office (NBI building C, third floor) 10-15 minutes to 10 if you want to grab a quick coffee before the meeting or join us at 10.00 in auditorium A otherwise.
 
 Those interested will visit the Beer Festival afterwards.
 
 === Topics ===
 
-Meeting Topics (at 10):
- # Welcome and coffee
- # Short presentation of each participant and active projects
- # Presentations of active or related projects (see below)
- # Other topics that may come up
- # Planning for the future
+Meeting Topics:
+ # 9.45-10.00 Optional coffee
+ # 10.00 Welcome in Auditorium A
+ # 10.15 Morning session of talks
+ # 11.45 Lunch
+ # 12.15 Afternoon session of talks
+ # 13.30 Round up and planning for the future
+ # 14.00 Optional ESS Talk at HCØ: Data analysis in real time?
+ # ??.?? Optional participation in the Beer Festival 
+
 
 _Proposed Presentations:_
  * Short status on current and future MiG projects (Brian Vinter)

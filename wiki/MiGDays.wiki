@@ -37,16 +37,19 @@ Meeting Topics:
  # ??.?? Optional participation in the Beer Festival 
 
 
-_Proposed Presentations:_
- * Short status on current and future MiG projects (Brian Vinter)
- * VM integration in MiG with VNC access
- * VGrid collaboration tools
- * MiG sftp/sshfs support
- * a DropBox/SpiderOak/...-like synchronized storage service for MiG
+Confirmed Talks:
+ * Short Status on Current and Future MiG Projects (Brian Vinter)
+ * MiG Home SFTP/SSHFS Access (Jonas Bardino)
+ * A DropBox/SpiderOak/...-like Synchronized Storage Service for MiG (Brian Vinter)
+ * Virtual Machines with VNC Access (Simon A. F. Lund)
+ * PyCSP on MiG (Rune M. Friborg)
+ * CphVB Service in MiG (Kenneth Skovhede)
+ * VGrid Collaboration Tools (Jonas Bardino)
+
+_Proposed Talks:_
  * The MiG user interface library
- * CphVB service in MiG
- * PyCSP on MiG
  * ...
+
 
 === Sign up ===
 Please send a mail to Jonas (ContactUs) if you plan to attend, so that we can make proper preparations in terms of a suitable meeting room and refreshments.

@@ -46,10 +46,6 @@ Confirmed Talks:
  * CphVB Service in MiG (Kenneth Skovhede)
  * VGrid Collaboration Tools (Jonas Bardino)
 
-_Proposed Talks:_
- * The MiG user interface library
- * ...
-
 
 === Sign up ===
 Please send a mail to Jonas (ContactUs) if you plan to attend, so that we can make proper preparations in terms of a suitable meeting room and refreshments.

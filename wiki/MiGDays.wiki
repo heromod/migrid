@@ -11,12 +11,19 @@ On a previous MiG Working Day, we discussed the future collaboration possibiliti
 
 However, there is no requirement whatsoever that you participate at all even if you are a core member of the MiG team, and the participation can be limited or full time as you see fit.
 
-We are planning the next MiG Day to take place on the 11th of May at NBI. 
+We are planning the next MiG Day to take place in May next year at NBI. 
 
 As usual we will go to the [http://www.beerfestival.dk/ Beer Festival] afterwards.
 
+== May 2013 at NBI ==
+We are hosting the next MiG Day at NBI...
 
-== Friday the 11th of May 2012 at the NBI ==
+Those interested will visit the Beer Festival afterwards.
+
+
+= Previous MiG working Days =
+
+== Friday the 11th of May 2012 at NBI ==
 We are hosting the next MiG Day at NBI, Auditorium A, and it will take place at the 11th of May. 
 We've invited a number of speakers to tell about the latest developments in relation to MiG as well as the ongoing and future projects.
 
@@ -37,23 +44,15 @@ Meeting Topics:
  # ??.?? Optional participation in the Beer Festival 
 
 
-Confirmed Talks:
+Talks:
  * Short Status on Current and Future MiG Projects (Brian Vinter)
+ * VGrid Collaboration Tools (Jonas Bardino)
+ * PyCSP on MiG (Rune M. Friborg)
+ * Virtual Machines with VNC Access (Simon A. F. Lund)
+ * CphVB Service in MiG (Kenneth Skovhede)
  * MiG Home SFTP/SSHFS Access (Jonas Bardino)
  * A DropBox/SpiderOak/...-like Synchronized Storage Service for MiG (Brian Vinter)
- * Virtual Machines with VNC Access (Simon A. F. Lund)
- * PyCSP on MiG (Rune M. Friborg)
- * CphVB Service in MiG (Kenneth Skovhede)
- * VGrid Collaboration Tools (Jonas Bardino)
 
-
-=== Sign up ===
-Please send a mail to Jonas (ContactUs) if you plan to attend, so that we can make proper preparations in terms of a suitable meeting room and refreshments.
-
-_Further details will be announced later._
-
-
-= Previous MiG working Days =
 
 == Friday the 7th of May 2010 at the E-Science Center / DIKU ==
 

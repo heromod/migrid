@@ -23,6 +23,9 @@ Those interested will visit the Beer Festival afterwards.
 
 = Previous MiG working Days =
 
+== Past Talks ==
+Slides from talks at previous MiG Days are available under [http://sites.google.com/site/minimumintrusiongrid/tutorials-and-talks Tutorials and talks] on the main project page.
+
 == Friday the 11th of May 2012 at NBI ==
 We are hosting the next MiG Day at NBI, Auditorium A, and it will take place at the 11th of May. 
 We've invited a number of speakers to tell about the latest developments in relation to MiG as well as the ongoing and future projects.

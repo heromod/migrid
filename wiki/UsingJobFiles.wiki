@@ -302,8 +302,13 @@ The example above does *not* consider the actual availability of the unzip comma
 
 
 == SFTP Access to your MiG home ==
-We provide sftp access to MiG homes as a part of our sshfs support mentioned below. Thus it is possible to open your MiG home through any sftp client that supports ssh-keys. Please refer to the instructions on the ssh settings tab on your Settings page.
+We provide sftp access to MiG homes as a part of our sshfs support mentioned below. Thus it is possible to open your MiG home through any sftp client that supports ssh-keys. 
+Please refer to the instructions on the ssh settings tab on your Settings page if you use Mac or Linux.
+
+ 
+It is slightly more complicated but still possible on Windows. The [http://support.suso.com/supki/SSH_Tutorial_for_Windows SSH Tutorial for Windows] gives a nice general SSH introduction and includes the main steps for SFTP use with MiG. Just follow the section on 'Generating a key' and instead of proceeding with  the 'Putting the public key on the server' section, simply paste it into the text field on the MiG ssh settings page and click 'Save keys'.
+Then you should be able to return to the 'Using WinSCP to transfer files' section to import the generated key and connect with the hostname and username from the ssh settings page.
 
 
 == Remote mounting of MiG home ==
-Please refer to the page about [MiGFSIntro remote Fuse mounting] for details about working with your MiG home files directly on your own computer.
+Please refer to the page about [MiGFSIntro remote Fuse mounting] for details about working with your MiG home files directly on your own computer. This is probably limited to Mac and Linux users.

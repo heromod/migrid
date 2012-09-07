@@ -2,15 +2,21 @@
 
 = Renew prerequisites =
 
-When your MiG user certificate is just about to expire (which you may notice if you use the certificate countdown widget) or when it already expired you can request a new one.
-You need to find out the exact certificate fields values for this to work, however.
-If you don't remember the request field values you can find them by viewing the certificate details in your browser preferences or with openssl.
+When your MiG user certificate is just about to expire (which you may notice if you use the certificate countdown widget) or when it already expired you can request certificate renewal.
 
-== Certificate info in browser ==
+== Renewing Working Certificates ==
+If your certificate is still valid it is just a matter of using it on the 
+certificate request/renewal page as mentioned on GettingStarted with your original password (see Password Notes).
+
+
+== Renewing Expired Certificates ==
+If your certificate already expired you need to find out the exact certificate field values for the renewal to work. If you don't remember the request field values you can find them by viewing the certificate details in your browser preferences or with openssl.
+
+=== Certificate Info in Browser ===
 You will likely need to dig into your browser settings or preferences and find certificates under security or advanced settings. Please refer to the documentation for your particular browser.
 
 
-== Certificate info from cert.pem file ==
+=== Certificate Info from cert.pem File ===
 Just look at the output from:
 {{{
 openssl x509 -in ~/.mig/cert.pem -noout -subject
@@ -29,13 +35,15 @@ State:
 Two letter country-code: DK
 }}}
 
-
-= Renewing your certificate =
+== Renew Process ==
 When you know your certificate field values open up the usual certificate request page as mentioned on GettingStarted and fill in the exact same field details as those on your old certificate.
+
+If you submit a request with different fields it will result in a new account and thus no access to your old jobs, files and permissions.
+
+
+= Password Notes =
 Currently we do *not* support changing passwords on the keys, so the password you enter must be identical to the one you used on your original request, too.
+If you use the same fields but a different password we will have to reject the request.
 You can of course still change the password yourself as soon as you receive the new certificate. This is covered in the MiG user scripts documentation.
 
-If you submit a request with different fields it will result in a new account and thus no access to your old jobs, files and permissions and if you use the same fields but a different password we will have to reject the request.
-
 Please refer to the standard procedure in case you [ForgottenPassword forgot your original password].
- 

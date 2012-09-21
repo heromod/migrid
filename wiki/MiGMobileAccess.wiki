@@ -1,7 +1,7 @@
 #summary Access MiG from your cell phone or tablet
 
 = Introduction =
-Client certificates are not very well supported on mobile devices like phones and tablets, but with the release of [http://www.mozilla.com/en-US/mobile/download/ Firefox 4 Mobile] we got a working solution at least for Android users. The setup is not very user friendly because Firefox doesn't include the usual certificate management interface on mobile (yet?), but it works with a little command line work.
+Client certificates are not very well supported on mobile devices like phones and tablets, but with the release of [http://www.mozilla.com/en-US/mobile/download/ Firefox 4 Mobile] we got a working solution at least for Android users. The setup is not very user friendly because Firefox doesn't include the usual certificate management interface on mobile (yet?), but it works with a little command line work or with the more recently added Cert Manager add-on.
 We have provided a couple of check boxes for touch screen use on the Files and Jobs pages to make them usable even from devices without traditional right and double click support.
 
 
@@ -9,6 +9,12 @@ We have provided a couple of check boxes for touch screen use on the Files and J
 Instructions for each supported platform follows here. Feel free to add more if you know of other supported platforms.
 
 == Android ==
+
+=== Cert Manager ===
+Open Firefox and install the Cert Manager add-on from the list of official add-ons. You need a file manager like e.g. OI File manager on the device to select your p12 file. Go to Your Add-ons and open Options for Cert Manager where you can choose to import CA certificates and user certificates. Each of them will open a file manager where you select the file to import followed by a request for your optional Firefox master password and the certificate password.
+
+
+=== Command Line ===
 These step-by-step instructions were tested on a HTC Desire connected to a Linux box but they should work on other recent Android devices and computers with minor changes.
 
  * install Firefox from the market (may require Android 2.2 or later) and move it to SD card for write access
@@ -35,7 +41,7 @@ cd
  * unmount the device on the computer and switch to charge only mode on the device before disconnecting the usb cable
 
 
-== Maemo ==
+== Maemo / Tizen ==
 Untested but the procedure for Android should be usable again, only with a different profile path.
 
 

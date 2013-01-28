@@ -76,5 +76,5 @@ next section if you prefer to set up your own test Grid instead.
 
 
 == As a Grid provider ==
-With our recent public release of the code it is now possible to deploy your own grids. The latest mig-X.Y.Z.tgz archive from the [http://code.google.com/p/migrid/downloads/list Downloads page] includes specific instructions for setting up your own MiG server on a [http://www.debian.org/ Debian] based host, but the software is known to also work on other UNIX/Linux installations with Apache, Python  and OpenSSH.
+With our public release of the code it is possible to deploy your own grids. The latest mig-X.Y.Z.tgz archive from the [http://code.google.com/p/migrid/downloads/list Downloads page] includes specific instructions for setting up your own MiG server on a [http://www.debian.org/ Debian] based host, but the software is known to also work on other UNIX/Linux installations with Apache, Python  and OpenSSH.
 Please refer to the included [http://code.google.com/p/migrid/source/browse/trunk/README README] or [http://code.google.com/p/migrid/source/browse/trunk/mig/install/README.Debian mig/install/README.Debian] for step by step installation instructions on Debian Linux. More documentation will follow on this subject, so please feel free to [ContactUs contact us] if you run into problems.

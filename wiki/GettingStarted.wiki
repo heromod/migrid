@@ -59,7 +59,7 @@ With MiG-SSS resources you additionally get more control over the exact resource
 You can install MiG-SSS on your computer by following the MiG-SSS link on the [http://sites.google.com/site/minimumintrusiongrid/getting-started/sandboxes MiG Sandboxes] page.
 
 === Full scale resources ===
-The full scale resource model is mainly for dedicated Grid resources such as super computers or cluster computers. They require a Linux/UNIX based system with the _bash_ shell and inbound ssh access to at least one user account from the MiG servers. When those prerequisites are fulfilled, it takes no more installation or daemons to utilize the computer(s) as a MiG resource. Furthermore MiG is very firewall friendly so in most cases you do not need to add new firewall rules to run a MiG resource.
+The full scale resource model is mainly for dedicated Grid resources such as super computers or cluster computers. They require a Linux/UNIX based system with the _bash_ shell, the _cURL_ tool and inbound ssh access to at least one user account from the MiG servers. When those prerequisites are fulfilled, it takes no more installation or daemons to utilize the computer(s) as a MiG resource. Furthermore MiG is very firewall friendly so in most cases you do not need to add new firewall rules to run a MiG resource.
 
 To get started with this setup you need a working MiG user certificate, and then it is a matter of filling in a resource creation form on your personal MiG Resources page (further information about access to your personal MiG page is included with your user certificate).
 

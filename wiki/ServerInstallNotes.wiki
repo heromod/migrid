@@ -6,11 +6,11 @@ These install notes are based on Simon A.F. Lund's experiences from [http://www.
 
 
 = Minimum Intrusion Grid - Installation and Configuration =
-This is note of following the documentation for installation of a MiG-server from the documentation sources in [1][2]. With added information on operating system installation and additional tools used in the process.
+This is note of following the documentation for installation of a MiG-server from the documentation sources in the References section. With added information on operating system installation and additional tools used in the process.
 
 = Environment =
 
- * A Lenovo x200 laptop running Xubuntu 10.4 with VirtualBox
+ * A Lenovo x200 laptop running Xubuntu 10.4 with [http://www.virtualbox.org VirtualBox]
  * Ubuntu 10.4 64-bit was the chosen operating system and installed in a virtual machine
 
 

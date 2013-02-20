@@ -64,12 +64,14 @@ MiG is state-machine with logic in /home/mig/mig and state represented as the se
 
 
 === Configuration ===
+This example is for 1.4.3 but you should generally use the latest stable release avilable.
 {{{
-wget http://migrid.googlecode.com/files/mig-1.4.2.tgz
-tar xzf mig-1.4.2.tgz
-mv mig-1.4.2/* .
-rmdir mig-1.4.2/
-rm mig-1.4.2.tgz
+VERSION=1.4.3
+wget http://migrid.googlecode.com/files/mig-$VERSION.tgz
+tar xzf mig-$VERSION.tgz
+mv mig-$VERSION/* .
+rmdir mig-$VERSION/
+rm mig-$VERSION.tgz
 chmod -R 700 ~mig
 cd mig/install
 ./generateconfs.py

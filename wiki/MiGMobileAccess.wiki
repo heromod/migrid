@@ -1,7 +1,7 @@
 #summary Access MiG from your cell phone or tablet
 
 = Introduction =
-Client certificates are not very well supported on mobile devices like phones and tablets, but with the release of [http://www.mozilla.com/en-US/mobile/download/ Firefox 4 Mobile] we got a working solution at least for Android users. The setup is not very user friendly because Firefox doesn't include the usual certificate management interface on mobile (yet?), but it works with a little command line work or with the more recently added Cert Manager add-on.
+Client certificates are not very well supported on mobile devices like phones and tablets, but with the release of [http://www.mozilla.com/en-US/mobile/download/ Firefox 4 Mobile] we got a working solution at least for Android users. The setup is not very user friendly because Firefox doesn't include the usual certificate management interface on mobile (yet?), but it works with a little command line work or with the more recently added Cert Manager add-on. Unfortunately this solution stopped working again after Firefox 13 where the UI engine was completely rewritten. In Android 4.0+ the native browser supports client certificates, however. Apparently Google have also implemented it in the Chrome beta for Android, so it may arrive in the official release soon.
 We have provided a couple of check boxes for touch screen use on the Files and Jobs pages to make them usable even from devices without traditional right and double click support.
 
 
@@ -10,11 +10,15 @@ Instructions for each supported platform follows here. Feel free to add more if 
 
 == Android ==
 
-=== Cert Manager ===
+=== Native Android 4.0+ and Chrome Browser ===
+Copy the cacert.pem and cert.p12 files to the phone and rename cacert.pem to cacert.crt. Install a file manager like OI File Manager from the app store and tap each of the files from it to launch the certificate import dialog. Afterwards the keys and certificates are available in the global credentials store used e.g. by the native browser. The same procedure should apply for versions of Chrome with user certificate support.
+
+
+=== Firefox + Cert Manager ===
 Open Firefox and install the Cert Manager add-on from the list of official add-ons. You need a file manager like e.g. OI File manager on the device to select your p12 file. Go to Your Add-ons and open Options for Cert Manager where you can choose to import CA certificates and user certificates. Each of them will open a file manager where you select the file to import followed by a request for your optional Firefox master password and the certificate password.
 
 
-=== Command Line ===
+=== Firefox + Command Line ===
 These step-by-step instructions were tested on a HTC Desire connected to a Linux box but they should work on other recent Android devices and computers with minor changes.
 
  * install Firefox from the market (may require Android 2.2 or later) and move it to SD card for write access
@@ -46,11 +50,10 @@ Untested but the procedure for Android should be usable again, only with a diffe
 
 
 == Conclusion ==
-Now you can fire up Firefox on the device and surf to the certificate protected MiG pages. Enjoy!
+Now you can fire up your browser on the device and surf to the certificate protected MiG pages. Enjoy!
 
 Please note that old Firefox versions did _not_ support password protecting the certificate store, so you needed to leave the password empty there. With recent versions you can enable master password in Firefox and use it during import.
-Hopefully Mozilla will include the full certificate management interface   at some point, but until then the above should be a work around. 
-Recently a [https://addons.mozilla.org/en-US/mobile/addon/cert-manager/ certificate manager add-on] was released for Android. If it works as describred it may be a simpler solution to getting your mobile Firefox on MiG.
+Hopefully Mozilla will include the full certificate management interface at some point, but until then the above should be a work around. 
 
 Please *beware* of the security implications of storing without a password and [ContactUs report any potential abuse].
 

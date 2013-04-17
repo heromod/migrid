@@ -125,7 +125,7 @@ So in short we do not recommend external output destinations unless you are fami
 
 
 === A Single Script ===
-If your job consists of multiple or complex commands you may prefer to wrap them all up in a job shell script. For example you may create a file, myscript.sh, in your MiG home directory that you want to run in your job. You need to be careful with the execution on the resource, because the PATH environment may or may not include the current directory.
+MiG jobs use an execution wrapper to grab exit codes of individual commands and that wrapper effectively prevents any commands exceeding a single line. Thus if your job consists of multi-line or complex commands you may prefer to wrap them all up in a job shell script of your own. For example you may create a file, myscript.sh, in your MiG home directory that you want to run in your job. You need to be careful with the execution on the resource, because the PATH environment may or may not include the current directory.
 Thus you need to explicitly specify where to run the script from.
 
 Now your job description could look like this:
@@ -138,11 +138,14 @@ Now your job description could look like this:
 60
 }}}
 
-or e.g. 
+or the explicit and thus better
 
 {{{
 ::EXECUTE::
-bash myscript.sh
+$BASH myscript.sh
+
+::RUNTIMEENVIRONMENT::
+BASH-ANY-1
 
 ::CPUTIME::
 60
@@ -274,7 +277,7 @@ rm -f ${MIG_LOCALJOBNAME}.getupdatedone
 In this case the source is the name of the message queue and the destination is the destination directory for a file with the message. Thus the message will appear in a file called 'default' in the current working directory in this example.
 
 You can orchestrate jobs by filling job instructions in a message queue and submitting jobs that fetch actual job instructions when they start executing, in order to create a typical producer/consumer situation.
-Another possibility is to have jobs communicate directly through the message queues. E.g. by having each job generate the input for a future job and send it to the message queue for the next job to proceed with. As it takes some seconds to pass the messages between the grid and the resources, it will not be useful as a low latency message passing mechanism, but it makes sense for long running jobs.
+Another possibility is to have jobs communicate directly through the message queues. E.g. by having each job generate the input for a future job and send it to the message queue for the next job to proceed with. As it takes some seconds to pass the messages between the grid and the resources, it will not be useful as a low latency message passing mechanism, but it makes sense for limited communication between long running jobs.
 
 == Lots of Files or Recursive Directories ==
 If your job requires lots of input or output files it may be tedious to manually handle them in the INPUTFILES and OUTPUTFILES fields. In that case it may be simpler to pack and unpack the files before and after the transfers between MiG server and resource.
@@ -298,7 +301,7 @@ output.txt
 
 The same methods can be applied for output files by packing them up as the last command in the EXECUTE field. This is not always simpler than handling the files individually in INPUTFILES and OUTPUTFILES but it does provide a workaround for the missing recursive directory support.
 
-The example above does *not* consider the actual availability of the unzip command on the resource. In principle it should request an UNZIP runtime environment, which is not yet available, though.
+The example above does *not* consider the actual availability of the unzip command on the resource. In principle it should use the $UNZIP command from the ZIP-ANY-1 runtime environment, which may not be available everywhere, however.
 
 
 == SFTP Access to your MiG home ==
@@ -309,9 +312,8 @@ Please refer to the instructions on the ssh settings tab on your Settings page i
 It is slightly more complicated but still possible on Windows. The [http://support.suso.com/supki/SSH_Tutorial_for_Windows SSH Tutorial for Windows] gives a nice general SSH introduction and includes the main steps for SFTP use with MiG. Just follow the section on 'Generating a key' and instead of proceeding with  the 'Putting the public key on the server' section, simply paste it into the text field on the MiG ssh settings page and click 'Save keys'.
 Then you should be able to return to the 'Using WinSCP to transfer files' section to import the generated key and connect with the hostname and username from the ssh settings page. FileZilla is another graphical client with SFTP and ssh key support.
 
-Some users have reported problems with some graphical clients truncating our very long usernames after 100 characters and thus breaking login. The FireFTP add-on for Firefox is known to still work under those circumstances, so you can use it to work around such problems. Apparently the username length is *not* limited by the SSH/SFTP protocol so it looks like a bug in those other graphical clients.
-
+Some users have reported problems with some clients truncating our very long usernames after 100 characters and thus breaking login. The FireFTP add-on for Firefox is known to still work under those circumstances, so you can use it to work around such problems. The username length is *not* limited by the SSH/SFTP protocol so it is a bug in those other clients. For putty and putty-based graphical clients like FileZilla it was only fixed after the 0.62 release of putty, so you need to find a newer official release or development snapshot to get it working there with the long usernames.
 
 
 == Remote mounting of MiG home ==
-Please refer to the page about [MiGFSIntro remote Fuse mounting] for details about working with your MiG home files directly on your own computer. This is probably limited to Mac and Linux users.
+Please refer to the page about [MiGFSIntro remote Fuse mounting] for details about working with your MiG home files directly on your own computer. Fuse is limited to Mac and Linux but the Dokan-based win-sshfs on Windows _may_ provide similar functionality, although we haven't tested it.

@@ -24,13 +24,13 @@ openssl x509 -in ~/.mig/cert.pem -noout -subject
 
 As an example the line 
 {{{
-subject= /C=DK/ST=NA/L=NA/O=DIKU/OU=NA/CN=Jonas Bardino/emailAddress=bardino@diku.dk
+subject= /C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Jonas Bardino/emailAddress=bardino@nbi.ku.dk
 }}}
 translates to:
 {{{
 Full name: Jonas Bardino
-Organisation: DIKU
-Email address: bardino@diku.dk
+Organisation: NBI
+Email address: bardino@nbi.ku.dk
 State: 
 Two letter country-code: DK
 }}}

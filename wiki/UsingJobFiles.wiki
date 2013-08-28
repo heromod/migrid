@@ -317,7 +317,7 @@ ssh-keygen -t rsa -f ~/.mig/id_rsa
 }}}
 On Windows you can use PuTTYgen for the same task.
 
-*NB*: We only started including the corresponding public key, key.pub , with user certificates recently so please ask if you miss it.
+*NB*: We only recently started including the corresponding public key, key.pub , with user certificates so please ask if you miss it.
 
 
 === Known issues with SSH/SFTP from Windows ===

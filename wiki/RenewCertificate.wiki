@@ -44,6 +44,6 @@ If you submit a request with different fields it will result in a new account an
 = Password Notes =
 Currently we do *not* support changing passwords on the keys, so the password you enter must be identical to the one you used on your original request, too.
 If you use the same fields but a different password we will have to reject the request.
-You can of course still change the password yourself as soon as you receive the new certificate. This is covered in the MiG user scripts documentation.
+You can of course still change the password yourself as soon as you receive the new certificate. This is covered in the [http://dk.migrid.org/public/doc/user_scripts/MiG-user-scripts.html MiG user scripts documentation].
 
 Please refer to the standard procedure in case you [ForgottenPassword forgot your original password].

@@ -5,6 +5,7 @@ This section focuses MiG user projects and issues.
 
  * [UserFAQ Frequently Asked Questions - users]
  * [UsingJobFiles Using Files in MiG Jobs]
+ * [GroupCollaboration Group Collaborating Using VGrids]
  * [MiGOneClickCoding Coding MiG One-Click Jobs]
  * [SandboxResourceCoding Coding MiG Sandbox Jobs]
  * [MiGFSIntro Introduction to Fuse based remote file access]

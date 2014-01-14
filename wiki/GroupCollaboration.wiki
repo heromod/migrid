@@ -28,6 +28,8 @@ A number of collaboration tools are automatically available for all VGrids.
 VGrids have a shared folder which automatically appears as a folder with the name of the VGrid in the root of owner/member grid homes. Again using the eScience VGrid as an example, all owners and members there will have an eScience folder on their Files page and can share files and sub-folders with all other participants there.
 Such shared folders are marked with a small chain on the folder icon.
 
+Tip: If you want to point other participants in your VGrid to a shared folder, it is easy to do so from your Files page. Simply navigate to the relevant folder and use copy link address in the right-click menu on the _navigation breadcrumbs_ at the top. Then you can paste the direct URL into email or whatever communication form you prefer.
+
 
 == Web Pages and Portals ==
 Virtual organizations often want to have some internal and public web pages. The former are typically used for internal information and creating member portals, while the latter are e.g. used to present the organization to the public.

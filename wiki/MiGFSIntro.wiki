@@ -14,7 +14,7 @@ You need a Linux/UNIX operating system with FUSE support and a working sshfs ins
 [http://fuse.sourceforge.net/sshfs.html SSHFS]
 
 For Mac OS X users there's the [http://osxfuse.github.io/ OSXFUSE] which works with SSHFS.
-Please refer to the (OSX)FUSE page for instructions on setting up FUSE if you haven't already got it working in e.g. [http://richard.jones.name/google-hacks/gmail-filesystem/gmail-filesystem.html GMailFS] or [http://fuse.sourceforge.net/sshfs.html SSHFS].
+Please refer to the (OSX)FUSE page for instructions on setting up FUSE if you haven't already got it working in e.g. [http://code.google.com/p/gmailfs/ GMailFS] or [http://fuse.sourceforge.net/sshfs.html SSHFS].
 With most recent Linux distributions you simply need to install a fuse-utils package if it is not already installed and load the `fuse` kernel module .
 
 == Instructions ==

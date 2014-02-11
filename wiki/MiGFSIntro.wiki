@@ -2,23 +2,23 @@
 #labels Phase-Deploy
 
 = Introduction =
-Once you start seriously using MiG as a user you may end up deciding that that manipulating and using the files in your MiG home directory is cumbersome whether you use the web interface or user scripts. There's a third option available to Linux/UNIX users in that case: the [http://fuse.sourceforge.net/ FUSE] based SSHFS and MiGFS.
-With FUSE and SSHFS or MiGFS you can _locally_ mount your MiG home directory like any other file system and manipulate files and directories with the tools you prefer. This may include moving files around in your file manager or editing your input files in Emacs or other editors.
+Once you start seriously using MiG as a user you may end up deciding that that manipulating and using the files in your MiG home directory is cumbersome whether you use the web interface or user scripts. There's a third option available to Linux/UNIX users in that case: the [http://fuse.sourceforge.net/ FUSE] based SSHFS (and the old deprecated MiGFS).
+With FUSE and SSHFS or MiGFS you can _locally_ mount your MiG home directory like any other file system and manipulate files and directories with the tools you prefer. This may include moving files around in your file manager or editing your input files in Emacs or whatever editor you prefer.
 
 
 = SSHFS (recommended) =
-We recommend the new SSHFS solution for mounting your MiG home even though it is not that well tested with MiG!
+We recommend the SSHFS solution for mounting your MiG home since it is well tested and performs better than the old MiGFS solution!
 
 == Requirements ==
 You need a Linux/UNIX operating system with FUSE support and a working sshfs installation to get MiG sshfs-mounted: 
 [http://fuse.sourceforge.net/sshfs.html SSHFS]
 
-For Mac OS X users there's the [http://code.google.com/p/macfuse/ MacFUSE] which should work with SSHFS.
-Please refer to the FUSE page for instructions on setting up FUSE if you haven't already got it working in e.g. [http://richard.jones.name/google-hacks/gmail-filesystem/gmail-filesystem.html GMailFS] or [http://fuse.sourceforge.net/sshfs.html SSHFS].
+For Mac OS X users there's the [http://osxfuse.github.io/ OSXFUSE] which works with SSHFS.
+Please refer to the (OSX)FUSE page for instructions on setting up FUSE if you haven't already got it working in e.g. [http://richard.jones.name/google-hacks/gmail-filesystem/gmail-filesystem.html GMailFS] or [http://fuse.sourceforge.net/sshfs.html SSHFS].
 With most recent Linux distributions you simply need to install a fuse-utils package if it is not already installed and load the `fuse` kernel module .
 
 == Instructions ==
-First make sure sshfs works with any UNIX account you have with remote ssh access. 
+First make sure sshfs works with any UNIX account you have with ssh access. You can also try with localhost if you don't have access to remote systems. 
 All the remaining instructions for setting up and using sshfs with MiG are included in the _ssh settings_ section of your MiG Settings page.
 
 

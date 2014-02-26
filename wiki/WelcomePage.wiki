@@ -9,6 +9,7 @@ This is the public Minimum intrusion Grid wiki. On these pages you can communica
   * [MiGTerminology MiG Terminology]
   * [RenewCertificate Renewing your MiG certificate]
   * [MiGInterfaces Overview of available MiG interfaces]
+  * [GroupCollaboration Group collaboration in MiG]
   * [CustomizeWebInterfaces Customizing your MiG web interfaces]
   * [MiGMobileAccess Mobile Access to MiG]
   * [ContactUs Contact Information]

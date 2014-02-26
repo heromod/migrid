@@ -5,6 +5,7 @@
   * [MiGTerminology MiG Terminology]
   * [RenewCertificate Renewing your MiG certificate]
   * [MiGInterfaces Overview of available MiG interfaces]
+  * [GroupCollaboration Group collaboration in MiG]
   * [CustomizeWebInterfaces Customizing your MiG web interfaces]
   * [MiGMobileAccess Mobile Access to MiG]
   * [ContactUs Contact Information]

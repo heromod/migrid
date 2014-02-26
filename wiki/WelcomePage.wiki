@@ -6,8 +6,8 @@ This is the public Minimum intrusion Grid wiki. On these pages you can communica
 
   * [WelcomePage Welcome to MiG]
   * [GettingStarted Getting started with MiG]
-  * [RenewCertificate Renewing your MiG certificate]
   * [MiGTerminology MiG Terminology]
+  * [RenewCertificate Renewing your MiG certificate]
   * [MiGInterfaces Overview of available MiG interfaces]
   * [CustomizeWebInterfaces Customizing your MiG web interfaces]
   * [MiGMobileAccess Mobile Access to MiG]

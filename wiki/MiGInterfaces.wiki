@@ -13,12 +13,19 @@ We are still working on additional interfaces like [http://www.json.org/ JSON] t
 MiG includes a set of user scripts that you can run from the command line or wrap in your own job management. Python and Bourne Shell versions are available to support some common use cases, and a C API is on the planning board.
 You can obtain the user scripts including the miglib python library from Downloads on your personal MiG page.
 
+= Python Applications =
+We provide a [http://code.google.com/p/migrid/source/browse/trunk/user-projects/miginterface/ miginterface python library] for common application development using MiG jobs and files. Please refer to the [http://migrid.googlecode.com/svn/trunk/user-projects/miginterface/README README] there for details and instructions.
+
 = XMLRPC =
-Direct access to MiG from just about any programming language is available through an XMLRPC interface. This is implemented via xmlrpclib for python (see [http://code.google.com/p/migrid/source/browse/trunk/mig/user/xmlrpcsslclient.py xmlrpcsslclient.py]) with a few examples in our repository. A documentation of the methods is under development [XmlRpcMethods here]. Additional API details can be found in the actual server code in `mig/shared/functionality/` but they may still change slightly over time.
+Direct access to MiG from just about any programming language is available through an XMLRPC interface. There's an example implementation via xmlrpclib for Python (see [http://code.google.com/p/migrid/source/browse/trunk/mig/user/xmlrpcsslclient.py xmlrpcsslclient.py]) with a few examples in our repository. The overall concept should apply for any other programming language with [http://en.wikipedia.org/wiki/XML-RPC XMLRPC support]. Documentation of the methods is under development [XmlRpcMethods here]. Additional API details can be found in the actual server code in `mig/shared/functionality/` but they may still change slightly over time.
 
 = JSON =
 All MiG functionality pages can return their results in the platform neutral JSON format. Just append output_format=json in the query string to get JSON formatted output directly usable for e.g. JQuery integration. A number of the MiG web pages already use that mechanism for very flexible and dynamic web solutions, and developers and users can easily add their own external additions.
 Please [ContactUs contact us] if this is something you would like to know more about.
 
-= SFTP =
-Efficient access to your MiG home is possible through the SFTP interface. Please refer to the corresponding section on the [UsingJobFiles using job files page] for the details.
+= SFTP / SSHFS =
+Efficient access to your MiG home files is possible through the SFTP interface, which is the OpenSSH file transfer protocol. Please refer to the corresponding section on the [UsingJobFiles using job files page] for the details.
+SFTP works on all common platforms, but it requires client installation of some sort.
+
+= WebDAV / FTPS / ... =
+We are working on other efficient file access interfaces with better native platform integration so that we may provide direct access to MiG home files without any additional software installation. This is work in progress but feel free to [ContactUs contact us] if this is something you want to help test or try out.

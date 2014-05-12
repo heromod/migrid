@@ -326,8 +326,8 @@ The example above does *not* consider the actual availability of the unzip comma
 
 
 == SFTP Access to your MiG home ==
-We provide sftp access to MiG homes as a part of our sshfs support mentioned below. Thus it is possible to open your MiG home through any sftp client that supports ssh-keys.
-Please refer to the instructions on the _ssh settings_ tab on your Settings page.
+We provide sftp access to MiG homes and that is also the basis for our sshfs support mentioned below. Thus it is possible to open your MiG home through any sftp client that supports ssh-keys.
+Please refer to our [https://sites.google.com/site/minimumintrusiongrid/getting-started/how-to-get-started How to get started] page for step-by-step instructions for connecting with a graphical client. Quick command line and sshfs instructions are available directly on the _ssh settings_ tab on your Settings page.
 
 
 === Creating a new key ===
@@ -338,12 +338,11 @@ ssh-keygen -t rsa -f ~/.mig/id_rsa
 }}}
 On Windows you can use PuTTYgen for the same task.
 
+The [http://support.suso.com/supki/SSH_Tutorial_for_Windows SSH Tutorial for Windows] gives a nice general SSH introduction and includes the main steps for SFTP from Windows including the optional key generation. Most of it is the same for MiG but in the 'Putting the public key on the server' section it is done by simply pasting the public key into the text field on the MiG _ssh settings_ page and clicking 'Save ssh'.
+
 
 === Known issues with SSH/SFTP from Windows ===
-The [http://support.suso.com/supki/SSH_Tutorial_for_Windows SSH Tutorial for Windows] gives a nice general SSH introduction and includes the main steps for SFTP use with MiG. Just follow the section on 'Generating a key' and instead of proceeding with  the 'Putting the public key on the server' section, simply paste it into the text field on the MiG ssh settings page and click 'Save ssh'.
-Then you should be able to return to the 'Using WinSCP to transfer files' section to import the generated key and connect with the hostname and username from the ssh settings page. FileZilla is another graphical client with SFTP and ssh key support.
-
-Some users have reported problems with some clients truncating our very long usernames after 100 characters and thus breaking login. The FireFTP add-on for Firefox is known to still work under those circumstances, so you can use it to work around such problems. The username length is *not* limited by the SSH/SFTP protocol so it is a bug in those other clients. For putty and putty-based graphical clients like FileZilla it was only fixed after the 0.62 release of putty, so you need to find a newer official release or development snapshot to get it working there with the long usernames.
+Some users have reported problems with some clients like PuTTY and FileZilla truncating our very long usernames after 100 characters and thus breaking login. The FireFTP add-on for Firefox is known to still work under those circumstances, so you can use it to work around such problems. The username length is *not* limited by the SSH/SFTP protocol itself, so it is a bug in those other clients. For PuTTY and PuTTY-based graphical clients like FileZilla it was only fixed after the 0.62 release of PuTTY, so you need to find a newer official release or development snapshot to get it working there with the long usernames.
 
 
 == Remote mounting of MiG home ==

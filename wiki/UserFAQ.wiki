@@ -24,21 +24,26 @@ It is not uncommon to experience problems with input and output files not showin
 File handling is actually simpler in MiG than in most other Grids, because files can simply be referenced directly from your MiG home directory. However, there still are a few pitfalls when trying to handle e.g. directories. Please take a look at UsingJobFiles and the different MiG user tutorials for detailed examples of the possible file handling methods. If you still can't manage to get your files into the desired locations for jobs, please [ContactUs contact us] so that we can help you and possibly expand the documentation.
 
 
-== Why do my jobs fail with `error while loading shared libraries: XYZ: failed to map segment from shared object: Cannot allocate memory` ==
-MiG resources generally enforce time, memory and disk limits requested in the job. Thus you likely need to request enough memory to allow the the job to run.
-If in doubt you may be able to experiment with a local bash shell and the built-in ulimit command:
+== Why do my jobs fail with cryptic errors ==
+If you experience jobs failing or finishing with cryptic errors in your JOBID.stdout/stderr like e.g.
+ * `error while loading shared libraries: XYZ: failed to map segment from shared object: Cannot allocate memory`
+ * `Killed` (with an exit code of 137 in JOBID.status)
+you probably got hit by the resource limits.
+MiG resources generally enforce wallclock/cpu-time, memory and disk limits requested in the job. Thus you need to request enough of those resources to allow the the job to complete.
+If in doubt you can experiment with a local bash shell and the built-in ulimit command. 
+To run your application, `myapp.py`, with memory constraints you can try with:
 {{{
 bash
 MEMORY=10
 ulimit -v $((MEMORY*1024))
-python
+python myapp.py
 }}}
 It will fail with more or less obvious memory allocation errors if your MEMORY value is too small:
 {{{
 python: error while loading shared libraries: libssl.so.1.0.0: failed to map segment from shared object: Cannot allocate memory
 }}}
-Exit and keep bumping the value until you are some megs above what your command needs to make sure it will run even with a little overhead.
-
+Exit the shell and retry bumping the value until you are some megs above what your command needs, to make sure it will run even with a little overhead.
+Similarly if you request 900 seconds of CPUTIME your job will be killed if it exceeds that amount of either walltime *or* cputime. Please note that if your application implicitly or explicitly utilizes multiple CPU cores the cputime can accumulate much faster than wallclock time, so you need to set CPUCOUNT accordingly to avoid hitting the cputime limit prematurely.
 
 == Why do my jobs sometimes finish with output like `bash: command not found: XYZ`? ==
 

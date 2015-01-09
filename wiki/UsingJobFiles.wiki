@@ -347,3 +347,14 @@ Some users have reported problems with some clients like PuTTY and FileZilla tru
 
 == Remote mounting of MiG home ==
 Please refer to the page about [MiGFSIntro remote Fuse mounting] for details about working with your MiG home files directly on your own computer. Fuse is limited to Mac and Linux but the Dokan-based win-sshfs on Windows _may_ provide similar functionality, although we haven't tested it.
+
+
+== Mounting of MiG home during job execution ==
+We have recently introduced experimental support for mounting your MiG home (or a sub-directory of it) directly on the resources during job execution. In that way it becomes possible to read and write any file under the mounted directory without worrying about INPUTFILES/OUTPUTFILES.
+If e.g. I want to access the files in my shared/job-io sub-directory on MiG I can use the following in my job:
+{{{
+::MOUNT::
+shared/job-io job-io
+}}}
+Then shared/job-io is automatically mounted on a local job-io directory during job execution. Thus my job commands can access the files with e.g. job-io/somefile .
+The mount is also automatically removed again after the job finishes.

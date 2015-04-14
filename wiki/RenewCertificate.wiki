@@ -1,16 +1,19 @@
 #summary Renewing your MiG certificate
 
-= Renew prerequisites =
-
+= Renewing You Certificate =
+Our certificate policy dictates that user certificates are valid for a year and then expire to automatically stop working. 
 When your MiG user certificate is just about to expire (which you may notice if you use the certificate countdown widget) or when it already expired you can request certificate renewal.
 
-== Renewing Working Certificates ==
-If your certificate is still valid it is just a matter of using it on the 
-certificate request/renewal page as mentioned on GettingStarted with your original password (see Password Notes).
-
+== Renewing Valid Certificates ==
+If your certificate is still valid, renewing is just a matter of using it to auto-fill most of the fields on the 
+[https://dk-cert.migrid.org/cgi-bin/reqcert.py certificate renewal] page and submit with either the old or a new password. Then you receive a new certificate to install like mentioned on GettingStarted. In case you chose a new password you also receive a new key along with the certificate. You only need to worry about the key if you use the advanced access methods like the user scripts and source code repositories.
 
 == Renewing Expired Certificates ==
-If your certificate already expired you need to find out the exact certificate field values for the renewal to work. If you don't remember the request field values you can find them by viewing the certificate details in your browser preferences or with openssl.
+If your certificate already expired or if you lost it, you need to find out the exact certificate field values for the renewal to work. If you don't remember the request field values you can find them by viewing the certificate details in your browser preferences or with __openssl__. More details can be found in the following sections.
+
+When you know your certificate field values, open up the usual certificate request page as mentioned on GettingStarted and fill in the exact same field details as those on your old certificate. Importantly this includes the password you used.
+
+If you submit a request with different fields it will result in a new account and thus no access to your old jobs, files and permissions.
 
 === Certificate Info in Browser ===
 You will likely need to dig into your browser settings or preferences and find certificates under security or advanced settings. Please refer to the documentation for your particular browser.
@@ -35,15 +38,9 @@ State:
 Two letter country-code: DK
 }}}
 
-== Renew Process ==
-When you know your certificate field values open up the usual certificate request page as mentioned on GettingStarted and fill in the exact same field details as those on your old certificate.
 
-If you submit a request with different fields it will result in a new account and thus no access to your old jobs, files and permissions.
-
-
-= Password Notes =
-Currently we do *not* support changing passwords on the keys, so the password you enter must be identical to the one you used on your original request, too.
-If you use the same fields but a different password we will have to reject the request.
+=== Password Notes ===
+Currently we only support changing passwords when renewing still valid certificates, so unless you use that procedure, the password you enter must be identical to the one you used on your last certificate. That is, if you use the same fields but a __different__ password we will have to reject the request.
 You can of course still change the password yourself as soon as you receive the new certificate. This is covered in the [http://dk.migrid.org/public/doc/user_scripts/MiG-user-scripts.html MiG user scripts documentation].
 
 Please refer to the standard procedure in case you [ForgottenPassword forgot your original password].

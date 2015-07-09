@@ -344,6 +344,13 @@ The [http://support.suso.com/supki/SSH_Tutorial_for_Windows SSH Tutorial for Win
 === Known issues with SSH/SFTP from Windows ===
 Some users have reported problems with some clients like PuTTY and FileZilla truncating our very long usernames after 100 characters and thus breaking login. The FireFTP add-on for Firefox is known to still work under those circumstances, so you can use it to work around such problems. The username length is *not* limited by the SSH/SFTP protocol itself, so it is a bug in those other clients. For PuTTY and PuTTY-based graphical clients like FileZilla it was only fixed after the 0.62 release of PuTTY, so you need to find a newer official release or development snapshot to get it working there with the long usernames.
 
+== File Synchronization ==
+We have received requests for rsync access or similar to the files in MiG user homes. We do not have an rsync service, but a similar functionality can be achieved with the use of the lftp client and the mirror command. This includes support for removing files removed locally and other handy features known from rsync:
+{{{
+lftp -u bardino@nbi.ku.dk,'' \
+    -e "mirror -eRv /home/jonas/build/upload-test lftp-uploaded/; quit" \
+    sftp://sftp.migrid.org
+}}}
 
 == Remote mounting of MiG home ==
 Please refer to the page about [MiGFSIntro remote Fuse mounting] for details about working with your MiG home files directly on your own computer. Fuse is limited to Mac and Linux but the Dokan-based win-sshfs on Windows _may_ provide similar functionality, although we haven't tested it.
